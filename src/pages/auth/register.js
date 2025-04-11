@@ -1,116 +1,110 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faUser, faLock, faEye, faEyeSlash,faEnvelope  } from '@fortawesome/free-solid-svg-icons';
-
-import 'bootstrap/dist/css/bootstrap.min.css';
-import 'font-awesome/css/font-awesome.min.css';
+import { faUser, faLock, faEye, faEnvelope } from '@fortawesome/free-solid-svg-icons';
 import './styleAuth.css';
 
-const Login = () => {
+const Register = () => {
+    const [formData, setFormData] = useState({
+        username: '',
+        email: '',
+        password: '',
+        retypePassword: ''
+    });
+
+    const [message, setMessage] = useState('');
+    const navigate = useNavigate();
+
+    const handleChange = (e) => {
+        setFormData({ ...formData, [e.target.name]: e.target.value });
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+
+        const payload = {
+            username: formData.username,
+            email: formData.email,
+            password: formData.password,
+            retype_password: formData.retypePassword // giữ camelCase
+
+        };
+        console.log("Payload gửi:", payload);
+
+
+        try {
+            const response = await fetch('http://localhost:8080/api/v1/users/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            const text = await response.text(); // <-- Đổi sang text() thay vì json()
+
+            if (response.ok) {
+                setMessage('Đăng ký thành công!');
+                setTimeout(() => navigate('/login'), 1000);
+            } else {
+                try {
+                    const data = JSON.parse(text); // Nếu backend vẫn trả JSON
+                    if (Array.isArray(data)) {
+                        setMessage(data.join('\n'));
+                    } else {
+                        setMessage(data.message || text); // fallback
+                    }
+                } catch (err) {
+                    setMessage(text); // Nếu không phải JSON
+                }
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            setMessage('Đã xảy ra lỗi. Vui lòng thử lại.');
+        }
+    };
+
+
     return (
-        <body>
         <div>
             <section className="signup">
                 <div className="container-auth">
                     <div className="signup-content">
-                        <div className="signup-form">
+                        <form className="signup-form" onSubmit={handleSubmit}>
                             <h2 className="form-title">Đăng ký</h2>
-
                             <div className="form-group">
-                                <label htmlFor="name">
-                                    <FontAwesomeIcon icon={faUser}/>
-                                </label>
-                                <input
-                                    type="text"
-                                    name="name"
-                                    id="name"
-                                    placeholder="Nhập username"
-
-                                    //khi giá trị của trường nhập thay đổi thì nó sẽ cập nhật trạng thái của username
-                                    required //đánh dấu trường bắt buộc
-                                />
+                                <label><FontAwesomeIcon icon={faUser}/></label>
+                                <input type="text" name="username" placeholder="Tên đăng nhập" value={formData.username}
+                                       onChange={handleChange} required/>
                             </div>
                             <div className="form-group">
-                                <label htmlFor="name">
-                                    <FontAwesomeIcon icon={faEnvelope}/>
-                                </label>
-                                <input
-                                    type="text"
-                                    name="name"
-                                    id="name"
-                                    placeholder="Nhập email"
+                                <label><FontAwesomeIcon icon={faEnvelope}/></label>
+                                <input type="email" name="email" placeholder="Email" value={formData.email}
+                                       onChange={handleChange} required/>
+                            </div>
+                            <div className="form-group">
+                                <label><FontAwesomeIcon icon={faLock}/></label>
+                                <input type="password" name="password" placeholder="Mật khẩu" value={formData.password}
+                                       onChange={handleChange} required/>
+                            </div>
+                            <div className="form-group">
+                                <label><FontAwesomeIcon icon={faLock}/></label>
+                                <input type="password" name="retypePassword" placeholder="Nhập lại mật khẩu"
+                                       value={formData.retypePassword} onChange={handleChange} required/>
+                            </div>
+                            {/*<div>*/}
+                            {/*    <input type="checkbox" id="agree-term" name="agree-term" required/>*/}
+                            {/*    <label htmlFor="agree-term">Đồng ý với các điều khoản</label>*/}
+                            {/*</div>*/}
 
-                                    //khi giá trị của trường nhập thay đổi thì nó sẽ cập nhật trạng thái của username
-                                    required //đánh dấu trường bắt buộc
-                                />
+                            <div className="form-group form-button">
+                                <input type="submit" className="form-submit" value="Đăng ký"/>
                             </div>
-                            <div className="form-group" style={{marginBottom: '10px'}}>
-                                <label htmlFor="pass">
-                                    <FontAwesomeIcon icon={faLock}/>
-                                </label>
-                                <input
-
-                                    name="pass"
-                                    id="pass"
-                                    placeholder="Nhập mật khẩu"
-                                    required
-                                />
-                                <FontAwesomeIcon
-                                    className="password-icon"
-                                    style={{
-                                        cursor: 'pointer',
-                                        position: 'absolute',
-                                        top: '50%',
-                                        right: '10px',
-                                        transform: 'translateY(-50%)'
-                                    }}
-                                />
-                            </div>
-                            <div className="form-group" style={{marginBottom: '10px'}}>
-                                <label htmlFor="pass">
-                                    <FontAwesomeIcon icon={faLock}/>
-                                </label>
-                                <input
-
-                                    name="pass"
-                                    id="pass"
-                                    placeholder="Nhập lại mật khẩu"
-                                    required
-                                />
-                                <FontAwesomeIcon
-                                    className="password-icon"
-                                    style={{
-                                        cursor: 'pointer',
-                                        position: 'absolute',
-                                        top: '50%',
-                                        right: '10px',
-                                        transform: 'translateY(-50%)'
-                                    }}
-                                />
-                            </div>
-                            <div className="form-group" style={{marginBottom: '1px'}}>
-                                <input
-                                    type="checkbox"
-                                    name="agree-term"
-                                    id="agree-term"
-                                    className="agree-term"
-
-                                />
-                                <label htmlFor="agree-term" className="label-agree-term" style={{fontSize: '15px'}}>
-                                    <span><span></span></span> Đồng ý với các điều khoản
-                                </label>
-                            </div>
-                            <div className="form-group form-button" style={{marginTop: '-20px'}}>
-                                <input type="submit" name="signup" id="signup" className="form-submit"
-                                       value="Đăng ký"/>
-                            </div>
-                        </div>
+                            {message && <p style={{color: 'red', whiteSpace: 'pre-wrap'}}>{message}</p>}
+                        </form>
                         <div className="signup-image">
                             <figure>
-                                <img width={500} height={500} src="/img/fashion4.png" alt="sing up image"/>
+                                <img width={500} height={500} src="/img/fashion4.png" alt="sign up"/>
                             </figure>
-                            <Link to="/login" className="signup-image-link" style={{fontSize: '18px'}}>
+                            <Link to="/login" className="signup-image-link" style={{fontSize: '18px' }}>
                                 Đã có tài khoản? Đăng nhập!
                             </Link>
                         </div>
@@ -118,8 +112,7 @@ const Login = () => {
                 </div>
             </section>
         </div>
-        </body>
     );
 };
 
-export default Login;
+export default Register;

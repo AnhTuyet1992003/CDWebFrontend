@@ -17,6 +17,9 @@ import Register from './pages/auth/register';
 import AdminIndex from './pages/admin/admin-index';
 import AdminListUser from './pages/admin/list-user';
 import UserList from './pages/admin/test';
+
+import AuthCallback from './pages/auth/google/callback';
+import OAuth2RedirectHandler from "./pages/auth/google/OAuth2RedirectHandler"
 function App() {
   return (
       <Router>
@@ -38,7 +41,9 @@ function App() {
 
 
             <Route path="*" element={<h1>404 Not Found</h1>} />
-
+            <Route path="/auth/google/callback" element={<AuthCallback />} />
+            <Route path="/auth/facebook/callback" element={<AuthCallback />} />
+            <Route path="/oauth2/success" element={<OAuth2RedirectHandler />} />
 
             <Route path="/admin-index" element={<LayoutAdmin><AdminIndex /></LayoutAdmin>} />
             <Route path="/admin-list-user" element={<LayoutAdmin><UserList /></LayoutAdmin>} />
