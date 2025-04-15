@@ -10,11 +10,29 @@ import 'font-awesome/css/font-awesome.min.css';
 import './styleAuth.css';
 import axios from 'axios';
 import Cookies from 'js-cookie';
+import { jwtDecode } from 'jwt-decode';
+
+import { useEffect } from 'react';
 
 
 const Login = () => {
 
     const navigate = useNavigate();
+    useEffect(() => {
+        const token = Cookies.get('token');
+        console.log('Token:', token);
+
+        if (token) {
+            try {
+                const decoded = jwtDecode(token);
+                // Token còn hợp lệ -> chuyển về /home
+                navigate('/home');
+            } catch (err) {
+                console.error("Token không hợp lệ");
+            }
+        }
+    }, []);
+
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
 
@@ -26,11 +44,17 @@ const Login = () => {
                 password
             });
 
-            const {accessToken} = response.data;
-            // lưu token vào localStorage (hoặc cookie)
+            const accessToken= response.data.accessToken;
+            console.log("Access token nhận được:", accessToken);
+
             // Lưu token vào cookie
-            Cookies.set('token', accessToken, { expires: 7 }); // expires là số ngày, bạn có thể điều chỉnh
+            Cookies.set('token', accessToken, { expires: 1 }); // expires là số ngày, bạn có thể điều chỉnh
             localStorage.setItem('accessToken', accessToken);
+            // Decode token để lấy thông tin người dùng
+            const decoded = jwtDecode(accessToken);
+            console.log("usename nhận được:", decoded.sub);
+            localStorage.setItem('username', decoded.sub);
+            window.dispatchEvent(new Event("storage"));
             alert('Đăng nhập thành công!');
             // Chuyển hướng đến trang chủ
             navigate('/home');
@@ -46,6 +70,10 @@ const Login = () => {
             if (!provider) throw new Error('Thiếu provider');
 
             const redirectUrl = `${baseUrl}/${provider}`;
+
+            alert('Đăng nhập thành công!');
+            // Chuyển hướng đến trang chủ
+            navigate('/home');
 
             navigate('/home');
             // Tùy backend, nếu HEAD bị CORS chặn, có thể bỏ đoạn kiểm tra này
