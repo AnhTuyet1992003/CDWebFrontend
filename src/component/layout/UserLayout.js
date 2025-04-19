@@ -19,11 +19,11 @@ const UserLayout = ({ children }) => {
         };
     }, []);
     return (
-        <body>
+        <>
         <Header/>
         <div className="user-content">{children}</div>
         <Footer/>
-        </body>
+        </>
     );
 };
 

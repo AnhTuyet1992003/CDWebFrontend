@@ -1,9 +1,9 @@
 // /**
 //  * UI Tooltips & Popovers
 //  */
-import bootstrap from '../vendor/js/bootstrap'
 
-
+'use strict';
+import bootstrap from "../vendor/js/bootstrap";
 (function () {
   const popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'));
   const popoverList = popoverTriggerList.map(function (popoverTriggerEl) {

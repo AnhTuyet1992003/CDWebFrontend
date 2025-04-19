@@ -1,17 +1,111 @@
 /**
  * Dashboard Analytics
  */
-import config from './config'
-import ApexCharts from 'apexcharts';
-// 'use strict';
 
-(function () {
-  let cardColor, headingColor, axisColor, shadeColor, borderColor;
-
-  cardColor = config.colors.white;
+'use strict';
+import config from "./config";
+import ApexCharts from "../vendor/libs/apex-charts/apexcharts";
+document.addEventListener('DOMContentLoaded', function (e) {
+  let cardColor, headingColor, legendColor, labelColor, shadeColor, borderColor, fontFamily;
+  cardColor = config.colors.cardColor;
   headingColor = config.colors.headingColor;
-  axisColor = config.colors.axisColor;
+  legendColor = config.colors.bodyColor;
+  labelColor = config.colors.textMuted;
   borderColor = config.colors.borderColor;
+  fontFamily = config.fontFamily;
+
+  // Order Area Chart
+  // --------------------------------------------------------------------
+  const orderAreaChartEl = document.querySelector('#orderChart'),
+    orderAreaChartConfig = {
+      chart: {
+        height: 80,
+        type: 'area',
+        toolbar: {
+          show: false
+        },
+        sparkline: {
+          enabled: true
+        }
+      },
+      markers: {
+        size: 6,
+        colors: 'transparent',
+        strokeColors: 'transparent',
+        strokeWidth: 4,
+        discrete: [
+          {
+            fillColor: cardColor,
+            seriesIndex: 0,
+            dataPointIndex: 6,
+            strokeColor: config.colors.success,
+            strokeWidth: 2,
+            size: 6,
+            radius: 8
+          }
+        ],
+        offsetX: -1,
+        hover: {
+          size: 7
+        }
+      },
+      grid: {
+        show: false,
+        padding: {
+          top: 15,
+          right: 7,
+          left: 0
+        }
+      },
+      colors: [config.colors.success],
+      fill: {
+        type: 'gradient',
+        gradient: {
+          shadeIntensity: 1,
+          opacityFrom: 0.4,
+          gradientToColors: [config.colors.cardColor],
+          opacityTo: 0.4,
+          stops: [0, 100]
+        }
+      },
+      dataLabels: {
+        enabled: false
+      },
+      stroke: {
+        width: 2,
+        curve: 'smooth'
+      },
+      series: [
+        {
+          data: [180, 175, 275, 140, 205, 190, 295]
+        }
+      ],
+      xaxis: {
+        show: false,
+        lines: {
+          show: false
+        },
+        labels: {
+          show: false
+        },
+        stroke: {
+          width: 0
+        },
+        axisBorder: {
+          show: false
+        }
+      },
+      yaxis: {
+        stroke: {
+          width: 0
+        },
+        show: false
+      }
+    };
+  if (typeof orderAreaChartEl !== undefined && orderAreaChartEl !== null) {
+    const orderAreaChart = new ApexCharts(orderAreaChartEl, orderAreaChartConfig);
+    orderAreaChart.render();
+  }
 
   // Total Revenue Report Chart - Bar Chart
   // --------------------------------------------------------------------
@@ -19,12 +113,12 @@ import ApexCharts from 'apexcharts';
     totalRevenueChartOptions = {
       series: [
         {
-          name: '2021',
+          name: new Date().getFullYear() - 1,
           data: [18, 7, 15, 29, 18, 12, 9]
         },
         {
-          name: '2020',
-          data: [-13, -18, -9, -14, -5, -17, -15]
+          name: new Date().getFullYear() - 2,
+          data: [-13, -18, -9, -14, -8, -17, -15]
         }
       ],
       chart: {
@@ -36,10 +130,11 @@ import ApexCharts from 'apexcharts';
       plotOptions: {
         bar: {
           horizontal: false,
-          columnWidth: '33%',
-          borderRadius: 12,
+          columnWidth: '30%',
+          borderRadius: 8,
           startingShape: 'rounded',
-          endingShape: 'rounded'
+          endingShape: 'rounded',
+          borderRadiusApplication: 'around'
         }
       },
       colors: [config.colors.primary, config.colors.info],
@@ -57,19 +152,24 @@ import ApexCharts from 'apexcharts';
         horizontalAlign: 'left',
         position: 'top',
         markers: {
-          height: 8,
-          width: 8,
+          size: 4,
           radius: 12,
-          offsetX: -3
+          shape: 'circle',
+          strokeWidth: 0
         },
+        fontSize: '13px',
+        fontFamily: fontFamily,
+        fontWeight: 400,
         labels: {
-          colors: axisColor
+          colors: legendColor,
+          useSeriesColors: false
         },
         itemMargin: {
           horizontal: 10
         }
       },
       grid: {
+        strokeDashArray: 7,
         borderColor: borderColor,
         padding: {
           top: 0,
@@ -78,12 +178,16 @@ import ApexCharts from 'apexcharts';
           right: 20
         }
       },
+      fill: {
+        opacity: [1, 1]
+      },
       xaxis: {
         categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
         labels: {
           style: {
             fontSize: '13px',
-            colors: axisColor
+            fontFamily: fontFamily,
+            colors: labelColor
           }
         },
         axisTicks: {
@@ -97,24 +201,14 @@ import ApexCharts from 'apexcharts';
         labels: {
           style: {
             fontSize: '13px',
-            colors: axisColor
+            fontFamily: fontFamily,
+            colors: labelColor
           }
         }
       },
       responsive: [
         {
           breakpoint: 1700,
-          options: {
-            plotOptions: {
-              bar: {
-                borderRadius: 10,
-                columnWidth: '32%'
-              }
-            }
-          }
-        },
-        {
-          breakpoint: 1580,
           options: {
             plotOptions: {
               bar: {
@@ -129,8 +223,8 @@ import ApexCharts from 'apexcharts';
           options: {
             plotOptions: {
               bar: {
-                borderRadius: 10,
-                columnWidth: '42%'
+                borderRadius: 12,
+                columnWidth: '43%'
               }
             }
           }
@@ -140,8 +234,8 @@ import ApexCharts from 'apexcharts';
           options: {
             plotOptions: {
               bar: {
-                borderRadius: 10,
-                columnWidth: '48%'
+                borderRadius: 11,
+                columnWidth: '45%'
               }
             }
           }
@@ -151,8 +245,8 @@ import ApexCharts from 'apexcharts';
           options: {
             plotOptions: {
               bar: {
-                borderRadius: 10,
-                columnWidth: '40%'
+                borderRadius: 11,
+                columnWidth: '37%'
               }
             }
           }
@@ -162,8 +256,8 @@ import ApexCharts from 'apexcharts';
           options: {
             plotOptions: {
               bar: {
-                borderRadius: 11,
-                columnWidth: '48%'
+                borderRadius: 12,
+                columnWidth: '45%'
               }
             }
           }
@@ -173,19 +267,8 @@ import ApexCharts from 'apexcharts';
           options: {
             plotOptions: {
               bar: {
-                borderRadius: 10,
-                columnWidth: '30%'
-              }
-            }
-          }
-        },
-        {
-          breakpoint: 840,
-          options: {
-            plotOptions: {
-              bar: {
-                borderRadius: 10,
-                columnWidth: '35%'
+                borderRadius: 12,
+                columnWidth: '33%'
               }
             }
           }
@@ -195,7 +278,7 @@ import ApexCharts from 'apexcharts';
           options: {
             plotOptions: {
               bar: {
-                borderRadius: 10,
+                borderRadius: 11,
                 columnWidth: '28%'
               }
             }
@@ -206,8 +289,8 @@ import ApexCharts from 'apexcharts';
           options: {
             plotOptions: {
               bar: {
-                borderRadius: 10,
-                columnWidth: '32%'
+                borderRadius: 11,
+                columnWidth: '30%'
               }
             }
           }
@@ -218,29 +301,18 @@ import ApexCharts from 'apexcharts';
             plotOptions: {
               bar: {
                 borderRadius: 10,
-                columnWidth: '37%'
+                columnWidth: '38%'
               }
             }
           }
         },
         {
-          breakpoint: 480,
+          breakpoint: 440,
           options: {
             plotOptions: {
               bar: {
                 borderRadius: 10,
-                columnWidth: '45%'
-              }
-            }
-          }
-        },
-        {
-          breakpoint: 420,
-          options: {
-            plotOptions: {
-              bar: {
-                borderRadius: 10,
-                columnWidth: '52%'
+                columnWidth: '50%'
               }
             }
           }
@@ -250,7 +322,7 @@ import ApexCharts from 'apexcharts';
           options: {
             plotOptions: {
               bar: {
-                borderRadius: 10,
+                borderRadius: 9,
                 columnWidth: '60%'
               }
             }
@@ -282,7 +354,7 @@ import ApexCharts from 'apexcharts';
       series: [78],
       labels: ['Growth'],
       chart: {
-        height: 240,
+        height: 200,
         type: 'radialBar'
       },
       plotOptions: {
@@ -301,17 +373,17 @@ import ApexCharts from 'apexcharts';
           dataLabels: {
             name: {
               offsetY: 15,
-              color: headingColor,
+              color: legendColor,
               fontSize: '15px',
-              fontWeight: '600',
-              fontFamily: 'Public Sans'
+              fontWeight: '500',
+              fontFamily: fontFamily
             },
             value: {
               offsetY: -25,
               color: headingColor,
               fontSize: '22px',
               fontWeight: '500',
-              fontFamily: 'Public Sans'
+              fontFamily: fontFamily
             }
           }
         }
@@ -356,13 +428,89 @@ import ApexCharts from 'apexcharts';
     growthChart.render();
   }
 
+  // Revenue Bar Chart
+  // --------------------------------------------------------------------
+  const revenueBarChartEl = document.querySelector('#revenueChart'),
+    revenueBarChartConfig = {
+      chart: {
+        height: 95,
+        type: 'bar',
+        toolbar: {
+          show: false
+        }
+      },
+      plotOptions: {
+        bar: {
+          barHeight: '80%',
+          columnWidth: '75%',
+          startingShape: 'rounded',
+          endingShape: 'rounded',
+          borderRadius: 4,
+          distributed: true
+        }
+      },
+      grid: {
+        show: false,
+        padding: {
+          top: -20,
+          bottom: -12,
+          left: -10,
+          right: 0
+        }
+      },
+      colors: [
+        config.colors.primary,
+        config.colors.primary,
+        config.colors.primary,
+        config.colors.primary,
+        config.colors.primary,
+        config.colors.primary,
+        config.colors.primary
+      ],
+      dataLabels: {
+        enabled: false
+      },
+      series: [
+        {
+          data: [40, 95, 60, 45, 90, 50, 75]
+        }
+      ],
+      legend: {
+        show: false
+      },
+      xaxis: {
+        categories: ['M', 'T', 'W', 'T', 'F', 'S', 'S'],
+        axisBorder: {
+          show: false
+        },
+        axisTicks: {
+          show: false
+        },
+        labels: {
+          style: {
+            colors: labelColor,
+            fontSize: '13px'
+          }
+        }
+      },
+      yaxis: {
+        labels: {
+          show: false
+        }
+      }
+    };
+  if (typeof revenueBarChartEl !== undefined && revenueBarChartEl !== null) {
+    const revenueBarChart = new ApexCharts(revenueBarChartEl, revenueBarChartConfig);
+    revenueBarChart.render();
+  }
+
   // Profit Report Line Chart
   // --------------------------------------------------------------------
   const profileReportChartEl = document.querySelector('#profileReportChart'),
     profileReportChartConfig = {
       chart: {
-        height: 80,
-        // width: 175,
+        height: 75,
+        width: 240,
         type: 'line',
         toolbar: {
           show: false
@@ -412,7 +560,49 @@ import ApexCharts from 'apexcharts';
       },
       yaxis: {
         show: false
-      }
+      },
+      responsive: [
+        {
+          breakpoint: 1700,
+          options: {
+            chart: {
+              width: 200
+            }
+          }
+        },
+        {
+          breakpoint: 1579,
+          options: {
+            chart: {
+              width: 180
+            }
+          }
+        },
+        {
+          breakpoint: 1500,
+          options: {
+            chart: {
+              width: 160
+            }
+          }
+        },
+        {
+          breakpoint: 1450,
+          options: {
+            chart: {
+              width: 140
+            }
+          }
+        },
+        {
+          breakpoint: 1400,
+          options: {
+            chart: {
+              width: 240
+            }
+          }
+        }
+      ]
     };
   if (typeof profileReportChartEl !== undefined && profileReportChartEl !== null) {
     const profileReportChart = new ApexCharts(profileReportChartEl, profileReportChartConfig);
@@ -425,15 +615,16 @@ import ApexCharts from 'apexcharts';
     orderChartConfig = {
       chart: {
         height: 165,
-        width: 130,
-        type: 'donut'
+        width: 136,
+        type: 'donut',
+        offsetX: 15
       },
       labels: ['Electronic', 'Sports', 'Decor', 'Fashion'],
-      series: [85, 15, 50, 50],
-      colors: [config.colors.primary, config.colors.secondary, config.colors.info, config.colors.success],
+      series: [50, 85, 25, 40],
+      colors: [config.colors.success, config.colors.primary, config.colors.secondary, config.colors.info],
       stroke: {
         width: 5,
-        colors: cardColor
+        colors: [cardColor]
       },
       dataLabels: {
         enabled: false,
@@ -451,6 +642,14 @@ import ApexCharts from 'apexcharts';
           right: 15
         }
       },
+      states: {
+        hover: {
+          filter: { type: 'none' }
+        },
+        active: {
+          filter: { type: 'none' }
+        }
+      },
       plotOptions: {
         pie: {
           donut: {
@@ -458,22 +657,23 @@ import ApexCharts from 'apexcharts';
             labels: {
               show: true,
               value: {
-                fontSize: '1.5rem',
-                fontFamily: 'Public Sans',
+                fontSize: '1.125rem',
+                fontFamily: fontFamily,
+                fontWeight: 500,
                 color: headingColor,
-                offsetY: -15,
+                offsetY: -17,
                 formatter: function (val) {
                   return parseInt(val) + '%';
                 }
               },
               name: {
-                offsetY: 20,
-                fontFamily: 'Public Sans'
+                offsetY: 17,
+                fontFamily: fontFamily
               },
               total: {
                 show: true,
-                fontSize: '0.8125rem',
-                color: axisColor,
+                fontSize: '13px',
+                color: legendColor,
                 label: 'Weekly',
                 formatter: function (w) {
                   return '38%';
@@ -495,11 +695,11 @@ import ApexCharts from 'apexcharts';
     incomeChartConfig = {
       series: [
         {
-          data: [24, 21, 30, 22, 42, 26, 35, 29]
+          data: [21, 30, 22, 42, 26, 35, 29]
         }
       ],
       chart: {
-        height: 215,
+        height: 200,
         parentHeightOffset: 0,
         parentWidthOffset: 0,
         toolbar: {
@@ -511,7 +711,7 @@ import ApexCharts from 'apexcharts';
         enabled: false
       },
       stroke: {
-        width: 2,
+        width: 3,
         curve: 'smooth'
       },
       legend: {
@@ -526,13 +726,14 @@ import ApexCharts from 'apexcharts';
           {
             fillColor: config.colors.white,
             seriesIndex: 0,
-            dataPointIndex: 7,
+            dataPointIndex: 6,
             strokeColor: config.colors.primary,
             strokeWidth: 2,
             size: 6,
             radius: 8
           }
         ],
+        offsetX: -1,
         hover: {
           size: 7
         }
@@ -541,25 +742,25 @@ import ApexCharts from 'apexcharts';
       fill: {
         type: 'gradient',
         gradient: {
-          shade: shadeColor,
-          shadeIntensity: 0.6,
-          opacityFrom: 0.5,
-          opacityTo: 0.25,
-          stops: [0, 95, 100]
+          shadeIntensity: 1,
+          opacityFrom: 0.3,
+          gradientToColors: [config.colors.cardColor],
+          opacityTo: 0.3,
+          stops: [0, 100]
         }
       },
       grid: {
         borderColor: borderColor,
-        strokeDashArray: 3,
+        strokeDashArray: 8,
         padding: {
           top: -20,
           bottom: -8,
-          left: -10,
+          left: 0,
           right: 8
         }
       },
       xaxis: {
-        categories: ['', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
+        categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
         axisBorder: {
           show: false
         },
@@ -570,7 +771,7 @@ import ApexCharts from 'apexcharts';
           show: true,
           style: {
             fontSize: '13px',
-            colors: axisColor
+            colors: labelColor
           }
         }
       },
@@ -605,10 +806,9 @@ import ApexCharts from 'apexcharts';
           strokeWidth: '8',
           hollow: {
             margin: 2,
-            size: '45%'
+            size: '40%'
           },
           track: {
-            strokeWidth: '50%',
             background: borderColor
           },
           dataLabels: {
@@ -621,8 +821,9 @@ import ApexCharts from 'apexcharts';
                 return '$' + parseInt(val);
               },
               offsetY: 5,
-              color: '#697a8d',
-              fontSize: '13px',
+              color: legendColor,
+              fontSize: '12px',
+              fontFamily: fontFamily,
               show: true
             }
           }
@@ -660,4 +861,4 @@ import ApexCharts from 'apexcharts';
     const weeklyExpenses = new ApexCharts(weeklyExpensesEl, weeklyExpensesConfig);
     weeklyExpenses.render();
   }
-})();
+});

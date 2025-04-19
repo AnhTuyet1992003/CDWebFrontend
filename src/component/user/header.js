@@ -90,7 +90,7 @@ const Header = () => {
                                     <Link to="/contact" style={{cursor: 'pointer'}}>Liên hệ</Link>
                                 </li>
                                 <li>
-                                    <Link to="/admin-index" style={{cursor: 'pointer'}}>Admin</Link>
+                                    <Link to="/admin" style={{cursor: 'pointer'}}>Admin</Link>
                                 </li>
                             </ul>
                         </nav>

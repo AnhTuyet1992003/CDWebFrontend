@@ -11,12 +11,12 @@ import Login from './pages/auth/login';
 import BlogDetail from './pages/user/blog-detail';
 import Contact from './pages/user/contact';
 import ProductDetail from './pages/user/product-detail';
-import LayoutUser from './component/layout/UserLayout.js';
+import LayoutUser from './component/layout/UserLayout';
 import LayoutAdmin from './component/layout/AdminLayout';
 import Register from './pages/auth/register';
-import AdminIndex from './pages/admin/admin-index';
-import AdminListUser from './pages/admin/list-user';
-import UserList from './pages/admin/test';
+import AddProduct from './pages/admin/add-product';
+import UserList from './pages/admin/list-user';
+import Admin from './pages/admin/index'
 
 import AuthCallback from './pages/auth/google/callback';
 import OAuth2RedirectHandler from "./pages/auth/google/OAuth2RedirectHandler"
@@ -39,14 +39,14 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
 
-
             <Route path="*" element={<h1>404 Not Found</h1>} />
             <Route path="/auth/google/callback" element={<AuthCallback />} />
             <Route path="/auth/facebook/callback" element={<AuthCallback />} />
             <Route path="/oauth2/success" element={<OAuth2RedirectHandler />} />
 
-            <Route path="/admin-index" element={<LayoutAdmin><AdminIndex /></LayoutAdmin>} />
+            <Route path="/admin" element={<LayoutAdmin><Admin /></LayoutAdmin>} />
             <Route path="/admin-list-user" element={<LayoutAdmin><UserList /></LayoutAdmin>} />
+            <Route path="/admin-add-product" element={<AddProduct />} />
           {/*/!* Admin Routes *!/*/}
           {/*<Route path="/admin" element={<AdminHome />} />*/}
           {/*<Route path="/admin/dashboard" element={<AdminDashboard />} />*/}
