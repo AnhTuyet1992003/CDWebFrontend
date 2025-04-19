@@ -3,8 +3,8 @@
  */
 
 'use strict';
-
-(function () {
+import bootstrap from "../vendor/js/bootstrap";
+document.addEventListener('DOMContentLoaded', function (e) {
   // Bootstrap toasts example
   // --------------------------------------------------------------------
   const toastPlacementExample = document.querySelector('.toast-placement-ex'),
@@ -32,9 +32,8 @@
 
       toastPlacementExample.classList.add(selectedType);
       DOMTokenList.prototype.add.apply(toastPlacementExample.classList, selectedPlacement);
-      // eslint-disable-next-line no-undef
       toastPlacement = new bootstrap.Toast(toastPlacementExample);
       toastPlacement.show();
     };
   }
-})();
+});

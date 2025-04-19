@@ -1,12 +1,20 @@
 /**
  * Main
  */
-import Menu from '../vendor/js/menu'
-import Helpers from '../vendor/js/helpers'
-import bootstrap from '../vendor/js/bootstrap'
-// 'use strict';
 
-let menu, animate;
+'use strict';
+
+import Menu from "../vendor/js/menu";
+import Helpers from "../vendor/js/helpers";
+import bootstrap from "../vendor/js/bootstrap";
+let menu,
+  animate;
+document.addEventListener('DOMContentLoaded', function () {
+  // class for ios specific styles
+  if (navigator.userAgent.match(/iPhone|iPad|iPod/i)) {
+    document.body.classList.add('ios');
+  }
+});
 
 (function () {
   // Initialize menu
@@ -116,5 +124,9 @@ let menu, animate;
   // If current layout is vertical and current window screen is > small
 
   // Auto update menu collapsed/expanded based on the themeConfig
-  window.Helpers.setCollapsed(true, false);
+      window.Helpers.setCollapsed(true, false);
 })();
+// Utils
+function isMacOS() {
+  return /Mac|iPod|iPhone|iPad/.test(navigator.userAgent);
+}
