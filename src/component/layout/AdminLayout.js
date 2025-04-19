@@ -60,6 +60,7 @@ const AdminLayout = ({ children }) => {
                                         className="form-control border-0 shadow-none ps-1 ps-sm-2 d-md-block d-none"
                                         placeholder="Search..."
                                         aria-label="Search..."/>
+
                                 </div>
                             </div>
 
@@ -132,7 +133,6 @@ const AdminLayout = ({ children }) => {
 
                 </div>
             </div>
-
             <div class="layout-overlay layout-menu-toggle"></div>
         </div>
         <div className="buy-now">
@@ -141,6 +141,7 @@ const AdminLayout = ({ children }) => {
         </>
     )
         ;
+
 };
 
 export default AdminLayout;
