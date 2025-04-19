@@ -9,10 +9,17 @@ const OAuth2RedirectHandler = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
+        // 🧼 Loại bỏ fragment #_=_ của Facebook nếu có
+        if (window.location.hash === '#_=_') {
+            window.history.replaceState(null, '', window.location.pathname + window.location.search);
+        }
         const handleOAuth2Redirect = async () => {
+
             // Lấy token từ URL (nếu backend redirect về với token trong query)
             const params = new URLSearchParams(window.location.search);
             const token = params.get('token');
+
+            console.log("Token từ URL:", token);
 
             if (token) {
                 // Lưu token vào cookie hoặc localStorage
@@ -23,6 +30,8 @@ const OAuth2RedirectHandler = () => {
                 const decoded = jwtDecode(token);
                 const fullEmail = decoded.sub;
                 const username = fullEmail.split('@')[0]; // Lấy phần trước @
+
+                console.log("Token decoded:", decoded);
 
                 localStorage.setItem('username', username);
                 window.dispatchEvent(new Event("storage")); // Gửi sự kiện để header cập nhật

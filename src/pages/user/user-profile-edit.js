@@ -29,7 +29,7 @@ const UserProfileEdit = () => {
         const decoded = jwtDecode(token);
         const username = decoded.sub;
 
-        axios.post(`http://localhost:8080/api/v1/users/details`, {}, {
+        axios.post(`https://localhost:8443/api/v1/users/details`, {}, {
             headers: {
                 Authorization: `Bearer ${token}`,
             }

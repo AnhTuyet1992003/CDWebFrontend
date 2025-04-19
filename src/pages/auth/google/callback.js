@@ -12,7 +12,7 @@ export default function AuthCallback() {
         const provider = location.pathname.includes('google') ? 'google' : 'facebook';
 
         if (code) {
-            fetch(`http://localhost:8080/auth/${provider}/callback?code=${code}`, {
+            fetch(`https://localhost:8443/auth/${provider}/callback?code=${code}`, {
                 method: 'GET',
                 credentials: 'include', // Để backend có thể gửi cookie nếu dùng HttpOnly
             })

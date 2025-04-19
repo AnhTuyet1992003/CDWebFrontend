@@ -17,6 +17,12 @@ import { useEffect } from 'react';
 
 const Login = () => {
 
+    useEffect(() => {
+        if (window.location.hash === '#_=_') {
+            window.history.replaceState(null, null, window.location.href.split('#')[0]);
+        }
+    }, []);
+
     const navigate = useNavigate();
     useEffect(() => {
         const token = Cookies.get('token');
@@ -39,7 +45,7 @@ const Login = () => {
     const handleLoginSubmit = async (e) => {
         e.preventDefault();
         try {
-            const response = await axios.post('http://localhost:8080/api/v1/users/login', {
+            const response = await axios.post('https://localhost:8443/api/v1/users/login', {
                 username,
                 password
             });
@@ -65,19 +71,23 @@ const Login = () => {
     }
     const handleSocialLogin = async (provider) => {
         try {
-            const baseUrl = 'http://localhost:8080/oauth2/authorization';
+            const baseUrl = 'https://localhost:8443/oauth2/authorization';
 
             if (!provider) throw new Error('Thiếu provider');
 
             const redirectUrl = `${baseUrl}/${provider}`;
+            console.log("Đang đăng nhập bằng:", provider);
 
-            alert('Đăng nhập thành công!');
+            //alert('Đăng nhập thành công!');
             // Chuyển hướng đến trang chủ
-            navigate('/home');
+            //navigate('/home');
 
-            navigate('/home');
+            //navigate('/home');
             // Tùy backend, nếu HEAD bị CORS chặn, có thể bỏ đoạn kiểm tra này
             window.location.href = redirectUrl;
+            // Cập nhật URL đăng nhập với Facebook
+            //window.location.href = "https://localhost:8443/oauth2/authorization/facebook";
+
         } catch (error) {
             console.error('Lỗi:', error.message);
             alert(`Không thể kết nối đến dịch vụ ${provider}.`);
