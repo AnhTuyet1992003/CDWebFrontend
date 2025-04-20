@@ -57,7 +57,7 @@ function App() {
             <Route path="/admin-list-user" element={<LayoutAdmin><UserList /></LayoutAdmin>} />
             <Route path="/admin-add-product" element={<AddProduct />} />
 
-            <Route path="/user-profile-edit" element={<UserProfileEdit/>}/>
+            <Route path="/user-profile-edit" element={<LayoutUser><UserProfileEdit/></LayoutUser>}/>
             <Route path="/admin-index" element={<LayoutAdmin><AdminIndex /></LayoutAdmin>} />
             {/*<Route path="/admin-list-user" element={<AdminListUser/>} />*/}
           {/*/!* Admin Routes *!/*/}
