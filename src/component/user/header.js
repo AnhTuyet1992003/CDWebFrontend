@@ -13,6 +13,7 @@ const Header = () => {
 
             if (!storedUsername) {
                 const token = Cookies.get('token');
+                console.log("token header: "+ token)
                 if (token) {
                     try {
                         const payload = JSON.parse(atob(token.split('.')[1]));

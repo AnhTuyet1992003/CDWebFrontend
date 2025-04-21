@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { jwtDecode } from 'jwt-decode';
+import Cookies from 'js-cookie';
+
 
 const UserProfileEdit = () => {
     const [user, setUser] = useState({
@@ -16,10 +18,14 @@ const UserProfileEdit = () => {
 
     // Load user info from token
     useEffect(() => {
-        const token = document.cookie
-            .split('; ')
-            .find(row => row.startsWith('token='))
-            ?.split('=')[1];
+        // const token = document.cookie
+        //     .split('; ')
+        //     .find(row => row.startsWith('token='))
+        //     ?.split('=')[1];
+        const token = localStorage.getItem('accessToken');
+            // Cookies.get('token');
+
+        console.log("token profile: "+token)
 
         if (!token) {
             setMessage('Bạn chưa đăng nhập');
@@ -29,10 +35,11 @@ const UserProfileEdit = () => {
         const decoded = jwtDecode(token);
         const username = decoded.sub;
 
-        axios.post(`https://localhost:8443/api/v1/users/details`, {}, {
+        axios.put(`https://localhost:8443/api/v1/users/details`, {}, {
             headers: {
                 Authorization: `Bearer ${token}`,
-            }
+            },
+            withCredentials: true,
         })
             .then(res => {
                 const userData = res.data;
@@ -60,19 +67,22 @@ const UserProfileEdit = () => {
     const handleUpdate = async (e) => {
         e.preventDefault();
 
-        const token = document.cookie
-            .split('; ')
-            .find(row => row.startsWith('token='))
-            ?.split('=')[1];
+        // const token = document.cookie
+        //     .split('; ')
+        //     .find(row => row.startsWith('token='))
+        //     ?.split('=')[1];
+        const token = localStorage.getItem('accessToken');
+
 
         try {
             const res = await axios.put(
-                `http://localhost:8080/api/v1/users/details/${userId}`,
+                `https://localhost:8443/api/v1/users/details/${userId}`,
                 user,
                 {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },
+                    withCredentials: true,
                 }
             );
             setMessage('Cập nhật thông tin thành công!');
