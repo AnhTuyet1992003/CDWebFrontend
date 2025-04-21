@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import axios, {post} from 'axios';
 import { jwtDecode } from 'jwt-decode';
 import './user-profile-edit.css'
 // Bootstrap CSS
@@ -18,7 +18,53 @@ const UserProfileEdit = () => {
         phone: '',
         address: '',
         birthday: '',
+        avatar: ''
     });
+    const [avatarFile, setAvatarFile] = useState(null);
+
+    //khi chọn file ảnh
+    // Khi chọn file ảnh
+    const handleAvatarChange = (e) => {
+        const files = e.target.files;
+        if (!files || files.length === 0) {
+            console.log("No file selected"); // 👉 sẽ không log dòng này nếu chọn đúng
+            setMessage("Vui lòng chọn một ảnh hợp lệ.");
+            return;
+        }
+
+        const file = files[0];
+        console.log("File selected:", file); // ✅ kiểm tra đúng file chưa
+        setAvatarFile(file);
+    };
+
+
+    //gửi file lên api
+    const handleUploadAvatar = async () => {
+        if (!avatarFile){
+            alert("Vui lòng chọn 1 ảnh để tải lên.")
+            return;
+        }
+        const token = document.cookie
+            .split('; ')
+            .find(row => row.startsWith('token='))
+            ?.split('=')[1];
+        const formData = new FormData();
+        formData.append('file', avatarFile);
+
+        try {
+            const response = await axios.post('https://localhost:8443/api/v1/users/upload-avatar', formData, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+
+            alert('Tải ảnh lên thành công!')
+            console.log('Avatar Url:', response.data.data.url);
+        }catch (error){
+            console.error(error);
+            alert('Lỗi khi tải ảnh')
+        };
+    }
 
     const [userId, setUserId] = useState(null);
     const [message, setMessage] = useState('');
@@ -29,7 +75,7 @@ const UserProfileEdit = () => {
             .split('; ')
             .find(row => row.startsWith('token='))
             ?.split('=')[1];
-
+console.log("token"+ token)
         if (!token) {
             setMessage('Bạn chưa đăng nhập');
             return;
@@ -52,6 +98,7 @@ const UserProfileEdit = () => {
                     phone: userData.phone || '',
                     address: userData.address || '',
                     birthday: userData.formattedBirthday || '',
+                    avatar: userData.avatar || 'https://res.cloudinary.com/dorz7ucva/image/upload/v1745202292/image_2820bc603a47efcf17a0806b81ca92bff7ea2905.png'
                 });
                 setUserId(userData.id);
             })
@@ -93,31 +140,31 @@ const UserProfileEdit = () => {
 
     return (
         <>
-            {/*<div className="information">*/}
-            {/*    <div className="max-w-xl mx-auto mt-10 bg-white shadow-md p-6 rounded-xl">*/}
-            {/*        <h2 className="text-xl font-bold mb-4">Cập nhật thông tin người dùng</h2>*/}
-            {/*        {message && <div className="mb-4 text-red-500">{message}</div>}*/}
-            {/*        <form onSubmit={handleUpdate} className="space-y-4">*/}
-            {/*            <input type="text" name="fullname" value={user.fullname} onChange={handleChange}*/}
-            {/*                   placeholder="Họ tên"*/}
-            {/*                   className="w-full p-2 border rounded"/>*/}
-            {/*            <input type="text" name="username" value={user.username} onChange={handleChange}*/}
-            {/*                   placeholder="Tên đăng nhập" className="w-full p-2 border rounded"/>*/}
-            {/*            <input type="text" name="phone" value={user.phone} onChange={handleChange}*/}
-            {/*                   placeholder="Số điện thoại"*/}
-            {/*                   className="w-full p-2 border rounded"/>*/}
-            {/*            <input type="text" name="address" value={user.address} onChange={handleChange}*/}
-            {/*                   placeholder="Địa chỉ"*/}
-            {/*                   className="w-full p-2 border rounded"/>*/}
-            {/*            <input type="date" name="birthday" value={user.birthday} onChange={handleChange}*/}
-            {/*                   className="w-full p-2 border rounded"/>*/}
-            {/*            <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Lưu*/}
-            {/*                thay*/}
-            {/*                đổi*/}
-            {/*            </button>*/}
-            {/*        </form>*/}
-            {/*    </div>*/}
-            {/*</div>*/}
+            <div className="information">
+                <div className="max-w-xl mx-auto mt-10 bg-white shadow-md p-6 rounded-xl">
+                    <h2 className="text-xl font-bold mb-4">Cập nhật thông tin người dùng</h2>
+                    {message && <div className="mb-4 text-red-500">{message}</div>}
+                    <form onSubmit={handleUpdate} className="space-y-4">
+                        <input type="text" name="fullname" value={user.fullname} onChange={handleChange}
+                               placeholder="Họ tên"
+                               className="w-full p-2 border rounded"/>
+                        <input type="text" name="username" value={user.username} onChange={handleChange}
+                               placeholder="Tên đăng nhập" className="w-full p-2 border rounded"/>
+                        <input type="text" name="phone" value={user.phone} onChange={handleChange}
+                               placeholder="Số điện thoại"
+                               className="w-full p-2 border rounded"/>
+                        <input type="text" name="address" value={user.address} onChange={handleChange}
+                               placeholder="Địa chỉ"
+                               className="w-full p-2 border rounded"/>
+                        <input type="date" name="birthday" value={user.birthday} onChange={handleChange}
+                               className="w-full p-2 border rounded"/>
+                        <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Lưu
+                            thay
+                            đổi
+                        </button>
+                    </form>
+                </div>
+            </div>
 
 
             <div className="containerEdit light-style flex-grow-1 container-p-y">
@@ -149,20 +196,28 @@ const UserProfileEdit = () => {
                                 <div className="tab-pane fade active show" id="account2-general">
 
                                     <div className="card2-body media align-items-center">
-                                        <img src="https://bootdey.com/img/Content/avatar/avatar1.png" alt=""
+                                        <img src={user.avatar} alt=""
                                              className="d-block ui-w-80"/>
                                         <div className="media-body ml-4">
                                             <label className="btn btn-outline-primary upload-photo-label">
-                                                Upload new photo
-                                                <input type="file" className="account2-settings-fileinput"/>
+                                                Tải hình mới lên
+                                                <input
+                                                    type="file"
+                                                    accept="image/*"
+                                                    className="account2-settings-fileinput"
+                                                    onChange={handleAvatarChange}
+                                                    // style={{display: "none"}}
+                                                />
                                             </label> &nbsp;
-                                            <button type="button" className="btn btn-default md-btn-flat">Reset</button>
+                                            <button type="button"
+                                                    className="btn btn-default md-btn-flat"
+                                                    onClick={handleUploadAvatar}>Tải ảnh</button>
 
-                                            <div className="text-light small mt-1">Allowed JPG, GIF or PNG. Max size of
+                                            <div className="text-light small mt-1">Cho phép JPG, GIF hoặc PNG. Kích thước tối đa là
                                                 800K
                                             </div>
                                         </div>
-                                    </div>
+                                    </div><br></br>
                                     <hr className="border-light m-0"/>
 
                                     <div className="card-body">
@@ -171,11 +226,11 @@ const UserProfileEdit = () => {
                                             <input type="text" className="form-control mb-1"/>
                                         </div>
                                         <div className="form-group">
-                                            <label className="form-label">Name</label>
+                                            <label className="form-label">Tên</label>
                                             <input type="text" className="form-control" value="Nelle Maxwell"/>
                                         </div>
                                         <div className="form-group">
-                                            <label className="form-label">E-mail</label>
+                                            <label className="form-label">Email</label>
                                             <input type="text" className="form-control mb-1" value="nmaxwell@mail.com"/>
                                             <div className="alert alert-warning mt-3">
                                                 Your email is not confirmed. Please check your inbox.<br/>
@@ -183,8 +238,8 @@ const UserProfileEdit = () => {
                                             </div>
                                         </div>
                                         <div className="form-group">
-                                            <label className="form-label">Company</label>
-                                            <input type="text" className="form-control" value="Company Ltd."/>
+                                            <label className="form-label">Số điện thoại</label>
+                                            <input type="tel" className="form-control" pattern="[0-9]+" />
                                         </div>
                                     </div>
 
