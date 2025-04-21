@@ -54,12 +54,15 @@ const Login = () => {
             console.log("Access token nhận được:", accessToken);
 
             // Lưu token vào cookie
-            Cookies.set('token', accessToken, { expires: 1 }); // expires là số ngày, bạn có thể điều chỉnh
+            Cookies.set('token', accessToken, { expires: 1, secure: false, sameSite: 'Lax' }); // expires là số ngày, bạn có thể điều chỉnh
             localStorage.setItem('accessToken', accessToken);
+            // Cookies.set('testToken', accessToken, { secure: false });
+            // console.log(Cookies.get('testToken'));
             // Decode token để lấy thông tin người dùng
             const decoded = jwtDecode(accessToken);
             console.log("usename nhận được:", decoded.sub);
             localStorage.setItem('username', decoded.sub);
+
             window.dispatchEvent(new Event("storage"));
             alert('Đăng nhập thành công!');
             // Chuyển hướng đến trang chủ

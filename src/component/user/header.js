@@ -1,11 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Cookies from 'js-cookie';
+import {jwtDecode} from "jwt-decode";
+import axios from "axios";
 
 const Header = () => {
     const navigate = useNavigate();
     const [username, setUsername] = useState('');
+    const [user, setUser] = useState({
 
+        avatar: ''
+    });
+    const [userId, setUserId] = useState(null);
     useEffect(() => {
         console.log("🎯 Header mounted");
         const loadUsername = () => {
@@ -57,7 +63,39 @@ const Header = () => {
         // Navigate to login page
         navigate('/login');
     };
+    // Load user info from token
 
+    useEffect(() => {
+        const token = document.cookie
+            .split('; ')
+            .find(row => row.startsWith('token='))
+            ?.split('=')[1];
+        console.log("token"+ token)
+        if (!token) {
+            console.log("⛔ Không có token, không gọi API user details");
+            return; // Không làm gì nếu chưa đăng nhập
+        }
+
+        const decoded = jwtDecode(token);
+        const username = decoded.sub;
+
+        axios.post(`https://localhost:8443/api/v1/users/details`, {}, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            }
+        })
+            .then(res => {
+                const userData = res.data;
+                setUser({
+                    avatar: userData.avatar || 'https://res.cloudinary.com/dorz7ucva/image/upload/v1745202292/image_2820bc603a47efcf17a0806b81ca92bff7ea2905.png'
+                });
+                setUserId(userData.id);
+            })
+            .catch(err => {
+                console.error(err);
+                alert('Lỗi khi tải thông tin người dùng');
+            });
+    }, []);
     return (
         <>
             <header className="header">
@@ -99,20 +137,48 @@ const Header = () => {
                                                         className="nav-link dropdown-toggle hide-arrow p-0"
                                                         href="#"
                                                         data-bs-toggle="dropdown">
-                                                        <div className="avatar avatar-online">
-                                                            <img src="/img-admin/avatars/1.png" alt
-                                                                 className="w-px-40 h-auto rounded-circle"/>
+                                                        <div className="avatar avatar-online"
+                                                             style={{
+                                                                 width: "40px",
+                                                                 height: "40px",
+                                                                 borderRadius: "50%",
+                                                                 // overflow: "hidden"
+                                                             }}>
+                                                            <img
+                                                                src={user.avatar}
+                                                                alt=""
+                                                                style={{
+                                                                    width: "100%",
+                                                                    height: "100%",
+                                                                    objectFit: "cover"
+                                                                }}
+                                                            />
                                                         </div>
+
                                                     </a>
                                                     <ul className="dropdown-menu dropdown-menu-end">
                                                         <li>
                                                             <a className="dropdown-item" href="#">
-                                                                <div className="d-flex">
+                                                            <div className="d-flex">
                                                                     <div className="flex-shrink-0 me-3">
-                                                                        <div className="avatar avatar-online">
-                                                                            <img src="/img-admin/avatars/1.png" alt
-                                                                                 className="w-px-40 h-auto rounded-circle"/>
+                                                                        <div className="avatar avatar-online"
+                                                                             style={{
+                                                                                 width: "40px",
+                                                                                 height: "40px",
+                                                                                 borderRadius: "50%",
+                                                                                 // overflow: "hidden"
+                                                                             }}>
+                                                                            <img
+                                                                                src={user.avatar}
+                                                                                alt=""
+                                                                                style={{
+                                                                                    width: "100%",
+                                                                                    height: "100%",
+                                                                                    objectFit: "cover" // Quan trọng để ảnh fill mà không méo
+                                                                                }}
+                                                                            />
                                                                         </div>
+
                                                                     </div>
                                                                     <div className="flex-grow-1">
                                                                         <h6 className="mb-0">{username}</h6>
