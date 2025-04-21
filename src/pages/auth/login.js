@@ -54,7 +54,13 @@ const Login = () => {
             console.log("Access token nhận được:", accessToken);
 
             // Lưu token vào cookie
-            Cookies.set('token', accessToken, { expires: 1, secure: false, sameSite: 'Lax' }); // expires là số ngày, bạn có thể điều chỉnh
+            Cookies.set('token', accessToken, {
+                expires: 1,
+                secure: true,
+                sameSite: 'None',
+            });
+            // expires là số ngày, bạn có thể điều chỉnh
+
             localStorage.setItem('accessToken', accessToken);
             // Cookies.set('testToken', accessToken, { secure: false });
             // console.log(Cookies.get('testToken'));
@@ -65,6 +71,7 @@ const Login = () => {
 
             window.dispatchEvent(new Event("storage"));
             alert('Đăng nhập thành công!');
+            console.log('Login success, token:', Cookies.get('token'));
             // Chuyển hướng đến trang chủ
             navigate('/home');
         } catch (error) {
