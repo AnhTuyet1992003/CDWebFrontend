@@ -20,10 +20,19 @@ const OAuth2RedirectHandler = () => {
             const token = params.get('token');
 
             console.log("Token từ URL:", token);
+            console.log(document.cookie); // Xem thử cookie nào đang tồn tại
 
             if (token) {
                 // Lưu token vào cookie hoặc localStorage
-                Cookies.set('token', token, { expires: 7 });
+                //Cookies.set('token', token, { expires: 7 });
+                Cookies.set('token', token, {
+                    expires: 7,
+                    path: '/',
+                    sameSite: 'Lax', // hoặc 'Strict' nếu muốn chặt
+                    secure: false,   // Chạy local nên không bật secure
+                });
+
+                console.log("Token từ cookie:", Cookies.get('token'));
                 localStorage.setItem('accessToken', token);
 
                 // 👉 Decode token để lấy username
