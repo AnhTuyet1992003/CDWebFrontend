@@ -11,6 +11,10 @@ const Header = () => {
 
         avatar: ''
     });
+    Cookies.set('testCookie', 'hello', { expires: 1 });
+    console.log(Cookies.get('testCookie')); // Có ra 'hello' không?
+    console.log(document.cookie); // Có xuất hiện không?
+
     const [userId, setUserId] = useState(null);
     useEffect(() => {
         console.log("🎯 Header mounted");
