@@ -112,6 +112,7 @@ const UserProfileEdit = () => {
                     avatar: userData.avatar || 'https://res.cloudinary.com/dorz7ucva/image/upload/v1745202292/image_2820bc603a47efcf17a0806b81ca92bff7ea2905.png'
                 });
                 setUserId(userData.id);
+                console(userData.avatar);
             })
             .catch(err => {
                 console.error(err);

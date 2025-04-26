@@ -23,8 +23,10 @@ const OAuth2RedirectHandler = () => {
 
             if (token) {
                 // Lưu token vào cookie hoặc localStorage
-                Cookies.set('token', token, { expires: 7 });
-                localStorage.setItem('accessToken', token);
+                Cookies.set('token', token, { expires: 7 ,
+                    secure: true,
+                    sameSite: 'None',});
+                localStorage.setItem('accessToken ', token);
 
                 // 👉 Decode token để lấy username
                 const decoded = jwtDecode(token);

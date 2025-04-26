@@ -143,7 +143,7 @@ const Header = () => {
                                                                  width: "40px",
                                                                  height: "40px",
                                                                  borderRadius: "50%",
-                                                                 // overflow: "hidden"
+                                                                 overflow: "hidden"
                                                              }}>
                                                             <img
                                                                 src={user.avatar}
@@ -175,6 +175,7 @@ const Header = () => {
                                                                                 style={{
                                                                                     width: "100%",
                                                                                     height: "100%",
+                                                                                    borderRadius: "50%",
                                                                                     objectFit: "cover" // Quan trọng để ảnh fill mà không méo
                                                                                 }}
                                                                             />
