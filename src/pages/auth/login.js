@@ -48,7 +48,9 @@ const Login = () => {
             const response = await axios.post('https://localhost:8443/api/v1/users/login', {
                 username,
                 password
-            });
+            },{ withCredentials: true }).catch(error => {
+                console.error("Login failed: ", error); // In toàn bộ lỗi
+            });;
 
             const accessToken= response.data.accessToken;
             console.log("Access token nhận được:", accessToken);

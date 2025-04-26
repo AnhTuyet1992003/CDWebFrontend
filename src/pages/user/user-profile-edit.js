@@ -94,7 +94,7 @@ const UserProfileEdit = () => {
         const decoded = jwtDecode(token);
         const username = decoded.sub;
 
-        axios.put(`https://localhost:8443/api/v1/users/details`, {}, {
+        axios.post(`https://localhost:8443/api/v1/users/details`, {}, {
             headers: {
                 Authorization: `Bearer ${token}`,
             },
@@ -149,7 +149,15 @@ const UserProfileEdit = () => {
             setMessage('Cập nhật thông tin thành công!');
         } catch (error) {
             console.error(error);
-            setMessage('Lỗi khi cập nhật thông tin');
+
+            // Kiểm tra lỗi từ response
+            if (error.response && error.response.data) {
+                // Nếu có lỗi từ backend, lấy thông điệp từ response và hiển thị
+                setMessage(error.response.data);  // Hiển thị thông điệp lỗi từ backend
+            } else {
+                // Nếu không có lỗi response, hiển thị thông báo chung
+                setMessage('Lỗi khi cập nhật thông tin');
+            }
         }
     };
 
@@ -254,7 +262,7 @@ const UserProfileEdit = () => {
                                         </div>
                                         <div className="form-group">
                                             <label className="form-label">Số điện thoại</label>
-                                            <input type="tel" className="form-control" pattern="[0-9]+" />
+                                            <input type="tel" className="form-control" pattern="[0-9]+"  />
                                         </div>
                                     </div>
 

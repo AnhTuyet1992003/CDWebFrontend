@@ -3758,6 +3758,17 @@ ol {
 		padding: 500px;
 	}
 
+	.error-container {
+		margin-top: 4px;
+		margin-bottom: 10px;
+	}
+
+	.error {
+		color: red;
+		font-size: 14px; /* chỉnh font size nhỏ đẹp */
+		font-weight: 500;
+	}
+
 
 	/*test*/
 	
