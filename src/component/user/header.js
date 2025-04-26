@@ -48,6 +48,30 @@ const Header = () => {
             window.removeEventListener('userLogout', loadUsername);
             window.removeEventListener('storage', loadUsername);
         };
+
+        const script = document.createElement('script');
+        script.src = 'https://app.tudongchat.com/js/chatbox.js';
+        script.async = true;
+
+        script.onload = () => {
+            console.log('Script loaded');
+            if (window.TuDongChat) {
+                const tudong_chatbox = new window.TuDongChat('GEKBdJuf_t2KzMXWnR9hH');
+                tudong_chatbox.initial();
+            } else {
+                console.error('TuDongChat not found on window.');
+            }
+        };
+
+        script.onerror = () => {
+            console.error('Failed to load chatbox.js');
+        };
+
+        document.body.appendChild(script);
+
+        return () => {
+            document.body.removeChild(script);
+        };
     }, []);
 
     const handleLogout = () => {
@@ -283,6 +307,7 @@ const Header = () => {
                         <i className="fa fa-bars"/>
                     </div>
                 </div>
+
             </header>
         </>
     );
