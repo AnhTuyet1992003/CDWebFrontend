@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios, {post} from 'axios';
 import { jwtDecode } from 'jwt-decode';
+import Chatbox from './Chatbox';
 
 import Cookies from 'js-cookie';
 
@@ -117,6 +118,34 @@ const UserProfileEdit = () => {
                 console.error(err);
                 setMessage('Lỗi khi tải thông tin người dùng');
             });
+
+        //chat tu dong
+        console.log('✅ Chatbox script loaded');
+        const script = document.createElement('script');
+         script.src = 'https://app.tudongchat.com/js/chatbox.js';
+        //script.src = 'C:\\Users\\ADMIN\\eclipse-workspace\\CDWebFrontend\\src\\assets\\user\\js\\chatbox.js'
+        script.async = true;
+
+        script.onload = () => {
+            console.log('✅ Chatbox script loaded');
+            if (window.TuDongChat) {
+                const tudong_chatbox = new window.TuDongChat('GEKBdJuf_t2KzMXWnR9hH');
+                tudong_chatbox.initial();
+                console.log('✅ Chatbox initialized');
+            } else {
+                console.error('❌ TuDongChat not available');
+            }
+        };
+
+        script.onerror = () => {
+            console.error('❌ Failed to load chatbox.js');
+        };
+
+        document.body.appendChild(script);
+
+        return () => {
+            document.body.removeChild(script);
+        };
     }, []);
 
     const handleChange = (e) => {
@@ -233,13 +262,16 @@ const UserProfileEdit = () => {
                                             </label> &nbsp;
                                             <button type="button"
                                                     className="btn btn-default md-btn-flat"
-                                                    onClick={handleUploadAvatar}>Tải ảnh</button>
+                                                    onClick={handleUploadAvatar}>Tải ảnh
+                                            </button>
 
-                                            <div className="text-light small mt-1">Cho phép JPG, GIF hoặc PNG. Kích thước tối đa là
+                                            <div className="text-light small mt-1">Cho phép JPG, GIF hoặc PNG. Kích
+                                                thước tối đa là
                                                 800K
                                             </div>
                                         </div>
-                                    </div><br></br>
+                                    </div>
+                                    <br></br>
                                     <hr className="border-light m-0"/>
 
                                     <div className="card-body">
@@ -261,7 +293,7 @@ const UserProfileEdit = () => {
                                         </div>
                                         <div className="form-group">
                                             <label className="form-label">Số điện thoại</label>
-                                            <input type="tel" className="form-control" pattern="[0-9]+"  />
+                                            <input type="tel" className="form-control" pattern="[0-9]+"/>
                                         </div>
                                     </div>
 
@@ -468,6 +500,9 @@ const UserProfileEdit = () => {
                 </div>
 
             </div>
+
+
+            <div><Chatbox/></div>
 
         </>
     );

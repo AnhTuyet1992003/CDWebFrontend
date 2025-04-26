@@ -16,7 +16,8 @@ import LayoutAdmin from './component/layout/AdminLayout';
 import Register from './pages/auth/register';
 import AddProduct from './pages/admin/add-product';
 import UserList from './pages/admin/list-user';
-import Admin from './pages/admin/index'
+import Admin from './pages/admin/index';
+import Chatbox from "./pages/user/Chatbox";
 
 import AdminIndex from './pages/admin/index';
 import AdminListUser from './pages/admin/list-user';
@@ -44,7 +45,7 @@ function App() {
             <Route path="/contact" element={<LayoutUser><Contact /></LayoutUser>} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
-
+            <Route path="/chatbox" element={<Chatbox />} />
             <Route path="/header" element={<Header/>}/>
 
             <Route path="*" element={<h1>404 Not Found</h1>} />

@@ -1,5 +1,7 @@
 import React, { useEffect } from 'react';
 import {Link} from "react-router-dom";
+import Chatbox from './Chatbox';  // đúng đường dẫn file Chatbox bạn tạo
+
 const Home = () => {
 
 
@@ -242,7 +244,8 @@ const Home = () => {
                             <div className="row">
                                 <div className="col-lg-4 col-md-6">
                                     <div className="product__item">
-                                        <div className="product__item__pic set-bg" style={{backgroundImage: "url('/img/shop/shop-1.jpg')"}}>
+                                        <div className="product__item__pic set-bg"
+                                             style={{backgroundImage: "url('/img/shop/shop-1.jpg')"}}>
                                             <div className="label new">New</div>
                                             <ul className="product__hover">
                                                 <li><a href="/img/shop/shop-1.jpg" className="image-popup"><span
@@ -266,7 +269,8 @@ const Home = () => {
                                 </div>
                                 <div className="col-lg-4 col-md-6">
                                     <div className="product__item">
-                                        <div className="product__item__pic set-bg" style={{backgroundImage: "url('/img/shop/shop-2.jpg')"}}>
+                                        <div className="product__item__pic set-bg"
+                                             style={{backgroundImage: "url('/img/shop/shop-2.jpg')"}}>
                                             <ul className="product__hover">
                                                 <li><a href="/img/shop/shop-2.jpg" className="image-popup"><span
                                                     className="arrow_expand"></span></a></li>
@@ -289,7 +293,8 @@ const Home = () => {
                                 </div>
                                 <div className="col-lg-4 col-md-6">
                                     <div className="product__item">
-                                        <div className="product__item__pic set-bg" style={{backgroundImage: "url('/img/shop/shop-3.jpg')"}}>
+                                        <div className="product__item__pic set-bg"
+                                             style={{backgroundImage: "url('/img/shop/shop-3.jpg')"}}>
                                             <ul className="product__hover">
                                                 <li><a href="/img/shop/shop-3.jpg" className="image-popup"><span
                                                     className="arrow_expand"></span></a></li>
@@ -312,7 +317,8 @@ const Home = () => {
                                 </div>
                                 <div className="col-lg-4 col-md-6">
                                     <div className="product__item">
-                                        <div className="product__item__pic set-bg" style={{backgroundImage: "url('/img/shop/shop-4.jpg')"}}>
+                                        <div className="product__item__pic set-bg"
+                                             style={{backgroundImage: "url('/img/shop/shop-4.jpg')"}}>
                                             <ul className="product__hover">
                                                 <li><a href="/img/shop/shop-4.jpg" className="image-popup"><span
                                                     className="arrow_expand"></span></a></li>
@@ -335,7 +341,8 @@ const Home = () => {
                                 </div>
                                 <div className="col-lg-4 col-md-6">
                                     <div className="product__item sale">
-                                        <div className="product__item__pic set-bg" style={{backgroundImage: "url('/img/shop/shop-5.jpg')"}}>
+                                        <div className="product__item__pic set-bg"
+                                             style={{backgroundImage: "url('/img/shop/shop-5.jpg')"}}>
                                             <div className="label">Sale</div>
                                             <ul className="product__hover">
                                                 <li><a href="/img/shop/shop-5.jpg" className="image-popup"><span
@@ -359,7 +366,8 @@ const Home = () => {
                                 </div>
                                 <div className="col-lg-4 col-md-6">
                                     <div className="product__item">
-                                        <div className="product__item__pic set-bg" style={{backgroundImage: "url('/img/shop/shop-6.jpg')"}}>
+                                        <div className="product__item__pic set-bg"
+                                             style={{backgroundImage: "url('/img/shop/shop-6.jpg')"}}>
                                             <ul className="product__hover">
                                                 <li><a href="/img/shop/shop-6.jpg" className="image-popup"><span
                                                     className="arrow_expand"></span></a></li>
@@ -382,7 +390,8 @@ const Home = () => {
                                 </div>
                                 <div className="col-lg-4 col-md-6">
                                     <div className="product__item">
-                                        <div className="product__item__pic set-bg" style={{backgroundImage: "url('/img/shop/shop-7.jpg')"}}>
+                                        <div className="product__item__pic set-bg"
+                                             style={{backgroundImage: "url('/img/shop/shop-7.jpg')"}}>
                                             <ul className="product__hover">
                                                 <li><a href="/img/shop/shop-7.jpg" className="image-popup"><span
                                                     className="arrow_expand"></span></a></li>
@@ -405,7 +414,8 @@ const Home = () => {
                                 </div>
                                 <div className="col-lg-4 col-md-6">
                                     <div className="product__item">
-                                        <div className="product__item__pic set-bg" style={{backgroundImage: "url('/img/shop/shop-8.jpg')"}}>
+                                        <div className="product__item__pic set-bg"
+                                             style={{backgroundImage: "url('/img/shop/shop-8.jpg')"}}>
                                             <div className="label stockout stockblue">Out Of Stock</div>
                                             <ul className="product__hover">
                                                 <li><a href="/img/shop/shop-8.jpg" className="image-popup"><span
@@ -429,7 +439,8 @@ const Home = () => {
                                 </div>
                                 <div className="col-lg-4 col-md-6">
                                     <div className="product__item sale">
-                                        <div className="product__item__pic set-bg" style={{backgroundImage: "url('/img/shop/shop-9.jpg')"}}>
+                                        <div className="product__item__pic set-bg"
+                                             style={{backgroundImage: "url('/img/shop/shop-9.jpg')"}}>
                                             <div className="label">Sale</div>
                                             <ul className="product__hover">
                                                 <li><a href="/img/shop/shop-9.jpg" className="image-popup"><span
@@ -463,6 +474,7 @@ const Home = () => {
                         </div>
                     </div>
                 </div>
+                <Chatbox />
             </section>
 
         </>
