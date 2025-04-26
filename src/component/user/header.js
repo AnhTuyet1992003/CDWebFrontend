@@ -56,6 +56,8 @@ const Header = () => {
 
         // Remove the token and username from cookies/localStorage
         Cookies.remove('token');
+        Cookies.remove('token', { path: '/' }); // thêm path để chắc chắn xóa đúng cookie
+
         localStorage.removeItem('accessToken');
         localStorage.removeItem('username');
 

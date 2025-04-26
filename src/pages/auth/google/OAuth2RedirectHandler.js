@@ -25,14 +25,21 @@ const OAuth2RedirectHandler = () => {
             if (token) {
                 // Lưu token vào cookie hoặc localStorage
                 //Cookies.set('token', token, { expires: 7 });
-                Cookies.set('token', token, {
-                    expires: 7,
-                    path: '/',
-                    sameSite: 'Lax', // hoặc 'Strict' nếu muốn chặt
-                    secure: false,   // Chạy local nên không bật secure
-                });
-
-                console.log("Token từ cookie:", Cookies.get('token'));
+                // Lưu token vào cookie
+                // Cookies.set('token', token, {
+                //     expires: 1,
+                //     secure: true,
+                //     sameSite: 'None',
+                // });
+                // console.log("Token từ cookie:", Cookies.get('token'));
+                if (window.location.protocol === 'https:') {
+                    Cookies.set('token', token, {
+                        expires: 1,
+                        secure: true,
+                        sameSite: 'None',
+                    });
+                    console.log("Token từ cookie:", Cookies.get('token'));
+                }
                 localStorage.setItem('accessToken', token);
 
                 // 👉 Decode token để lấy username

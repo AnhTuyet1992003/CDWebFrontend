@@ -261,7 +261,7 @@ const UserProfileEdit = () => {
                                         </div>
                                         <div className="form-group">
                                             <label className="form-label">Số điện thoại</label>
-                                            <input type="tel" className="form-control" pattern="[0-9]+" />
+                                            <input type="tel" className="form-control" pattern="[0-9]+"  />
                                         </div>
                                     </div>
 
