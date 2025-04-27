@@ -26,6 +26,11 @@ const UserProfileEdit = () => {
         birthday: '',
         avatar: ''
     });
+    const [user2, setUser2] = useState({
+        password: '',
+        newPassword: '',
+        reNewPassword: ''
+    });
     const [avatarFile, setAvatarFile] = useState(null);
 
     //khi chọn file ảnh
@@ -153,6 +158,8 @@ const UserProfileEdit = () => {
         setUser(prev => ({ ...prev, [name]: value }));
     };
 
+
+
     const handleUpdate = async (e) => {
         e.preventDefault();
 
@@ -167,6 +174,68 @@ const UserProfileEdit = () => {
             const res = await axios.put(
                 `https://localhost:8443/api/v1/users/details/${userId}`,
                 user,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                    withCredentials: true,
+                }
+            );
+            setMessage('Cập nhật thông tin thành công!');
+        } catch (error) {
+            console.error(error);
+
+            // Kiểm tra lỗi từ response
+            if (error.response && error.response.data) {
+                // Nếu có lỗi từ backend, lấy thông điệp từ response và hiển thị
+                setMessage(error.response.data);  // Hiển thị thông điệp lỗi từ backend
+            } else {
+                // Nếu không có lỗi response, hiển thị thông báo chung
+                setMessage('Lỗi khi cập nhật thông tin');
+            }
+        }
+    };
+    const [errors, setErrors] = useState({});
+
+    const validateForm = () => {
+        const newErrors = {};
+        const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{7,}$/;
+
+        if (!user2.password) {
+            newErrors.password = 'Vui lòng nhập mật khẩu.';
+        } else if (!passwordRegex.test(user2.password)) {
+            newErrors.password = 'Mật khẩu ít nhất 7 ký tự, bao gồm chữ và số.';
+        }
+
+        if (!user2.newPassword) {
+            newErrors.newPassword = 'Vui lòng nhập mật khẩu.';
+        } else if (!passwordRegex.test(user2.passnewPasswordword)) {
+            newErrors.newPassword = 'Mật khẩu ít nhất 7 ký tự, bao gồm chữ và số.';
+        }
+
+        if (!user2.reNewPassword) {
+            newErrors.retypePassword = 'Vui lòng nhập lại mật khẩu.';
+        } else if (user2.newPassword !== user2.reNewPassword) {
+            newErrors.retypePassword = 'Mật khẩu không khớp.';
+        }
+        return newErrors;
+    };
+    const handleUpdatePassword = async (e) => {
+        e.preventDefault();
+        const validationErrors = validateForm();
+        setErrors(validationErrors);
+
+        // const token = document.cookie
+        //     .split('; ')
+        //     .find(row => row.startsWith('token='))
+        //     ?.split('=')[1];
+        const token = localStorage.getItem('accessToken');
+
+
+        try {
+            const res = await axios.put(
+                `https://localhost:8443/api/v1/users/changePassword/${userId}`,
+                user2,
                 {
                     headers: {
                         Authorization: `Bearer ${token}`,
@@ -299,24 +368,52 @@ const UserProfileEdit = () => {
 
                                 </div>
                                 <div className="tab-pane fade" id="account2-change-password">
-                                    <div className="card2-body pb-2">
+                                    <form onSubmit={handleUpdatePassword} className="space-y-4">
+                                        <div className="card2-body pb-2">
 
-                                        <div className="form-group">
-                                            <label className="form-label">Current password</label>
-                                            <input type="password" className="form-control"/>
+                                            {errors.password && (
+                                                <div className="error-container">
+                                                    <small className="error">{errors.password}</small>
+                                                </div>
+                                            )}
+                                            <div className="form-group">
+                                                <label className="form-label">Current password</label>
+                                                <input type="password" name = "password" value={user2.password} onChange={handleChange} required={true}  className="form-control"/>
+                                            </div>
+                                            {errors.newPassword && (
+                                                <div className="error-container">
+                                                    <small className="error">{errors.newPassword}</small>
+                                                </div>
+                                            )}
+
+                                            <div className="form-group">
+                                                <label className="form-label">New password</label>
+                                                <input type="password" name = "newPassword" value={user2.newPassword} onChange={handleChange} required={true} className="form-control"/>
+                                            </div>
+                                            {errors.reNewPassword && (
+                                                <div className="error-container">
+                                                    <small className="error">{errors.reNewPassword}</small>
+                                                </div>
+                                            )}
+
+                                            <div className="form-group">
+                                                <label className="form-label">Repeat new password</label>
+                                                <input type="password" name = "reNewPassword" value={user2.reNewPassword} onChange={handleChange} required={true} className="form-control"/>
+                                            </div>
+                                            {errors.password && (
+                                                <div className="error-container">
+                                                    <small className="error">{errors.password}</small>
+                                                </div>
+                                            )}
+
+                                            <div className="text-right mt-3">
+                                                <button type="submit" className="btn btn-primary">Save changes</button>
+                                                &nbsp;
+                                                <button type="button" className="btn btn-default">Cancel</button>
+                                            </div>
+
                                         </div>
-
-                                        <div className="form-group">
-                                            <label className="form-label">New password</label>
-                                            <input type="password" className="form-control"/>
-                                        </div>
-
-                                        <div className="form-group">
-                                            <label className="form-label">Repeat new password</label>
-                                            <input type="password" className="form-control"/>
-                                        </div>
-
-                                    </div>
+                                    </form>
                                 </div>
                                 <div className="tab-pane fade" id="account2-info">
                                     <div className="card2-body pb-2">

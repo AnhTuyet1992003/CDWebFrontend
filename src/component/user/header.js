@@ -145,7 +145,7 @@ const Header = () => {
                                     <li>
                                         <a href="#">Pages</a>
                                         <ul className="dropdown">
-                                            <li> <Link to="/login">Đăng nhập</Link></li>
+                                            <li> <Link to="/user-password-edit">ddoi pass</Link></li>
                                             <li><Link to="/product-detail">Chi tiết sản phẩm</Link></li>
                                             <li><Link to="/checkout">Thanh toán</Link></li>
                                             <li><Link to="/blog-detail">Blog Detail</Link></li>
