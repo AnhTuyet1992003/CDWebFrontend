@@ -47,11 +47,11 @@ function App() {
             <Route path="/contact" element={<LayoutUser><Contact /></LayoutUser>} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
-<<<<<<< HEAD
+
             <Route path="/AddToCart" element={<AddToCart />} />
-=======
+
             <Route path="/chatbox" element={<Chatbox />} />
->>>>>>> 698f8e3f2b5d83c64c4083c52aabd2312eb39cfb
+
             <Route path="/header" element={<Header/>}/>
 
             <Route path="*" element={<h1>404 Not Found</h1>} />
