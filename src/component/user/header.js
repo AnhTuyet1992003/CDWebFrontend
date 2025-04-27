@@ -121,7 +121,7 @@ const Header = () => {
                                     <li>
                                         <a href="#">Pages</a>
                                         <ul className="dropdown">
-                                            <li> <Link to="/login">Đăng nhập</Link></li>
+                                            <li><Link to="/login">Đăng nhập</Link></li>
                                             <li><Link to="/product-detail">Chi tiết sản phẩm</Link></li>
                                             <li><Link to="/checkout">Thanh toán</Link></li>
                                             <li><Link to="/blog-detail">Blog Detail</Link></li>
@@ -130,6 +130,7 @@ const Header = () => {
                                     <li><Link to="/blog">Blog</Link></li>
                                     <li><Link to="/contact">Liên hệ</Link></li>
                                     <li><Link to="/admin-index">Admin</Link></li>
+                                    <li><Link to="/AddToCart">Cart</Link></li>
                                 </ul>
                             </nav>
                         </div>
