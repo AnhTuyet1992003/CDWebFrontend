@@ -16,11 +16,13 @@ import LayoutAdmin from './component/layout/AdminLayout';
 import Register from './pages/auth/register';
 import AddProduct from './pages/admin/add-product';
 import UserList from './pages/admin/list-user';
-import Admin from './pages/admin/index'
+import Admin from './pages/admin/index';
+import Chatbox from "./pages/user/Chatbox";
 
 import AdminIndex from './pages/admin/index';
 import AdminListUser from './pages/admin/list-user';
 import UserProfileEdit from "./pages/user/user-profile-edit";
+import UserPasswordEdit from "./pages/user/user-password-edit";
 
 import Header from './component/user/header';
 
@@ -45,7 +47,11 @@ function App() {
             <Route path="/contact" element={<LayoutUser><Contact /></LayoutUser>} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
+<<<<<<< HEAD
             <Route path="/AddToCart" element={<AddToCart />} />
+=======
+            <Route path="/chatbox" element={<Chatbox />} />
+>>>>>>> 698f8e3f2b5d83c64c4083c52aabd2312eb39cfb
             <Route path="/header" element={<Header/>}/>
 
             <Route path="*" element={<h1>404 Not Found</h1>} />
@@ -57,7 +63,7 @@ function App() {
             <Route path="/admin" element={<LayoutAdmin><Admin /></LayoutAdmin>} />
             <Route path="/admin-list-user" element={<LayoutAdmin><UserList /></LayoutAdmin>} />
             <Route path="/admin-add-product" element={<AddProduct />} />
-
+            <Route path="/user-password-edit" element={<LayoutUser><UserPasswordEdit/></LayoutUser>}/>
             <Route path="/user-profile-edit" element={<LayoutUser><UserProfileEdit/></LayoutUser>}/>
             <Route path="/admin-index" element={<LayoutAdmin><AdminIndex /></LayoutAdmin>} />
             {/*<Route path="/admin-list-user" element={<AdminListUser/>} />*/}
