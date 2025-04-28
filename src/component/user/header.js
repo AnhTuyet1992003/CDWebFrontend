@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import Cookies from 'js-cookie';
 import {jwtDecode} from "jwt-decode";
 import axios from "axios";
+import '../../pages/user/AddToCart.css'
 
 const Header = () => {
     const navigate = useNavigate();
@@ -127,6 +128,9 @@ const Header = () => {
                 alert('Lỗi khi tải thông tin người dùng');
             });
     }, []);
+
+
+
     return (
         <>
             <header className="header">
@@ -145,6 +149,7 @@ const Header = () => {
                                     <li>
                                         <a href="#">Pages</a>
                                         <ul className="dropdown">
+                                            <li><Link to="/login">Đăng nhập</Link></li>
                                             <li> <Link to="/user-password-edit">ddoi pass</Link></li>
                                             <li><Link to="/product-detail">Chi tiết sản phẩm</Link></li>
                                             <li><Link to="/checkout">Thanh toán</Link></li>
@@ -154,6 +159,7 @@ const Header = () => {
                                     <li><Link to="/blog">Blog</Link></li>
                                     <li><Link to="/contact">Liên hệ</Link></li>
                                     <li><Link to="/admin-index">Admin</Link></li>
+                                    <li><Link to="/AddToCart">Cart</Link></li>
                                 </ul>
                             </nav>
                         </div>
@@ -173,7 +179,7 @@ const Header = () => {
                                                                  width: "40px",
                                                                  height: "40px",
                                                                  borderRadius: "50%",
-                                                                 // overflow: "hidden"
+                                                                 overflow: "hidden"
                                                              }}>
                                                             <img
                                                                 src={user.avatar}
@@ -205,6 +211,7 @@ const Header = () => {
                                                                                 style={{
                                                                                     width: "100%",
                                                                                     height: "100%",
+                                                                                    borderRadius: "50%",
                                                                                     objectFit: "cover" // Quan trọng để ảnh fill mà không méo
                                                                                 }}
                                                                             />

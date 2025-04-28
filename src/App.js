@@ -28,6 +28,7 @@ import Header from './component/user/header';
 
 import AuthCallback from './pages/auth/google/callback';
 import OAuth2RedirectHandler from "./pages/auth/google/OAuth2RedirectHandler"
+import AddToCart from "./pages/user/AddToCart"
 function App() {
   return (
       <Router>
@@ -46,7 +47,11 @@ function App() {
             <Route path="/contact" element={<LayoutUser><Contact /></LayoutUser>} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
+
+            <Route path="/AddToCart" element={<AddToCart />} />
+
             <Route path="/chatbox" element={<Chatbox />} />
+
             <Route path="/header" element={<Header/>}/>
 
             <Route path="*" element={<h1>404 Not Found</h1>} />

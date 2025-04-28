@@ -24,6 +24,7 @@ const OAuth2RedirectHandler = () => {
 
             if (token) {
                 // Lưu token vào cookie hoặc localStorage
+
                 //Cookies.set('token', token, { expires: 7 });
                 // Lưu token vào cookie
                 // Cookies.set('token', token, {
