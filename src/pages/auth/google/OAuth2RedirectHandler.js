@@ -33,14 +33,14 @@ const OAuth2RedirectHandler = () => {
                 //     sameSite: 'None',
                 // });
                 // console.log("Token từ cookie:", Cookies.get('token'));
-                if (window.location.protocol === 'https:') {
+                //if (window.location.protocol === 'https:') {
                     Cookies.set('token', token, {
                         expires: 1,
                         secure: true,
                         sameSite: 'None',
                     });
-                    console.log("Token từ cookie:", Cookies.get('token'));
-                }
+                    console.log("Token từ cookie login google:", Cookies.get('token'));
+                //}
                 localStorage.setItem('accessToken', token);
 
                 // 👉 Decode token để lấy username
