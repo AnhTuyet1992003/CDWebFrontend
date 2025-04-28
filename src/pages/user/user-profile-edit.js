@@ -61,6 +61,7 @@ const UserProfileEdit = () => {
             ?.split('=')[1];
         const formData = new FormData();
         formData.append('file', avatarFile);
+        console.log("Token từ cookie login google_avatar:", token);
 
         try {
             const response = await axios.post('https://localhost:8443/api/v1/users/upload-avatar', formData, {
