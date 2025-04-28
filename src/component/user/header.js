@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import Cookies from 'js-cookie';
 import {jwtDecode} from "jwt-decode";
 import axios from "axios";
+import '../../pages/user/AddToCart.css'
 
 const Header = () => {
     const navigate = useNavigate();
@@ -127,6 +128,9 @@ const Header = () => {
                 alert('Lỗi khi tải thông tin người dùng');
             });
     }, []);
+
+
+
     return (
         <>
             <header className="header">

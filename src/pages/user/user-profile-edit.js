@@ -600,7 +600,7 @@ const UserProfileEdit = () => {
             </div>
 
 
-            <div><Chatbox/></div>
+            {/*<div><Chatbox/></div>*/}
 
         </>
     );

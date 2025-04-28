@@ -1,9 +1,33 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from "react";
 import {Link} from "react-router-dom";
-import Chatbox from './Chatbox';  // đúng đường dẫn file Chatbox bạn tạo
-
+import Chatbox from './Chatbox';
+import axios from "axios";  // đúng đường dẫn file Chatbox bạn tạo
+import AddToCart from "./AddToCart";
+import './AddToCart.css'
 const Home = () => {
+    const [products, setProducts] = useState([]);
+    const [showAddToCart, setShowAddToCart] = useState(false);
+    const [selectedProductId, setSelectedProductId] = useState(null);
+    useEffect(() => {
+        axios.get("https://localhost:8443/api/v1/products/list", {
+            withCredentials: true
+        })
+            .then(reponse => {
+                setProducts(reponse.data);
+            })
+            .catch(error => {
+                console.error("Lỗi khi lấy sản phẩm:", error);
+            });
+    }, []);
 
+    const handleOpenAddToCart = (producId) => {
+      setSelectedProductId(producId);
+      setShowAddToCart(true);
+    };
+
+    const handleCloseAddToCart = () => {
+        setShowAddToCart(false);
+    };
 
     return (
         <>
@@ -242,20 +266,50 @@ const Home = () => {
                         </div>
                         <div className="col-lg-9 col-md-9">
                             <div className="row">
-                                <div className="col-lg-4 col-md-6">
+                                {/** nhãn new **/}
+                                {/*<div className="col-lg-4 col-md-6">*/}
+                                {/*    <div className="product__item">*/}
+                                {/*        <div className="product__item__pic set-bg"*/}
+                                {/*             style={{backgroundImage: "url('/img/shop/shop-1.jpg')"}}>*/}
+                                {/*            <div className="label new">New</div>*/}
+                                {/*            <ul className="product__hover">*/}
+                                {/*                <li><a href="/img/shop/shop-1.jpg" className="image-popup"><span*/}
+                                {/*                    className="arrow_expand"></span></a></li>*/}
+                                {/*                <li><a href="#"><span className="icon_heart_alt"></span></a></li>*/}
+                                {/*                <li><a href="#"><span className="icon_bag_alt"></span></a></li>*/}
+                                {/*            </ul>*/}
+                                {/*        </div>*/}
+                                {/*        <div className="product__item__text">*/}
+                                {/*            <h6><a href="#">Furry hooded parka</a></h6>*/}
+                                {/*            <div className="rating">*/}
+                                {/*                <i className="fa fa-star"></i>*/}
+                                {/*                <i className="fa fa-star"></i>*/}
+                                {/*                <i className="fa fa-star"></i>*/}
+                                {/*                <i className="fa fa-star"></i>*/}
+                                {/*                <i className="fa fa-star"></i>*/}
+                                {/*            </div>*/}
+                                {/*            <div className="product__price">$ 59.0</div>*/}
+                                {/*        </div>*/}
+                                {/*    </div>*/}
+                                {/*</div>*/}
+                                {products.map((product) => (
+                                <div className="col-lg-4 col-md-6" key={product.id}>
                                     <div className="product__item">
                                         <div className="product__item__pic set-bg"
-                                             style={{backgroundImage: "url('/img/shop/shop-1.jpg')"}}>
-                                            <div className="label new">New</div>
+                                             style={{ backgroundImage: `url('${product.image}')` }}>
                                             <ul className="product__hover">
-                                                <li><a href="/img/shop/shop-1.jpg" className="image-popup"><span
+                                                <li><a href={product.image} className="image-popup"><span
                                                     className="arrow_expand"></span></a></li>
                                                 <li><a href="#"><span className="icon_heart_alt"></span></a></li>
-                                                <li><a href="#"><span className="icon_bag_alt"></span></a></li>
+                                                <li><a href="#" onClick={(e) => {
+                                                    e.preventDefault();
+                                                    handleOpenAddToCart(product.id);
+                                                }}>
+                                                    <span className="icon_bag_alt"></span></a></li>
                                             </ul>
                                         </div>
                                         <div className="product__item__text">
-                                            <h6><a href="#">Furry hooded parka</a></h6>
+                                            <h6><a href="#">{product.nameProduct}</a></h6>
                                             <div className="rating">
                                                 <i className="fa fa-star"></i>
                                                 <i className="fa fa-star"></i>
@@ -263,205 +317,69 @@ const Home = () => {
                                                 <i className="fa fa-star"></i>
                                                 <i className="fa fa-star"></i>
                                             </div>
-                                            <div className="product__price">$ 59.0</div>
+                                            <div className="product__price">{product.price.toLocaleString()}₫</div>
                                         </div>
                                     </div>
                                 </div>
-                                <div className="col-lg-4 col-md-6">
-                                    <div className="product__item">
-                                        <div className="product__item__pic set-bg"
-                                             style={{backgroundImage: "url('/img/shop/shop-2.jpg')"}}>
-                                            <ul className="product__hover">
-                                                <li><a href="/img/shop/shop-2.jpg" className="image-popup"><span
-                                                    className="arrow_expand"></span></a></li>
-                                                <li><a href="#"><span className="icon_heart_alt"></span></a></li>
-                                                <li><a href="#"><span className="icon_bag_alt"></span></a></li>
-                                            </ul>
-                                        </div>
-                                        <div className="product__item__text">
-                                            <h6><a href="#">Flowy striped skirt</a></h6>
-                                            <div className="rating">
-                                                <i className="fa fa-star"></i>
-                                                <i className="fa fa-star"></i>
-                                                <i className="fa fa-star"></i>
-                                                <i className="fa fa-star"></i>
-                                                <i className="fa fa-star"></i>
-                                            </div>
-                                            <div className="product__price">$ 49.0</div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="col-lg-4 col-md-6">
-                                    <div className="product__item">
-                                        <div className="product__item__pic set-bg"
-                                             style={{backgroundImage: "url('/img/shop/shop-3.jpg')"}}>
-                                            <ul className="product__hover">
-                                                <li><a href="/img/shop/shop-3.jpg" className="image-popup"><span
-                                                    className="arrow_expand"></span></a></li>
-                                                <li><a href="#"><span className="icon_heart_alt"></span></a></li>
-                                                <li><a href="#"><span className="icon_bag_alt"></span></a></li>
-                                            </ul>
-                                        </div>
-                                        <div className="product__item__text">
-                                            <h6><a href="#">Croc-effect bag</a></h6>
-                                            <div className="rating">
-                                                <i className="fa fa-star"></i>
-                                                <i className="fa fa-star"></i>
-                                                <i className="fa fa-star"></i>
-                                                <i className="fa fa-star"></i>
-                                                <i className="fa fa-star"></i>
-                                            </div>
-                                            <div className="product__price">$ 59.0</div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="col-lg-4 col-md-6">
-                                    <div className="product__item">
-                                        <div className="product__item__pic set-bg"
-                                             style={{backgroundImage: "url('/img/shop/shop-4.jpg')"}}>
-                                            <ul className="product__hover">
-                                                <li><a href="/img/shop/shop-4.jpg" className="image-popup"><span
-                                                    className="arrow_expand"></span></a></li>
-                                                <li><a href="#"><span className="icon_heart_alt"></span></a></li>
-                                                <li><a href="#"><span className="icon_bag_alt"></span></a></li>
-                                            </ul>
-                                        </div>
-                                        <div className="product__item__text">
-                                            <h6><a href="#">Dark wash Xavi jeans</a></h6>
-                                            <div className="rating">
-                                                <i className="fa fa-star"></i>
-                                                <i className="fa fa-star"></i>
-                                                <i className="fa fa-star"></i>
-                                                <i className="fa fa-star"></i>
-                                                <i className="fa fa-star"></i>
-                                            </div>
-                                            <div className="product__price">$ 59.0</div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="col-lg-4 col-md-6">
-                                    <div className="product__item sale">
-                                        <div className="product__item__pic set-bg"
-                                             style={{backgroundImage: "url('/img/shop/shop-5.jpg')"}}>
-                                            <div className="label">Sale</div>
-                                            <ul className="product__hover">
-                                                <li><a href="/img/shop/shop-5.jpg" className="image-popup"><span
-                                                    className="arrow_expand"></span></a></li>
-                                                <li><a href="#"><span className="icon_heart_alt"></span></a></li>
-                                                <li><a href="#"><span className="icon_bag_alt"></span></a></li>
-                                            </ul>
-                                        </div>
-                                        <div className="product__item__text">
-                                            <h6><a href="#">Ankle-cuff sandals</a></h6>
-                                            <div className="rating">
-                                                <i className="fa fa-star"></i>
-                                                <i className="fa fa-star"></i>
-                                                <i className="fa fa-star"></i>
-                                                <i className="fa fa-star"></i>
-                                                <i className="fa fa-star"></i>
-                                            </div>
-                                            <div className="product__price">$ 49.0 <span>$ 59.0</span></div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="col-lg-4 col-md-6">
-                                    <div className="product__item">
-                                        <div className="product__item__pic set-bg"
-                                             style={{backgroundImage: "url('/img/shop/shop-6.jpg')"}}>
-                                            <ul className="product__hover">
-                                                <li><a href="/img/shop/shop-6.jpg" className="image-popup"><span
-                                                    className="arrow_expand"></span></a></li>
-                                                <li><a href="#"><span className="icon_heart_alt"></span></a></li>
-                                                <li><a href="#"><span className="icon_bag_alt"></span></a></li>
-                                            </ul>
-                                        </div>
-                                        <div className="product__item__text">
-                                            <h6><a href="#">Contrasting sunglasses</a></h6>
-                                            <div className="rating">
-                                                <i className="fa fa-star"></i>
-                                                <i className="fa fa-star"></i>
-                                                <i className="fa fa-star"></i>
-                                                <i className="fa fa-star"></i>
-                                                <i className="fa fa-star"></i>
-                                            </div>
-                                            <div className="product__price">$ 59.0</div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="col-lg-4 col-md-6">
-                                    <div className="product__item">
-                                        <div className="product__item__pic set-bg"
-                                             style={{backgroundImage: "url('/img/shop/shop-7.jpg')"}}>
-                                            <ul className="product__hover">
-                                                <li><a href="/img/shop/shop-7.jpg" className="image-popup"><span
-                                                    className="arrow_expand"></span></a></li>
-                                                <li><a href="#"><span className="icon_heart_alt"></span></a></li>
-                                                <li><a href="#"><span className="icon_bag_alt"></span></a></li>
-                                            </ul>
-                                        </div>
-                                        <div className="product__item__text">
-                                            <h6><a href="#">Circular pendant earrings</a></h6>
-                                            <div className="rating">
-                                                <i className="fa fa-star"></i>
-                                                <i className="fa fa-star"></i>
-                                                <i className="fa fa-star"></i>
-                                                <i className="fa fa-star"></i>
-                                                <i className="fa fa-star"></i>
-                                            </div>
-                                            <div className="product__price">$ 59.0</div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="col-lg-4 col-md-6">
-                                    <div className="product__item">
-                                        <div className="product__item__pic set-bg"
-                                             style={{backgroundImage: "url('/img/shop/shop-8.jpg')"}}>
-                                            <div className="label stockout stockblue">Out Of Stock</div>
-                                            <ul className="product__hover">
-                                                <li><a href="/img/shop/shop-8.jpg" className="image-popup"><span
-                                                    className="arrow_expand"></span></a></li>
-                                                <li><a href="#"><span className="icon_heart_alt"></span></a></li>
-                                                <li><a href="#"><span className="icon_bag_alt"></span></a></li>
-                                            </ul>
-                                        </div>
-                                        <div className="product__item__text">
-                                            <h6><a href="#">Cotton T-Shirt</a></h6>
-                                            <div className="rating">
-                                                <i className="fa fa-star"></i>
-                                                <i className="fa fa-star"></i>
-                                                <i className="fa fa-star"></i>
-                                                <i className="fa fa-star"></i>
-                                                <i className="fa fa-star"></i>
-                                            </div>
-                                            <div className="product__price">$ 59.0</div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="col-lg-4 col-md-6">
-                                    <div className="product__item sale">
-                                        <div className="product__item__pic set-bg"
-                                             style={{backgroundImage: "url('/img/shop/shop-9.jpg')"}}>
-                                            <div className="label">Sale</div>
-                                            <ul className="product__hover">
-                                                <li><a href="/img/shop/shop-9.jpg" className="image-popup"><span
-                                                    className="arrow_expand"></span></a></li>
-                                                <li><a href="#"><span className="icon_heart_alt"></span></a></li>
-                                                <li><a href="#"><span className="icon_bag_alt"></span></a></li>
-                                            </ul>
-                                        </div>
-                                        <div className="product__item__text">
-                                            <h6><a href="#">Water resistant zips backpack</a></h6>
-                                            <div className="rating">
-                                                <i className="fa fa-star"></i>
-                                                <i className="fa fa-star"></i>
-                                                <i className="fa fa-star"></i>
-                                                <i className="fa fa-star"></i>
-                                                <i className="fa fa-star"></i>
-                                            </div>
-                                            <div className="product__price">$ 49.0 <span>$ 59.0</span></div>
-                                        </div>
-                                    </div>
-                                </div>
+                                ))}
+
+                                {showAddToCart && (
+                                    <AddToCart productId={selectedProductId} onClose={handleCloseAddToCart} />
+                                )}
+
+                                {/** nhãn sale **/}
+                                {/*<div className="col-lg-4 col-md-6">*/}
+                                {/*    <div className="product__item sale">*/}
+                                {/*        <div className="product__item__pic set-bg"*/}
+                                {/*             style={{backgroundImage: "url('/img/shop/shop-5.jpg')"}}>*/}
+                                {/*            <div className="label">Sale</div>*/}
+                                {/*            <ul className="product__hover">*/}
+                                {/*                <li><a href="/img/shop/shop-5.jpg" className="image-popup"><span*/}
+                                {/*                    className="arrow_expand"></span></a></li>*/}
+                                {/*                <li><a href="#"><span className="icon_heart_alt"></span></a></li>*/}
+                                {/*                <li><a href="#"><span className="icon_bag_alt"></span></a></li>*/}
+                                {/*            </ul>*/}
+                                {/*        </div>*/}
+                                {/*        <div className="product__item__text">*/}
+                                {/*            <h6><a href="#">Ankle-cuff sandals</a></h6>*/}
+                                {/*            <div className="rating">*/}
+                                {/*                <i className="fa fa-star"></i>*/}
+                                {/*                <i className="fa fa-star"></i>*/}
+                                {/*                <i className="fa fa-star"></i>*/}
+                                {/*                <i className="fa fa-star"></i>*/}
+                                {/*                <i className="fa fa-star"></i>*/}
+                                {/*            </div>*/}
+                                {/*            <div className="product__price">$ 49.0 <span>$ 59.0</span></div>*/}
+                                {/*        </div>*/}
+                                {/*    </div>*/}
+                                {/*</div>*/}
+
+                                {/** nhãn stock hết hàng **/}
+                                {/*<div className="col-lg-4 col-md-6">*/}
+                                {/*    <div className="product__item">*/}
+                                {/*        <div className="product__item__pic set-bg"*/}
+                                {/*             style={{backgroundImage: "url('/img/shop/shop-8.jpg')"}}>*/}
+                                {/*            <div className="label stockout stockblue">Out Of Stock</div>*/}
+                                {/*            <ul className="product__hover">*/}
+                                {/*                <li><a href="/img/shop/shop-8.jpg" className="image-popup"><span*/}
+                                {/*                    className="arrow_expand"></span></a></li>*/}
+                                {/*                <li><a href="#"><span className="icon_heart_alt"></span></a></li>*/}
+                                {/*                <li><a href="#"><span className="icon_bag_alt"></span></a></li>*/}
+                                {/*            </ul>*/}
+                                {/*        </div>*/}
+                                {/*        <div className="product__item__text">*/}
+                                {/*            <h6><a href="#">Cotton T-Shirt</a></h6>*/}
+                                {/*            <div className="rating">*/}
+                                {/*                <i className="fa fa-star"></i>*/}
+                                {/*                <i className="fa fa-star"></i>*/}
+                                {/*                <i className="fa fa-star"></i>*/}
+                                {/*                <i className="fa fa-star"></i>*/}
+                                {/*                <i className="fa fa-star"></i>*/}
+                                {/*            </div>*/}
+                                {/*            <div className="product__price">$ 59.0</div>*/}
+                                {/*        </div>*/}
+                                {/*    </div>*/}
+                                {/*</div>*/}
                                 <div className="col-lg-12 text-center">
                                     <div className="pagination__option">
                                         <a href="#">1</a>
@@ -474,7 +392,7 @@ const Home = () => {
                         </div>
                     </div>
                 </div>
-                <Chatbox />
+                {/*<Chatbox />*/}
             </section>
 
         </>

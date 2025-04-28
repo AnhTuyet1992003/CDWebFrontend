@@ -6,22 +6,22 @@
     width: 100vw;
     height: 100vh;
     background: rgba(97, 93, 93, 0.44);
-    z-index: -999;
+    z-index: 999;
 }
 .AddToCart .content .close_addToCart{
     position: absolute;
     display: flex;
-    top: -15px;
-    right: -15px;
+    top: -10px;
+    right: -10px;
     justify-content: center;
     align-items: center;
     border-radius: 50%;
-    z-index: 1001;
-    border: 2px solid black;
+    z-index: 100001;
+    border: 1px solid black;
     background: white;
-    width: 40px;
-    height: 40px;
-    font-size: 20px;
+    width: 30px;
+    height: 30px;
+    font-size: 15px;
     cursor: pointer;
     transition: all 0.2s ease;
 }
@@ -37,7 +37,7 @@
     /*justify-items: center;*/
     /*align-items: center;*/
     padding: 20px;
-    z-index: 1000;
+    z-index: 100000;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
@@ -103,17 +103,17 @@
 
 }
 .AddToCart .content .content_product .row.row_name p{
-    font-size: 18px;
+    font-size: 20px;
     word-break: break-word;
     white-space: normal;
     margin: 0;
-    line-height: 1.2;
+    /*line-height: 1.2;*/
 }
 .AddToCart .content .content_product .row.row_name p span .fa{
     color: #ff9100;
 }
 .AddToCart .content .content_product .row.row_price p{
-    font-size: 28px;
+    font-size: 25px;
     word-break: break-word;
     white-space: normal;
     margin: 0;
@@ -206,13 +206,13 @@
     width: 25px;
     border-radius: 5px;
     font-size: 15px;
-    transition: all 0.2s ease; /* Thêm transition cho mượt */
+    transition: all 0.2s ease;
     user-select: none;
 }
 .AddToCart .content .content_product .row.row_quantity .btn_quantity .btn_quantity_de:active,
 .AddToCart .content .content_product .row.row_quantity .btn_quantity .btn_quantity_in:active {
-    background-color: #ddd; /* Đổi màu nền nhẹ */
-    transform: scale(0.9); /* Nhỏ lại 90% khi bấm */
+    background-color: #ddd;
+    transform: scale(0.9);
 }
 .AddToCart .content .content_product .row.row_quantity .btn_quantity .btn_quantity_number{
     display: flex;
@@ -227,11 +227,13 @@
 .AddToCart .content .content_product .row.row_color .btn_color:hover,
 .AddToCart .content .content_product .row.row_size .btn_size:hover{
     transform: scale(1.3);
-    border: 2px solid #ee4d2d;
+    /*border: 2px solid #ee4d2d;*/
+    border: 2px solid #87898c;
 }
 .AddToCart .content .content_product .row.row_color .btn_color.active,
 .AddToCart .content .content_product .row.row_size .btn_size.active{
-    border: 2px solid #48f639; /* Viền xanh khi chọn */
+    /*border: 2px solid #48f639; !* Viền xanh khi chọn *!*/
+    border: 1.5px solid #ee4d2d;
     transform: scale(1.3);
 }
 .AddToCart .content .content_product .row.row_button{
