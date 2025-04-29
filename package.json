@@ -55,7 +55,9 @@
     "react-dom": "^19.0.0",
     "react-router-dom": "^7.5.0",
     "react-scripts": "5.0.1",
+    "react-toastify": "^11.0.5",
     "slicknav": "^1.0.8",
+    "sweetalert2": "^11.19.1",
     "web-vitals": "^2.1.4",
     "webfontloader": "^1.6.16"
   },
