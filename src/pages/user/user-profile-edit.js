@@ -4,7 +4,7 @@ import { jwtDecode } from 'jwt-decode';
 import Chatbox from './Chatbox';
 
 import Cookies from 'js-cookie';
-
+import Swal from 'sweetalert2';
 
 import './user-profile-edit.css'
 // Bootstrap CSS
@@ -31,52 +31,123 @@ const UserProfileEdit = () => {
         newPassword: '',
         reNewPassword: ''
     });
-    const [avatarFile, setAvatarFile] = useState(null);
 
-    //khi chọn file ảnh
+    const [avatarFile, setAvatarFile] = useState(null);
+    const [avatarPreview, setAvatarPreview] = useState(null);
     // Khi chọn file ảnh
     const handleAvatarChange = (e) => {
         const files = e.target.files;
         if (!files || files.length === 0) {
             console.log("No file selected"); // 👉 sẽ không log dòng này nếu chọn đúng
             setMessage("Vui lòng chọn một ảnh hợp lệ.");
+
+            // Hiển thị Swal yêu cầu chọn ảnh hợp lệ
+            Swal.fire({
+                icon: 'warning',
+                title: '⚠️ Vui lòng chọn một ảnh hợp lệ.',
+                confirmButtonText: 'OK',
+            });
             return;
         }
 
         const file = files[0];
         console.log("File selected:", file); // ✅ kiểm tra đúng file chưa
+
+        // Kiểm tra định dạng file (ảnh)
+        const validImageTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+        if (!validImageTypes.includes(file.type)) {
+            Swal.fire({
+                icon: 'error',
+                title: '❌ Chỉ hỗ trợ ảnh JPEG, PNG hoặc JPG!',
+                confirmButtonText: 'OK',
+            });
+            setMessage("Chỉ hỗ trợ ảnh JPEG, PNG hoặc JPG.");
+            return;
+        }
+
+        // Nếu chọn đúng ảnh, lưu file
         setAvatarFile(file);
+        setMessage(""); // Xóa thông báo lỗi nếu chọn ảnh hợp lệ
+
+        // Tạo đường dẫn ảnh để hiển thị ngay
+        const previewUrl = URL.createObjectURL(file);
+        setAvatarPreview(previewUrl);
+
+        // Hiển thị thông báo chọn ảnh thành công
+        Swal.fire({
+            icon: 'success',
+            title: '✅ Ảnh đã được chọn thành công!',
+            timer: 1500,
+            showConfirmButton: false,
+        });
     };
 
 
     //gửi file lên api
     const handleUploadAvatar = async () => {
         if (!avatarFile){
-            alert("Vui lòng chọn 1 ảnh để tải lên.")
+            Swal.fire({
+                icon: 'warning',
+                title: '⚠️ Vui lòng chọn một ảnh để tải lên.',
+                confirmButtonText: 'OK',
+            });
             return;
         }
-        const token = document.cookie
-            .split('; ')
-            .find(row => row.startsWith('token='))
-            ?.split('=')[1];
-        const formData = new FormData();
-        formData.append('file', avatarFile);
-        console.log("Token từ cookie login google_avatar:", token);
 
-        try {
-            const response = await axios.post('https://localhost:8443/api/v1/users/upload-avatar', formData, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
+        // Xác nhận người dùng có muốn tải ảnh không
+        const confirmUpload = await Swal.fire({
+            icon: 'question',
+            title: 'Bạn có chắc chắn muốn cập nhật ảnh đại diện?',
+            showCancelButton: true,
+            confirmButtonText: 'Tải lên',
+            cancelButtonText: 'Hủy',
+        });
+
+        // Nếu người dùng xác nhận thì thực hiện tải ảnh
+        if (confirmUpload.isConfirmed) {
+            const token = document.cookie
+                .split('; ')
+                .find(row => row.startsWith('token='))?.split('=')[1];
+
+            const formData = new FormData();
+            formData.append('file', avatarFile);
+            console.log("Token từ cookie login google_avatar:", token);
+
+            try {
+                const response = await axios.post('https://localhost:8443/api/v1/users/upload-avatar', formData, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
+
+                // Hiển thị thông báo thành công
+                Swal.fire({
+                    icon: 'success',
+                    title: '✅ Tải ảnh lên thành công!',
+                    text: 'Ảnh đại diện đã được cập nhật.',
+                    timer: 2000,
+                    showConfirmButton: false,
+                });
+
+                console.log('Avatar Url:', response.data.data.url);
+            } catch (error) {
+                console.error(error);
+                Swal.fire({
+                    icon: 'error',
+                    title: '❌ Lỗi khi tải ảnh',
+                    text: 'Có lỗi xảy ra trong quá trình tải ảnh. Vui lòng thử lại.',
+                });
+            }
+        } else {
+            // Nếu người dùng hủy bỏ, hiển thị thông báo
+            Swal.fire({
+                icon: 'info',
+                title: 'Hủy tải ảnh',
+                text: 'Bạn đã hủy việc tải ảnh lên.',
             });
+        }
+    };
 
-            alert('Tải ảnh lên thành công!')
-            console.log('Avatar Url:', response.data.data.url);
-        }catch (error){
-            console.error(error);
-            alert('Lỗi khi tải ảnh')
-        };
-    }
 
     const [userId, setUserId] = useState(null);
     const [message, setMessage] = useState('');
@@ -318,8 +389,11 @@ const UserProfileEdit = () => {
                                 <div className="tab-pane fade active show" id="account2-general">
 
                                     <div className="card2-body media align-items-center">
-                                        <img src={user.avatar} alt=""
-                                             className="d-block ui-w-80"/>
+                                        <img
+                                            src={avatarPreview || user.avatar} // Nếu có ảnh preview thì hiển thị, không thì hiển thị ảnh mặc định
+                                            alt="Avatar"
+                                            className="d-block ui-w-80"
+                                        />
                                         <div className="media-body ml-4">
                                             <label className="btn btn-outline-primary upload-photo-label">
                                                 Tải hình mới lên
@@ -346,7 +420,7 @@ const UserProfileEdit = () => {
                                     <hr className="border-light m-0"/>
 
                                     <div className="card-body">
-                                        <div className="form-group">
+                                    <div className="form-group">
                                             <label className="form-label">Username</label>
                                             <input type="text" className="form-control mb-1"/>
                                         </div>

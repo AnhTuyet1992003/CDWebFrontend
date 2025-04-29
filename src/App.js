@@ -29,6 +29,7 @@ import Header from './component/user/header';
 import AuthCallback from './pages/auth/google/callback';
 import OAuth2RedirectHandler from "./pages/auth/google/OAuth2RedirectHandler"
 import AddToCart from "./pages/user/AddToCart"
+import { ToastContainer } from 'react-toastify';
 function App() {
   return (
       <Router>
@@ -71,6 +72,17 @@ function App() {
           {/*<Route path="/admin" element={<AdminHome />} />*/}
           {/*<Route path="/admin/dashboard" element={<AdminDashboard />} />*/}
         </Routes>
+
+          <ToastContainer
+              position="top-right"
+              autoClose={2000}
+              hideProgressBar={false}
+              newestOnTop
+              closeOnClick
+              pauseOnHover
+              draggable
+              theme="light"
+          />
       </Router>
   );
 }
