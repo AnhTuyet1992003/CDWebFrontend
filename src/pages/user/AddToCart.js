@@ -201,6 +201,7 @@ const AddToCart = ({ productId, onClose }) => {
                                             opacity: isDisabled ? 0.3 : 1,
                                             cursor: isDisabled ? 'not-allowed' : 'pointer'
                                         }}
+                                        title={color}
                                         onClick={() => {
                                             if (!isDisabled) {
                                                 handleColorSelect(color);
