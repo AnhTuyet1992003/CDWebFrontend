@@ -18,6 +18,7 @@ const Cart = () => {
     const [productVariants, setProductVariants] = useState({});
 
     const [selectedItems, setSelectedItems] = useState([]);
+
     const [isAllSelected, setIsAllSelected] = useState(false);
 
     const handleSelectAll = () => {
@@ -83,7 +84,7 @@ const Cart = () => {
                         title: '⚠️ Giỏ hàng của bạn đang trống.',
                         confirmButtonText: 'OK',
                     }).then(() => {
-                        navigate('/home');
+                        navigate('/shop');
                     });
                     return;
                 }
@@ -140,7 +141,7 @@ const Cart = () => {
                             title: '⚠️ Giỏ hàng của bạn đang trống.',
                             confirmButtonText: 'OK',
                         }).then(() => {
-                            navigate('/home');
+                            navigate('/shop');
                         });
                         return;
                     }
@@ -176,6 +177,8 @@ const Cart = () => {
             }
         });
     };
+
+
 
     const updateQuantity = async (cartItemId, newQuantity) => {
         try {
@@ -369,6 +372,87 @@ const Cart = () => {
             }
         });
     };
+
+    const handleRemoveSelectedItems = () => {
+        if (selectedItems.length === 0) {
+            Swal.fire({
+                icon: 'info',
+                title: 'Bạn chưa chọn sản phẩm nào để xoá.',
+                confirmButtonText: 'OK',
+            });
+            return;
+        }
+
+        Swal.fire({
+            icon: 'warning',
+            title: 'Bạn có chắc chắn muốn xoá các sản phẩm đã chọn?',
+            showCancelButton: true,
+            confirmButtonText: 'Xoá',
+            cancelButtonText: 'Huỷ',
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                try {
+                    const token = document.cookie
+                        .split('; ')
+                        .find(row => row.startsWith('token='))
+                        ?.split('=')[1];
+
+                    if (!token) {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: '⚠️ Bạn chưa đăng nhập.',
+                            confirmButtonText: 'OK',
+                        }).then(() => {
+                            navigate('/login');
+                        });
+                        return;
+                    }
+
+                    // Tạo URL query string
+                    const query = selectedItems.map(id => `cartItemId=${id}`).join('&');
+                    const url = `https://localhost:8443/api/v1/carts/remove-items?${query}`;
+
+                    const response = await axios.delete(url, {
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                        },
+                        withCredentials: true
+                    });
+
+                    const updatedCart = response.data.data;
+
+                    if (!updatedCart.items || updatedCart.items.length === 0) {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: '⚠️ Giỏ hàng của bạn đang trống.',
+                            confirmButtonText: 'OK',
+                        }).then(() => {
+                            navigate('/shop');
+                        });
+                        return;
+                    }
+
+                    setCart(updatedCart);
+                    setSelectedItems([]);
+                    setIsAllSelected(false);
+
+                    Swal.fire({
+                        icon: 'success',
+                        title: '✅ Đã xoá các sản phẩm khỏi giỏ hàng!',
+                        confirmButtonText: 'OK',
+                    });
+                } catch (error) {
+                    console.error("Error removing selected items: ", error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: '❌ Xảy ra lỗi khi xoá!',
+                        text: error.response?.data?.message || error.message,
+                    });
+                }
+            }
+        });
+    };
+
 
     return (
         <>
@@ -564,8 +648,15 @@ const Cart = () => {
                                 <input className={"check_product"} type={"checkbox"}
                                        onChange={handleSelectAll}
                                        checked={isAllSelected}/>
-                                <span style={{paddingLeft: "15px"}}>   Chọn tất cả ({cart.totalQuantity})  </span>
-                                <button style={{paddingLeft: "15px"}} className={"delete_all_product"}>Xóa</button>
+                                <span style={{paddingLeft: "15px"}}>   Chọn tất cả ({cart.totalQuantityProduct})  </span>
+                                <button
+                                    style={{paddingLeft: "15px"}}
+                                    className="delete_all_product"
+                                    onClick={handleRemoveSelectedItems}
+                                >
+                                    Xóa
+                                </button>
+
                             </div>
                             {/*<div className={"wish_list_product"}><FontAwesomeIcon className={"tym"} icon={faHeart}/> Lưu*/}
                             {/*    vào danh sách yêu thích*/}
@@ -579,7 +670,7 @@ const Cart = () => {
                                 </div>
                             </div>
                             <div className={"product_total_price"}>
-                                <div className={"total_price"}>Tổng tiền <p
+                                <div className={"total_price"}>Tổng tiền ( {cart.totalQuantityProduct} sản phẩm)<p
                                     className={"total"}>  {formatVND(cart.totalPrice)}</p></div>
                             </div>
                             <div className={"btn_checkout_order"}>Mua hàng</div>
