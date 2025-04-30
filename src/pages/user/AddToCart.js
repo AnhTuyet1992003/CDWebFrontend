@@ -143,7 +143,18 @@ const AddToCart = ({ productId, onClose }) => {
             });
         }
     };
-
+    const colorMap = {
+        "Đen": "#000000",
+        "Trắng": "#FFFFFF",
+        "Đỏ": "#FF0000",
+        "Xám": "#606060",
+        "Vàng": "#ffdd00",
+        "Nâu": "#854100",
+        "Tím": "#9900ff",
+        "Xanh": "#0b77e1",
+        "Xanh Demin": "#286fb5",
+        "Be": "#F5F5DC",
+    };
 
     return (
         <div className="AddToCart">
@@ -185,7 +196,8 @@ const AddToCart = ({ productId, onClose }) => {
                                         key={color}
                                         className={`btn_color ${selectedColor === color ? 'active' : ''}`}
                                         style={{
-                                            background: color === 'Trắng' ? '#ffffff' : '#000000',
+                                            // background: color === 'Trắng' ? '#ffffff' : '#000000',
+                                            background: colorMap[color] || "#ccc",
                                             opacity: isDisabled ? 0.3 : 1,
                                             cursor: isDisabled ? 'not-allowed' : 'pointer'
                                         }}
