@@ -1,8 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, {  useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import Swal from 'sweetalert2';
 import './AddToCart.css'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faTicket, faHeart } from '@fortawesome/free-solid-svg-icons';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess'; // ^
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'; // v
 
@@ -14,6 +16,27 @@ const Cart = () => {
     const [selectedColor, setSelectedColor] = useState(null);
     const [selectedSize, setSelectedSize] = useState(null);
     const [productVariants, setProductVariants] = useState({});
+
+    const [selectedItems, setSelectedItems] = useState([]);
+    const [isAllSelected, setIsAllSelected] = useState(false);
+
+    const handleSelectAll = () => {
+        if (isAllSelected) {
+            setSelectedItems([]);
+        } else {
+            setSelectedItems(cart.items.map(item => item.id));
+        }
+        setIsAllSelected(!isAllSelected);
+    };
+
+    const handleSelectItem = (itemId) => {
+        const updatedItems = selectedItems.includes(itemId)
+            ? selectedItems.filter(id => id !== itemId)
+            : [...selectedItems, itemId];
+        setSelectedItems(updatedItems);
+        setIsAllSelected(updatedItems.length === cart.items.length);
+    };
+
 
     const handleIncrease = async (cartItemId, currentQuantity) => {
         const newQuantity = currentQuantity + 1;
@@ -372,6 +395,16 @@ const Cart = () => {
                                 <table>
                                     <thead>
                                     <tr>
+                                        <th>
+                                            {/*<input*/}
+                                            {/*    type="checkbox"*/}
+                                            {/*    onChange={handleSelectAll}*/}
+                                            {/*    checked={isAllSelected}  // Thêm điều kiện để kiểm tra nếu tất cả sản phẩm đã được chọn*/}
+                                            {/*/>*/}
+                                            <input className={"check_product"} type={"checkbox"}
+                                                   onChange={handleSelectAll}
+                                                   checked={isAllSelected}/>
+                                        </th>
                                         <th>Sản phẩm</th>
                                         <th>Giá</th>
                                         <th>Số lượng</th>
@@ -382,22 +415,35 @@ const Cart = () => {
                                     <tbody>
                                     {cart.items.map(item => (
                                         <tr key={item.id}>
-                                            <td className="cart__product__item" style={{ position: "relative", overflow: "visible" }}>
+                                            <td>
+                                                {/*<input*/}
+                                                {/*    type="checkbox"*/}
+                                                {/*    checked={selectedItems.includes(item.id)}  // Kiểm tra nếu item này có trong danh sách đã chọn*/}
+                                                {/*    onChange={() => handleSelectItem(item.id)}  // Gọi hàm chọn/tắt chọn sản phẩm*/}
+                                                {/*/>*/}
+                                                <input className={"check_product"} type={"checkbox"}
+                                                       checked={selectedItems.includes(item.id)}
+                                                       onChange={() => handleSelectItem(item.id)}/>
+                                            </td>
+                                            <td className="cart__product__item"
+                                                style={{position: "relative", overflow: "visible"}}>
                                                 <img
-                                                    style={{ height: "90px", width: "90px" }}
+                                                    style={{height: "90px", width: "90px"}}
                                                     src={item.productImage}
                                                     alt={item.productName}
                                                 />
-                                                <div className="cart__product__item__title" style={{ overflow: "visible" }}>
+                                                <div className="cart__product__item__title"
+                                                     style={{overflow: "visible"}}>
                                                     <h6>{item.productName}</h6>
-                                                    <div style={{ position: 'relative' }}>
+                                                    <div style={{position: 'relative'}}>
                                                         <div
                                                             className="choose_size_color"
                                                             onClick={() => handleClickColorSizeProduct(item.id, item.productId, item.color, item.size)}
                                                         >
                                                         <span>
                                                             Màu sắc: {item.color} | Kích thước: {item.size}
-                                                            <ExpandMoreIcon style={{ fontSize: '16px', marginLeft: '5px' }} />
+                                                            <ExpandMoreIcon
+                                                                style={{fontSize: '16px', marginLeft: '5px'}}/>
                                                         </span>
                                                         </div>
 
@@ -407,7 +453,11 @@ const Cart = () => {
                                                                     <div className="color_title">
                                                                         <p>Màu sắc</p>
                                                                     </div>
-                                                                    <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap' }}>
+                                                                    <div style={{
+                                                                        display: 'flex',
+                                                                        gap: '5px',
+                                                                        flexWrap: 'wrap'
+                                                                    }}>
                                                                         {[...new Set(productVariants[item.id]?.map(v => v.color))].map((color, idx) => {
                                                                             // tìm variant có cùng color và size (nếu có) để lấy độ mờ
                                                                             const isCompatibleWithSize = !selectedSize || productVariants[item.id]?.some(v => v.color === color && v.size === selectedSize);
@@ -426,11 +476,16 @@ const Cart = () => {
                                                                         })}
                                                                     </div>
                                                                 </div>
-                                                                <div className="choose_size" style={{ marginTop: '10px' }}>
+                                                                <div className="choose_size"
+                                                                     style={{marginTop: '10px'}}>
                                                                     <div className="size_title">
                                                                         <p>Kích cỡ</p>
                                                                     </div>
-                                                                    <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap' }}>
+                                                                    <div style={{
+                                                                        display: 'flex',
+                                                                        gap: '5px',
+                                                                        flexWrap: 'wrap'
+                                                                    }}>
                                                                         {[...new Set(productVariants[item.id]?.map(v => v.size))].map((size, idx) => {
                                                                             const isCompatibleWithColor = !selectedColor || productVariants[item.id]?.some(v => v.size === size && v.color === selectedColor);
                                                                             return (
@@ -483,58 +538,57 @@ const Cart = () => {
                                             </td>
                                             <td className="cart__total">{formatVND(item.price * item.quantity)}</td>
                                             <td className="cart__close">
-            <span
-                className="icon_close"
-                onClick={() => handleRemoveItem(item.id)}
-                style={{ cursor: 'pointer' }}
-            ></span>
+                                                <span
+                                                    className="icon_close"
+                                                    onClick={() => handleRemoveItem(item.id)}
+                                                    style={{cursor: 'pointer'}}
+                                                ></span>
                                             </td>
                                         </tr>
                                     ))}
-
 
                                     </tbody>
                                 </table>
                             </div>
                         </div>
                     </div>
-                    <div className="row">
-                        <div className="col-lg-6 col-md-6 col-sm-6">
-                            <div className="cart__btn">
-                                <Link to="/home" style={{cursor: 'pointer'}}>Tiếp tục mua hàng</Link>
-
+                    <div className={"checkout_product"}>
+                        {/*<div className={"coupon_product"}>*/}
+                        {/*    <div className={"coupon_product_btn"}>*/}
+                        {/*    <FontAwesomeIcon className={"ticket"} icon={faTicket} />  Mã giảm giá*/}
+                        {/*    </div>*/}
+                        {/*</div>*/}
+                        {/*<hr/>*/}
+                        <div className={"information_cart"}>
+                            <div className={"choose_product"}>
+                                <input className={"check_product"} type={"checkbox"}
+                                       onChange={handleSelectAll}
+                                       checked={isAllSelected}/>
+                                <span style={{paddingLeft: "15px"}}>   Chọn tất cả ({cart.totalQuantity})  </span>
+                                <button style={{paddingLeft: "15px"}} className={"delete_all_product"}>Xóa</button>
                             </div>
-                        </div>
-                        <div className="col-lg-6 col-md-6 col-sm-6">
-                            <div className="cart__btn update__btn">
-                                <Link to="/cart" style={{cursor: 'pointer'}}><span className="icon_loading"></span>Cập
-                                    nhật giỏ hàng</Link>
+                            {/*<div className={"wish_list_product"}><FontAwesomeIcon className={"tym"} icon={faHeart}/> Lưu*/}
+                            {/*    vào danh sách yêu thích*/}
+                            {/*</div>*/}
+                            <div className={"coupon_product"}>
+                                <div className={"coupon_product_btn"}>
+                                    <FontAwesomeIcon className={"ticket"} icon={faTicket}/> Mã giảm giá
+                                </div>
+                                <div style={{paddingLeft: "10px"}} className={"coupon_is_choose"}>Đã
+                                    giảm {formatVND(10000)}
+                                </div>
                             </div>
-                        </div>
-                    </div>
-                    <div className="row">
-                        <div className="col-lg-6">
-                            <div className="discount__content">
-                                <h6>Mã khuyến mãi</h6>
-                                <form action="#">
-                                    <input type="text" placeholder="Nhập mã khuyến mãi"/>
-                                    <button type="submit" className="site-btn">Áp dụng mã</button>
-                                </form>
+                            <div className={"product_total_price"}>
+                                <div className={"total_price"}>Tổng tiền <p
+                                    className={"total"}>  {formatVND(cart.totalPrice)}</p></div>
                             </div>
-                        </div>
-                        <div className="col-lg-4 offset-lg-2">
-                            <div className="cart__total__procced">
-                                <h6>TỔng tiền giỏ hàng</h6>
-                                <ul>
-                                    <li>Tổng phụ <span>{formatVND(cart.totalPrice)}</span></li>
-                                    <li>Tổng tiền <span>{formatVND(cart.totalPrice)}</span></li>
-                                </ul>
-                                <a href="#" className="primary-btn">Tiến hành thanh toán</a>
-                            </div>
+                            <div className={"btn_checkout_order"}>Mua hàng</div>
                         </div>
                     </div>
                 </div>
+
             </section>
+
         </>
     );
 }
