@@ -28,7 +28,7 @@ import Header from './component/user/header';
 
 import AuthCallback from './pages/auth/google/callback';
 import OAuth2RedirectHandler from "./pages/auth/google/OAuth2RedirectHandler"
-import AddToCart from "./pages/user/AddToCart"
+import AddToCart from "./pages/user/checkout-choose-address"
 import { ToastContainer } from 'react-toastify';
 function App() {
   return (
