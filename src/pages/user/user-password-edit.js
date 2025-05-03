@@ -146,7 +146,7 @@ const UserPasswordEdit = () => {
                             </div>
                         )}
                         <div className="form-group">
-                            <label className="form-label">Current password</label>
+                            <label className="form-label"></label>
                             <input type="password" name="password" value={user2.password} onChange={handleChange}
                                    required={true} className="form-control"/>
                         </div>
@@ -157,7 +157,7 @@ const UserPasswordEdit = () => {
                         )}
 
                         <div className="form-group">
-                            <label className="form-label">New password</label>
+                            <label className="form-label"></label>
                             <input type="password" name="newPassword" value={user2.newPassword} onChange={handleChange}
                                    required={true} className="form-control"/>
                         </div>
@@ -168,7 +168,7 @@ const UserPasswordEdit = () => {
                         )}
 
                         <div className="form-group">
-                            <label className="form-label">Repeat new password</label>
+                            <label className="form-label"></label>
                             <input type="password" name="reNewPassword" value={user2.reNewPassword}
                                    onChange={handleChange} required={true} className="form-control"/>
                         </div>
