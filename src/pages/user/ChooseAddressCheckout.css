@@ -1,0 +1,118 @@
+.ChooseAddress{
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(97, 93, 93, 0.44);
+    z-index: 999;
+}
+.ChooseAddress .content{
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    /*justify-items: center;*/
+    /*align-items: center;*/
+    padding: 20px;
+    z-index: 100000;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 500px;
+    height: 550px;
+    background: rgb(255, 255, 255);
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgb(0,0,0,0.2);
+    /*overflow: hidden;*/
+    overflow: visible;
+}
+.ChooseAddress .content .close_ChooseAddress{
+    position: absolute;
+    display: flex;
+    top: -10px;
+    right: -10px;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50%;
+    z-index: 100001;
+    /*border: 1px solid #000000;*/
+    background: #ff0000;
+    color: white;
+    font-weight: bold;
+    width: 30px;
+    height: 30px;
+    font-size: 25px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+.ChooseAddress .content .close_ChooseAddress:hover{
+    transform: scale(1.2);
+}
+.ChooseAddress .content .title{
+    font-size: 20px;
+    font-weight: bold;
+}
+.ChooseAddress .content .address_content{
+    display: flex;
+    flex-direction: column;
+    height: 450px;
+    overflow: hidden;
+    flex-wrap: nowrap;
+    overflow-y: auto;
+}
+
+.contain_address{
+    display: flex;
+    flex-direction: row;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    align-items: center;
+    .checkbox_address .check_address{
+        width: 20px;
+        height: 20px;
+        cursor: pointer;
+        display: flex;
+        margin-right: 20px;
+    }
+    .checkbox_address .content_main{
+        .checkout_choose_address{
+            font-size: 10px;
+        }
+    }
+
+}
+
+.ChooseAddress .content .btn_address{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    .add_new_address{
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 5px;
+        width: 200px;
+        background: rgba(238, 77, 45, 0.18);
+        border: 2px solid rgba(238, 77, 45, 0.84);
+        border-radius: 10px;
+        transition: all 0.3s ease;
+    }
+    .add_new_address:hover{
+        background: #ee4d2d;
+        color: white;
+        transform: scale(1.03);
+        box-shadow: 0 6px 12px rgba(238, 77, 45, 0.3);
+        border-color: #ee4d2d;
+    }
+    .confirm{
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 5px;
+        width: 100px;
+        background: #ee4d2d;
+        border-radius: 10px;
+        color: white;
+    }
+}

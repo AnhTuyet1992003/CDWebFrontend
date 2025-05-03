@@ -1,4 +1,4 @@
-import React, {  useState, useEffect } from 'react';
+import React, {useMemo ,  useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import Swal from 'sweetalert2';
@@ -20,6 +20,19 @@ const Cart = () => {
     const [selectedItems, setSelectedItems] = useState([]);
 
     const [isAllSelected, setIsAllSelected] = useState(false);
+
+
+
+    const selectedSummary = useMemo(() => {
+        if (!cart || !cart.items) return { totalPrice: 0, totalQuantity: 0 };
+
+        const selected = cart.items.filter(item => selectedItems.includes(item.id));
+
+        const totalPrice = selected.reduce((sum, item) => sum + item.price * item.quantity, 0);
+        const totalQuantity = selected.reduce((sum, item) => sum + item.quantity, 0);
+        const totalQuantityProduct = selected.reduce((sum, item) => sum + 1, 0);
+        return { totalPrice, totalQuantity, totalQuantityProduct };
+    }, [cart, selectedItems]);
 
     const handleSelectAll = () => {
         if (isAllSelected) {
@@ -454,6 +467,62 @@ const Cart = () => {
     };
 
 
+    const handleCheckout = async () => {
+        const token = document.cookie
+            .split("; ")
+            .find((row) => row.startsWith("token="))
+            ?.split("=")[1];
+
+        if (!token) {
+            Swal.fire({
+                icon: 'warning',
+                title: '⚠️ Bạn chưa đăng nhập.',
+                confirmButtonText: 'OK',
+            }).then(() => {
+                navigate('/login');
+            });
+            return;
+        }
+
+        if (selectedItems.length === 0) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Bạn chưa chọn sản phẩm nào!',
+                text: 'Vui lòng chọn ít nhất một sản phẩm để tiếp tục.',
+                confirmButtonText: 'OK',
+            });
+            return;
+        }
+
+
+        try {
+            const query = selectedItems.map(id => `cart_item_id=${id}`).join('&');
+            const url = `https://localhost:8443/api/v1/oders/prepare?${query}`;
+            const response = await fetch(url, {
+                method: "POST",
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                },
+                withCredentials: true
+            });
+
+            const result = await response.json();
+            if (result.status === "success") {
+                localStorage.setItem("preparedOrder", JSON.stringify(result.data));
+
+                const preparedOrder = JSON.parse(localStorage.getItem("preparedOrder"));
+
+                navigate('/checkout');
+            } else {
+                Swal.fire({ icon: 'error', title: 'Lỗi', text: result.message });
+            }
+        } catch (error) {
+            console.error("Lỗi khi chuẩn bị đơn hàng:", error);
+            Swal.fire({ icon: 'error', title: 'Lỗi server' });
+        }
+    };
+
+
     return (
         <>
             <div className="breadcrumb-option">
@@ -648,7 +717,8 @@ const Cart = () => {
                                 <input className={"check_product"} type={"checkbox"}
                                        onChange={handleSelectAll}
                                        checked={isAllSelected}/>
-                                <span style={{paddingLeft: "15px"}}>   Chọn tất cả ({cart.totalQuantityProduct})  </span>
+                                <span
+                                    style={{paddingLeft: "15px"}}>   Chọn tất cả ({cart.totalQuantityProduct})  </span>
                                 <button
                                     style={{paddingLeft: "15px"}}
                                     className="delete_all_product"
@@ -670,10 +740,10 @@ const Cart = () => {
                                 </div>
                             </div>
                             <div className={"product_total_price"}>
-                                <div className={"total_price"}>Tổng tiền ( {cart.totalQuantityProduct} sản phẩm)<p
-                                    className={"total"}>  {formatVND(cart.totalPrice)}</p></div>
+                                <div className={"total_price"}>Tổng tiền <span style={{fontSize: "12px"}}>( {selectedSummary.totalQuantityProduct} sản phẩm)</span><p
+                                    className={"total"}>  {formatVND(selectedSummary.totalPrice)}</p></div>
                             </div>
-                            <div className={"btn_checkout_order"}>Mua hàng</div>
+                            <div className={"btn_checkout_order"} onClick={handleCheckout}>Mua hàng</div>
                         </div>
                     </div>
                 </div>
