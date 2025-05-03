@@ -379,7 +379,9 @@ const UserProfileEdit = () => {
                                             )}
                                             <div className="form-group">
                                                 <label className="form-label">Current password</label>
-                                                <input type="password" name = "password" value={user2.password} onChange={handleChange} required={true}  className="form-control"/>
+                                                <input type="password" name="password" value={user2.password}
+                                                       onChange={handleChange}
+                                                       required={true} className="form-control"/>
                                             </div>
                                             {errors.newPassword && (
                                                 <div className="error-container">
@@ -389,7 +391,9 @@ const UserProfileEdit = () => {
 
                                             <div className="form-group">
                                                 <label className="form-label">New password</label>
-                                                <input type="password" name = "newPassword" value={user2.newPassword} onChange={handleChange} required={true} className="form-control"/>
+                                                <input type="password" name="newPassword" value={user2.newPassword}
+                                                       onChange={handleChange}
+                                                       required={true} className="form-control"/>
                                             </div>
                                             {errors.reNewPassword && (
                                                 <div className="error-container">
@@ -399,7 +403,9 @@ const UserProfileEdit = () => {
 
                                             <div className="form-group">
                                                 <label className="form-label">Repeat new password</label>
-                                                <input type="password" name = "reNewPassword" value={user2.reNewPassword} onChange={handleChange} required={true} className="form-control"/>
+                                                <input type="password" name="reNewPassword" value={user2.reNewPassword}
+                                                       onChange={handleChange} required={true}
+                                                       className="form-control"/>
                                             </div>
                                             {errors.password && (
                                                 <div className="error-container">
