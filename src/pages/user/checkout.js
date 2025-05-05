@@ -220,11 +220,12 @@ const Checkout = () => {
         return new Intl.NumberFormat('vi-VN').format(money) + " ₫";
     };
 
+    const [isLoading, setIsLoading] = useState(false);
 
     const handlePlaceOrder = async (event) => {
         event.preventDefault();
+        if (isLoading) return;
 
-        // Kiểm tra nếu order null thì cảnh báo và chuyển hướng
         if (!order || !order.cart_items_choose) {
             Swal.fire({
                 icon: "error",
@@ -241,6 +242,15 @@ const Checkout = () => {
             Swal.fire({
                 icon: "warning",
                 title: "⚠️ Bạn chưa chọn địa chỉ giao hàng!",
+                confirmButtonText: "OK",
+            });
+            return;
+        }
+
+        if (!paymentId) {
+            Swal.fire({
+                icon: "warning",
+                title: "⚠️ Bạn chưa chọn phương thức thanh toán!",
                 confirmButtonText: "OK",
             });
             return;
@@ -273,55 +283,159 @@ const Checkout = () => {
 
         if (!result.isConfirmed) return;
 
-        // Lấy danh sách ID các cart item
-        const cartItemIds = order.cart_items_choose.map(item => item.id);
-
-        // Tạo body dạng x-www-form-urlencoded
-        const formData = new URLSearchParams();
-        cartItemIds.forEach(id => formData.append("cartItemIds", id));
-        formData.append("shippingAddressId", selectedAddress.id);
-        formData.append("shippingFee", 0);
-        formData.append("finalPrice", order.total_price);
-        formData.append("totalPrice", order.total_price);
-        formData.append("note", note || "");
-        formData.append("paymentId", paymentId)
+        setIsLoading(true);
 
         try {
-            const response = await fetch("https://localhost:8443/api/v1/oders/add-order", {
+            const cartItemIds = order.cart_items_choose.map(item => item.id);
+            const formData = new URLSearchParams();
+            cartItemIds.forEach(id => formData.append("cartItemIds", id));
+            formData.append("shippingAddressId", selectedAddress.id);
+            formData.append("shippingFee", 0);
+            formData.append("finalPrice", order.total_price);
+            formData.append("totalPrice", order.total_price);
+            formData.append("note", note || "");
+            formData.append("paymentId", paymentId);
+
+            const orderResponse = await fetch("https://localhost:8443/api/v1/oders/add-order", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/x-www-form-urlencoded",
-                    Authorization: `Bearer ${token}`
+                    Authorization: `Bearer ${token}`,
+
                 },
-                credentials: "include", // nếu backend yêu cầu cookie/session
+                credentials: "include",
                 body: formData.toString()
             });
 
-            const data = await response.json();
+            const orderData = await orderResponse.json();
 
-            if (data.status === "success") {
+            if (orderData.status !== "success") {
+                Swal.fire({
+                    icon: "error",
+                    title: "❌ Đặt hàng thất bại!",
+                    text: orderData.message,
+                });
+                return;
+            }
+
+            if (paymentId === "3") { // VNPay
+                console.log("selectedAddress before VNPay check:", selectedAddress);
+                if (!selectedAddress || !selectedAddress.addressDetail) { // Sử dụng addressDetails nhất quán
+                    Swal.fire({
+                        icon: "error",
+                        title: "❌ Lỗi dữ liệu địa chỉ!",
+                        text: "Thông tin địa chỉ giao hàng không đầy đủ.",
+                    });
+                    setIsLoading(false);
+                    return;
+                }
+
+                let vnpayParams = new URLSearchParams();
+                vnpayParams.append("amount", order.total_price.toString());
+                vnpayParams.append("vnp_OrderInfo", `${orderData.data.id}`)
+                console.log("order_id la: ------------------"+ orderData.data.id)
+                vnpayParams.append("ordertype", "billpayment");
+                vnpayParams.append("txt_billing_mobile", selectedAddress.receiverPhone);
+                vnpayParams.append("txt_billing_email", selectedAddress.email || "customer@example.com");
+                vnpayParams.append("txt_billing_fullname", selectedAddress.receiverName);
+                vnpayParams.append("txt_inv_addr1", selectedAddress.addressDetails); // Chỉ append một lần
+                vnpayParams.append("txt_bill_city", selectedAddress.province);
+                vnpayParams.append("txt_bill_country", "Vietnam");
+                vnpayParams.append("txt_inv_mobile", selectedAddress.receiverPhone);
+                vnpayParams.append("txt_inv_email", selectedAddress.email || "customer@example.com");
+                vnpayParams.append("txt_inv_customer", selectedAddress.receiverName);
+                vnpayParams.append("txt_inv_company", "N/A");
+                vnpayParams.append("txt_inv_taxcode", "N/A");
+                vnpayParams.append("cbo_inv_type", "I");
+                vnpayParams.append("language", "vn");
+
+                console.log("VNPay params:", vnpayParams.toString());
+                console.log("Token before calling /create-payment:", token);
+
+                try {
+                    const vnpayResponse = await fetch("https://localhost:8443/api/v1/payments/create-payment", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/x-www-form-urlencoded",
+                            Authorization: `Bearer ${token}`,
+                            Accept: "application/json"
+                        },
+                        credentials: "include",
+                        body: vnpayParams.toString()
+                    });
+
+                    console.log("vnpayResponse:  "+vnpayResponse)
+
+                    if (!vnpayResponse.ok) {
+                        const errorText = await vnpayResponse.text();
+                        console.error("VNPay API error:", {
+                            status: vnpayResponse.status,
+                            statusText: vnpayResponse.statusText,
+                            body: errorText
+                        });
+                        Swal.fire({
+                            icon: "error",
+                            title: "❌ Lỗi khi gọi API thanh toán!",
+                            text: `Status: ${vnpayResponse.status}, Error: ${errorText}`,
+                        });
+                        setIsLoading(false);
+                        return;
+                    }
+
+                    let vnpayData;
+                    try {
+                        vnpayData = await vnpayResponse.json();
+                        console.log("VNPay response data:", JSON.stringify(vnpayData, null, 2));
+                    } catch (error) {
+                        console.error("JSON parse error:", error);
+                        Swal.fire({
+                            icon: "error",
+                            title: "❌ Lỗi khi xử lý response!",
+                            text: "Dữ liệu trả về không đúng định dạng. Vui lòng thử lại.",
+                        });
+                        setIsLoading(false);
+                        return;
+                    }
+
+                    if (vnpayData.status == "00") { // Sử dụng so sánh lỏng để xử lý chuỗi/số
+                        console.log("Redirecting to VNPay URL:", vnpayData.data);
+                        window.location.href = vnpayData.data; // Chuyển hướng đến URL thanh toán
+                    } else {
+                        console.error("VNPay error response:", JSON.stringify(vnpayData, null, 2));
+                        Swal.fire({
+                            icon: "error",
+                            title: "❌ Lỗi khởi tạo thanh toán VNPay!",
+                            text: vnpayData.message || "Không thể khởi tạo thanh toán.",
+                        });
+                    }
+                } catch (error) {
+                    console.error("Fetch error:", error);
+                    Swal.fire({
+                        icon: "error",
+                        title: "❌ Lỗi khi gọi API thanh toán!",
+                        text: "Không thể kết nối tới server. Vui lòng thử lại.",
+                    });
+                }
+                setIsLoading(false);
+            } else {
                 Swal.fire({
                     icon: "success",
                     title: "✅ Đặt hàng thành công!",
-                    text: data.message,
+                    text: orderData.message,
                 }).then(() => {
                     navigate("/shop");
                     localStorage.removeItem("preparedOrder");
                 });
-            } else {
-                Swal.fire({
-                    icon: "error",
-                    title: "❌ Đặt hàng thất bại!",
-                    text: data.message,
-                });
             }
         } catch (error) {
-            console.error("Lỗi khi gọi API đặt hàng:", error);
+            console.error("Lỗi khi xử lý đặt hàng:", error);
             Swal.fire({
                 icon: "error",
                 title: "❌ Lỗi hệ thống",
                 text: "Đặt hàng thất bại, vui lòng thử lại sau.",
             });
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -411,28 +525,6 @@ const Checkout = () => {
                                             />
                                         )}
                                     </div>
-
-
-                                    {/*{selectedAddress ? (*/}
-                                    {/*    <>*/}
-                                    {/*        <div className="name">*/}
-                                    {/*            <p>*/}
-                                    {/*                <b>Tên người nhận: </b> {selectedAddress.receiverName}<br />*/}
-                                    {/*                <b>Số điện thoại: </b> {selectedAddress.receiverPhone}*/}
-                                    {/*            </p>*/}
-                                    {/*        </div>*/}
-                                    {/*        <div className="address">*/}
-                                    {/*            <p>*/}
-                                    {/*                <b>Địa chỉ: </b><br />*/}
-                                    {/*                {selectedAddress.addressDetails}<br />*/}
-                                    {/*                {selectedAddress.ward}, {selectedAddress.district}, {selectedAddress.province}*/}
-                                    {/*            </p>*/}
-                                    {/*        </div>*/}
-                                    {/*    </>*/}
-                                    {/*) : (*/}
-                                    {/*    <p><b>Hãy chọn thông tin giao hàng của bạn ở đây</b></p>*/}
-                                    {/*)}*/}
-
                                     {showAddressForm && (
                                         <>
                                             <div className="col-lg-12">
@@ -657,7 +749,13 @@ const Checkout = () => {
                                     </div>
 
 
-                                    <button type="button" className="site-btn" onClick={handlePlaceOrder}>Đặt hàng
+                                    <button
+                                        type="button"
+                                        className="site-btn"
+                                        onClick={handlePlaceOrder}
+                                        disabled={isLoading}
+                                    >
+                                        {isLoading ? "Đang xử lý..." : "Đặt hàng"}
                                     </button>
 
                                 </div>

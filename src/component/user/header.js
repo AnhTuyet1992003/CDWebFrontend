@@ -12,19 +12,14 @@ const Header = () => {
 
         avatar: ''
     });
-    Cookies.set('testCookie', 'hello', { expires: 1 });
-    console.log(Cookies.get('testCookie')); // Có ra 'hello' không?
-    console.log(document.cookie); // Có xuất hiện không?
 
     const [userId, setUserId] = useState(null);
     useEffect(() => {
-        console.log("🎯 Header mounted");
         const loadUsername = () => {
             let storedUsername = localStorage.getItem('username');
 
             if (!storedUsername) {
                 const token = Cookies.get('token');
-                console.log("token header: "+ token)
                 if (token) {
                     try {
                         const payload = JSON.parse(atob(token.split('.')[1]));
@@ -35,8 +30,6 @@ const Header = () => {
                     }
                 }
             }
-
-            console.log("loaded username:", storedUsername);
             setUsername(storedUsername || '');
         };
 
@@ -76,7 +69,6 @@ const Header = () => {
     }, []);
 
     const handleLogout = () => {
-        console.log("Logout function is called");
         alert('Bạn đã đăng xuất thành công!');
 
         // Remove the token and username from cookies/localStorage
