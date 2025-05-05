@@ -20,7 +20,7 @@ import 'bootstrap/dist/js/bootstrap.bundle.min';
 const UserProfileEdit = () => {
     const [user, setUser] = useState({
         fullname: '',
-        username: '',
+        //username: '',
         phone: '',
         address: '',
         birthday: '',
@@ -183,14 +183,14 @@ const UserProfileEdit = () => {
                 const formattedBirthday = userData.birthday + "T00:00:00"; // ghép thêm giờ phút giây
                 setUser({
                     fullname: userData.fullname || '',
-                    username: userData.username || '',
+                    //username: userData.username || '',
                     phone: userData.phone || '',
                     address: userData.address || '',
                     birthday: userData.formattedBirthday || '',
                     avatar: userData.avatar || 'https://res.cloudinary.com/dorz7ucva/image/upload/v1745202292/image_2820bc603a47efcf17a0806b81ca92bff7ea2905.png'
                 });
                 setUserId(userData.id);
-                console(userData.avatar);
+                console.log(userData.avatar); // Đúng
             })
             .catch(err => {
                 console.error(err);
@@ -341,8 +341,8 @@ const UserProfileEdit = () => {
                         <input type="text" name="fullname" value={user.fullname} onChange={handleChange}
                                placeholder="Họ tên"
                                className="w-full p-2 border rounded"/>
-                        <input type="text" name="username" value={user.username} onChange={handleChange}
-                               placeholder="Tên đăng nhập" className="w-full p-2 border rounded"/>
+                        {/*<input type="text" name="username" value={user.username} onChange={handleChange}*/}
+                        {/*       placeholder="Tên đăng nhập" className="w-full p-2 border rounded"/>*/}
                         <input type="text" name="phone" value={user.phone} onChange={handleChange}
                                placeholder="Số điện thoại"
                                className="w-full p-2 border rounded"/>

@@ -30,6 +30,7 @@ import AuthCallback from './pages/auth/google/callback';
 import OAuth2RedirectHandler from "./pages/auth/google/OAuth2RedirectHandler"
 import AddToCart from "./pages/user/checkout-choose-address"
 import { ToastContainer } from 'react-toastify';
+import VNPayReturn from './pages/user/vnpay-return';
 function App() {
   return (
       <Router>
@@ -59,6 +60,7 @@ function App() {
             <Route path="/auth/google/callback" element={<AuthCallback />} />
             <Route path="/auth/facebook/callback" element={<AuthCallback />} />
             <Route path="/oauth2/success" element={<OAuth2RedirectHandler />} />
+            <Route path="/vnpay-return" element={<VNPayReturn />} />
 
 
             <Route path="/admin" element={<LayoutAdmin><Admin /></LayoutAdmin>} />
@@ -67,6 +69,8 @@ function App() {
             <Route path="/user-password-edit" element={<LayoutUser><UserPasswordEdit/></LayoutUser>}/>
             <Route path="/user-profile-edit" element={<LayoutUser><UserProfileEdit/></LayoutUser>}/>
             <Route path="/admin-index" element={<LayoutAdmin><AdminIndex /></LayoutAdmin>} />
+            <Route path="/admin-index" element={<LayoutAdmin><AdminIndex /></LayoutAdmin>} />
+
             {/*<Route path="/admin-list-user" element={<AdminListUser/>} />*/}
           {/*/!* Admin Routes *!/*/}
           {/*<Route path="/admin" element={<AdminHome />} />*/}
