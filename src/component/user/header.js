@@ -281,6 +281,7 @@ const Header = () => {
                                         <>
                                             <Link to="/login">Đăng nhập</Link>
                                             <Link to="/register">Đăng ký</Link>
+                                            <Link to="/forgot-password">Quên mật khẩu</Link>
                                         </>
                                     )}
                                 </div>
