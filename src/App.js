@@ -33,7 +33,13 @@ import OrderDetail from "./pages/user/OrderDetail"
 import { ToastContainer } from 'react-toastify';
 import VNPayReturn from './pages/user/vnpay-return';
 
+
 import Btntest from "./pages/admin/testButoon";
+
+import ForgotPassword from "./pages/user/forgot-password";
+import ValidateOtp from "./pages/user/validate-otp";
+import NewPassword from "./pages/user/new-password"
+
 function App() {
   return (
       <Router>
@@ -52,6 +58,9 @@ function App() {
             <Route path="/contact" element={<LayoutUser><Contact /></LayoutUser>} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/validate-otp" element={<ValidateOtp />} />
+            <Route path="/new-password" element={<NewPassword />} />
 
             {/*<Route path="/AddToCart" element={<AddToCart />} />*/}
             <Route path="/AddToCart" element={<LayoutUser><OrderDetail /></LayoutUser>} />
