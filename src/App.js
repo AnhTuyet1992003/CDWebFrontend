@@ -16,6 +16,7 @@ import LayoutAdmin from './component/layout/AdminLayout';
 import Register from './pages/auth/register';
 import AddProduct from './pages/admin/add-product';
 import UserList from './pages/admin/list-user';
+import ProductList from './pages/admin/list-product';
 import Admin from './pages/admin/index';
 import Chatbox from "./pages/user/Chatbox";
 
@@ -81,6 +82,7 @@ function App() {
 
             <Route path="/admin" element={<LayoutAdmin><Admin /></LayoutAdmin>} />
             <Route path="/admin-list-user" element={<LayoutAdmin><UserList /></LayoutAdmin>} />
+            <Route path="/admin-list-product" element={<LayoutAdmin><ProductList /></LayoutAdmin>} />
             <Route path="/admin-add-product" element={<LayoutAdmin><AddProduct /></LayoutAdmin>} />
             <Route path="/user-password-edit" element={<LayoutUser><UserPasswordEdit/></LayoutUser>}/>
             <Route path="/user-profile-edit" element={<LayoutUser><UserProfileEdit/></LayoutUser>}/>

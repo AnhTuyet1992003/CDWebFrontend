@@ -10,13 +10,16 @@
     height: 70px;
     width: 60px;
 }
-.showProductColorSize table, th, td {
+.showProductColorSize .add_product_table, th, td {
     /*border:1px solid black;*/
     padding: 10px;
 }
-.showProductColorSize table, tr{
+.showProductColorSize .add_product_table .add_product_tr{
     border:1px solid black;
     padding: 10px;
     width: 100%;
     border-radius: 10px;
+}
+.add_product_table{
+    width: 100%;
 }

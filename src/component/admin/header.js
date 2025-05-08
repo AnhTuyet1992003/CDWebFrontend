@@ -246,9 +246,15 @@ const Header = () => {
                         </Link>
                     </li>
                     <li className="menu-item">
-                        <Link to="/admin-add-product" style={{cursor: 'pointer'}} className="menu-link"><i
+                        <Link to="/admin-add-product" style={{cursor: 'pointer'}} className="menu-link" ><i
                             className="menu-icon tf-icons bx bx-chat"></i>
                             <div className="text-truncate" data-i18n="Chat">Thêm sản phẩm</div>
+                        </Link>
+                    </li>
+                    <li className="menu-item">
+                        <Link to="/admin-list-product" style={{cursor: 'pointer'}} className="menu-link"><i
+                            className="menu-icon tf-icons bx bx-chat"></i>
+                            <div className="text-truncate" data-i18n="Chat">Danh sách sản phẩm</div>
                         </Link>
                     </li>
                     <li className="menu-item">
