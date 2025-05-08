@@ -1,0 +1,50 @@
+
+
+.Order_Detail .content{
+    position: relative;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    z-index: 100000;
+    width: 100%;
+    background: rgb(255, 255, 255);
+    overflow: visible;
+}
+
+.Order_Detail .content .detail_order{
+    background: #0c5460;
+    height: 1000px;
+    width: 750px;
+}
+
+.Order_Detail .content .note_ship_order{
+    background: #cc8e00;
+    height: 1000px;
+    width: 350px;
+}
+
+
+.Order_Detail .content  .card {
+    box-shadow: 0 20px 27px 0 rgb(0 0 0 / 5%);
+}
+.Order_Detail .content .card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    word-wrap: break-word;
+    background-color: #fff;
+    background-clip: border-box;
+    border: 0 solid rgba(0,0,0,.125);
+    border-radius: 1rem;
+}
+.Order_Detail .content .text-reset {
+    --bs-text-opacity: 1;
+    color: inherit!important;
+}
+.Order_Detail .content  a {
+    color: #5465ff;
+    text-decoration: none;
+}
