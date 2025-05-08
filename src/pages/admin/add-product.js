@@ -4,7 +4,7 @@ import './addProduct.css'
 import axios from "axios";
 import Swal from "sweetalert2";
 import { useNavigate } from 'react-router-dom';
-
+import { useSearchParams } from "react-router-dom";
 const AddProduct = () => {
 
     const [categories, setCategories] = useState([]);
@@ -40,6 +40,41 @@ const AddProduct = () => {
     const [inputStock, setInputStock] = useState("");
 
 
+    // truyn vào productId
+    const [searchParams] = useSearchParams();
+    const incomingProductId = searchParams.get("productId");
+
+    useEffect(() => {
+        // Nếu không có productId trong URL, reset form
+        if (!incomingProductId) {
+            setProductId("");  // reset productId
+            setName("");       // reset name
+            setDescription("");  // reset description
+            setPrice("");      // reset price
+            setStock("");      // reset stock
+            setCategoryId("");  // reset categoryId
+            setBrandId("");     // reset brandId
+        }
+    }, [incomingProductId]);
+
+    const handleReset = () => {
+        setProductId("");  // reset productId
+        setName("");       // reset name
+        setDescription("");  // reset description
+        setPrice("");      // reset price
+        setStock("");      // reset stock
+        setCategoryId("");  // reset categoryId
+        setBrandId("");     // reset brandId
+
+        navigate("/admin-add-product");
+    };
+    // Khi mount lần đầu, nếu có id thì set nó
+    useEffect(() => {
+        if (incomingProductId) {
+            setProductId(incomingProductId);
+        }
+    }, [incomingProductId]);
+
     const formatVND = (money) => {
         return new Intl.NumberFormat('vi-VN').format(money) + " ₫";
     };
@@ -49,7 +84,6 @@ const AddProduct = () => {
         const formattedValue = formatVND(value);
         setPrice(formattedValue);
     };
-
 
     useEffect(() => {
         axios.get("https://localhost:8443/api/v1/products/getCategory", { withCredentials: true })
@@ -69,6 +103,55 @@ const AddProduct = () => {
             .catch(err => console.error("Lỗi khi lấy color:", err));
 
         }, []);
+
+
+    useEffect(() => {
+        if (productId && categories.length > 0 && brands.length > 0) {
+            axios.get(`https://localhost:8443/api/v1/products/getProduct/${productId}`, {
+                withCredentials: true
+            })
+
+                .then((res) => {
+                    const product = res.data;
+                    setName(product.nameProduct);
+                    setDescription(product.description);
+                    setPrice(product.price);
+                    setSelectedFile(product.image);
+                    setStock(product.stock);
+
+                    const matchedCategory = categories.find(cat => cat.name === product.categoryName);
+                    if (matchedCategory) {
+                        setCategoryId(matchedCategory.category_id);
+                    }
+
+                    const matchedBrand = brands.find(brand => brand.name === product.brandName);
+                    if (matchedBrand) {
+                        setBrandId(matchedBrand.brand_id);
+                    }
+                    axios.get(`https://localhost:8443/api/v1/products/getProductSizeColor?productId=${productId}`, { withCredentials: true })
+                        .then(res => {
+                            const { data } = res.data;
+                            setProductColors(data);
+                            setProductName(res.data.nameProduct);
+                            setProductPrice(res.data.price);
+                            setProductFound(true);
+                        })
+                        .catch(err => {
+                            if (err.response?.status === 404) {
+                                setProductFound(false); // không tìm thấy sản phẩm
+                            } else {
+                                console.error("Lỗi khi gọi API", err);
+                            }
+                        });
+
+                })
+                .catch((err) => {
+                    console.error("Lỗi khi lấy thông tin sản phẩm:", err);
+                });
+        }
+    }, [productId, categories, brands]);
+
+
     useEffect(() => {
         if (!productId) return; // Kiểm tra nếu không có productId thì không gọi API
 
@@ -144,12 +227,9 @@ const AddProduct = () => {
             const data = response.data;
             const newProductId = data.productId;
             setProductId(newProductId);  // Lưu productId vừa thêm
-
-            // ✅ Reset form
-            // ✅ Reset form và gán lại đúng kiểu dữ liệu
             setName(data.data.nameProduct);
             setDescription(data.data.description);
-            setPrice(formatVND(data.data.price)); // hoặc String(data.data.price)
+            setPrice(formatVND(data.data.price));
             setStock(String(data.data.stock));
             setCategoryId(productData.category_id);
             setBrandId(productData.brand_id);
@@ -162,6 +242,87 @@ const AddProduct = () => {
         } catch (error) {
             console.error("Lỗi khi thêm sản phẩm:", error);
             alert("❌ Đã xảy ra lỗi khi thêm sản phẩm.");
+        }
+    };
+
+    const handleUpdateProduct = async (e) => {
+        e.preventDefault();
+
+        const token = document.cookie
+            .split('; ')
+            .find(row => row.startsWith('token='))
+            ?.split('=')[1];
+
+        if (!token) {
+            Swal.fire({
+                icon: 'warning',
+                title: '⚠️ Bạn chưa đăng nhập.',
+                confirmButtonText: 'OK',
+            }).then(() => {
+                navigate('/login');
+            });
+            return;
+        }
+
+        try {
+            const rawPrice = String(price).replace(/\D/g, "");
+
+            const productData = {
+                name_product: name,
+                description: description,
+                stock: parseInt(stock),
+                price: parseInt(rawPrice),
+                category_id: categoryId,
+                brand_id: brandId,
+            };
+
+            const formData = new FormData();
+            formData.append("product", JSON.stringify(productData));
+
+            const response = await axios.put(`https://localhost:8443/api/v1/products/update/${productId}`, formData, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                },
+                withCredentials: true
+            });
+
+            const data = response.data;
+
+            setName(data.data.nameProduct);
+            setDescription(data.data.description);
+            setPrice(formatVND(data.data.price));
+            setStock(String(data.data.stock));
+            setCategoryId(categoryId);
+            setBrandId(brandId);
+
+            Swal.fire({
+                icon: 'success',
+                title: '✅ ' + data.message,
+                text: `Mã sản phẩm: ${data.productId} - ${data.data.nameProduct}`,
+            });
+// Gọi lại API lấy thông tin sản phẩm mới sau khi thêm kích thước thành công
+            axios.get(`https://localhost:8443/api/v1/products/getProductSizeColor?productId=${productId}`, { withCredentials: true })
+                .then(res => {
+                    const { data } = res.data;
+                    setProductColors(data);
+                    setProductName(res.data.nameProduct);
+                    setProductPrice(res.data.price);
+                    setProductFound(true);
+                })
+                .catch(err => {
+                    if (err.response?.status === 404) {
+                        setProductFound(false); // không tìm thấy sản phẩm
+                    } else {
+                        console.error("Lỗi khi gọi API", err);
+                    }
+                });
+        } catch (error) {
+            console.error("Lỗi khi cập nhật sản phẩm:", error);
+            Swal.fire({
+                icon: 'error',
+                title: '❌ Lỗi khi cập nhật sản phẩm',
+                text: error.response?.data?.error || error.message,
+            });
         }
     };
 
@@ -310,6 +471,67 @@ const AddProduct = () => {
         }
     };
 
+    const handleDelete = (id) => {
+        const token = document.cookie
+            .split('; ')
+            .find(row => row.startsWith('token='))
+            ?.split('=')[1];
+
+        if (!token) {
+            Swal.fire({
+                icon: 'warning',
+                title: '⚠️ Bạn chưa đăng nhập.',
+                confirmButtonText: 'OK',
+            }).then(() => {
+                navigate('/login');
+            });
+            return;
+        }
+
+        Swal.fire({
+            title: 'Bạn có chắc muốn xóa?',
+            text: "Thao tác này không thể hoàn tác!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Xóa',
+            cancelButtonText: 'Hủy'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                axios.delete(`https://localhost:8443/api/v1/products/delete_product_size_color`, {
+                    params: {
+                        productSizeColorId: id
+                    },
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    withCredentials: true
+                })
+                    .then((res) => {
+                        // Cập nhật lại danh sách sau khi xóa
+                        setProductColors(prev => prev.filter(item => item.id !== id));
+
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Đã xóa thành công!',
+                            showConfirmButton: false,
+                            timer: 1500
+                        });
+                    })
+                    .catch((err) => {
+                        console.error("Lỗi khi xóa:", err);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Lỗi!',
+                            text: 'Không thể xóa mục này. Vui lòng thử lại sau.',
+                        });
+                    });
+            }
+        });
+    };
+
 
     return (
         <div className={"add_product"}>
@@ -323,12 +545,18 @@ const AddProduct = () => {
                             )}
 
                             {productId && (
-                                <h3 className="card-header"><b>Sản phẩm có ID: {productId}</b></h3>
+                                <div style={{display: "flex", flexDirection: "row", justifyContent: "space-between"}}>
+                                    <h3 className="card-header"><b>Sản phẩm có ID: {productId}</b></h3>
+                                    <button style={{marginTop: "20px"}} onClick={handleReset}
+                                            className="btn btn-primary">
+                                        Thêm sản phẩm
+                                    </button>
+                                </div>
                             )}
                             <form onSubmit={handleAddProduct}>
                                 {/*<form onSubmit={productId ? handleUpdateProduct : handleAddProduct}>*/}
 
-                                    <div className="card-body">
+                                <div className="card-body">
 
                                         <div className="mb-4">
                                             <label
@@ -427,10 +655,16 @@ const AddProduct = () => {
                                         )}
 
                                         {productId && (
-                                            <button style={{marginTop: "20px"}} type="" className="btn btn-warning">
+                                            <button
+                                                style={{ marginTop: "20px" }}
+                                                type="submit"
+                                                className="btn btn-warning"
+                                                onClick={handleUpdateProduct}
+                                            >
                                                 Chỉnh sửa thông tin
                                             </button>
                                         )}
+
 
 
                                     </div>
@@ -438,9 +672,9 @@ const AddProduct = () => {
                                 <div className={"showProductColorSize"}>
                                     {productFound && productColors.length > 0 && (
                                         <div className="mb-4">
-                                            <table>
+                                            <table className={"add_product_table"}>
                                                 <thead>
-                                                <tr>
+                                                <tr  className={"add_product_tr"}>
                                                     <th>Hình ảnh</th>
                                                     <th>Tên sản phẩm</th>
                                                     <th>Giá tiền</th>
@@ -452,7 +686,7 @@ const AddProduct = () => {
                                                 </thead>
                                                 <tbody>
                                                 {productColors.map((item, index) => (
-                                                    <tr key={item.id}>
+                                                    <tr key={item.id}  className={"add_product_tr"}>
                                                         <td>
                                                             <img src={item.image} alt="product" width="60"/>
                                                         </td>
@@ -475,10 +709,11 @@ const AddProduct = () => {
                                                                        href="javascript:void(0);">
                                                                         <i className="icon-base bx bx-edit-alt me-1"></i> Edit
                                                                     </a>
-                                                                    <a className="dropdown-item"
-                                                                       href="javascript:void(0);">
-                                                                        <i className="icon-base bx bx-trash me-1"></i> Delete
+                                                                    <a className="dropdown-item" href="#"
+                                                                       onClick={() => handleDelete(item.id)}>
+                                                                        <i className="icon-base bx bx-trash me-1"></i> Xóa
                                                                     </a>
+
                                                                 </div>
                                                             </div>
                                                         </td>
