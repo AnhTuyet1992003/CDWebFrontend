@@ -2,13 +2,14 @@ import React, { useEffect, useState } from 'react';
 import {Link} from "react-router-dom";
 import './ChooseAddressCheckout.css'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import {faCartShopping, faLocationDot, faXmark} from '@fortawesome/free-solid-svg-icons';
+import {faCartShopping, faLocationDot, faPen, faPenToSquare, faTrash, faXmark} from '@fortawesome/free-solid-svg-icons';
 import axios from 'axios';
 import Swal from 'sweetalert2';
 
 const CheckoutChooseAddress = ({ onClose, onSelectAddress, toggleAddressForm }) => {
     const [addresses, setAddresses] = useState([]);
     const [selectedIndex, setSelectedIndex] = useState(null);
+    const [selectedEditAddress, setEditAddress] = useState(null);
 
     useEffect(() => {
         const fetchAddresses = async () => {
@@ -131,24 +132,44 @@ const CheckoutChooseAddress = ({ onClose, onSelectAddress, toggleAddressForm }) 
                             </div>
                             <div className="content_main">
                                 <div className="checkout_choose_address">
-                                    <FontAwesomeIcon style={{color: "red"}} icon={faLocationDot}/>
-                                    <div style={{paddingLeft: "10px", display: "flex", flexDirection: "column"}}>
-                                        <div className="name">
-                                            <p>
-                                                <b>Tên người nhận: </b> {address.receiverName}<br/>
-                                                <b>Số điện thoại:</b> {address.receiverPhone}
-                                            </p>
+                                    <div style={{display: "flex", flexDirection: "row"}}>
+                                        <FontAwesomeIcon style={{color: "red"}} icon={faLocationDot}/>
+                                        <div style={{paddingLeft: "10px", display: "flex", flexDirection: "column"}}>
+                                            <div className="name">
+                                                <p>
+                                                    <b>Tên người nhận: </b> {address.receiverName}<br/>
+                                                    <b>Số điện thoại:</b> {address.receiverPhone}
+                                                </p>
+                                            </div>
+                                            <div className="address">
+                                                <p>
+                                                    <b>Địa chỉ: </b><br/>
+                                                    {address.addressDetail}<br/>
+                                                    {address.ward}, {address.district}, {address.province}
+                                                </p>
+                                            </div>
                                         </div>
-                                        <div className="address">
-                                            <p>
-                                                <b>Địa chỉ: </b><br/>
-                                                {address.addressDetails}<br/>
-                                                {address.ward}, {address.district}, {address.province}
-                                            </p>
+                                    </div>
+
+                                    <FontAwesomeIcon style={{color: "black"}}
+                                                     className="fa-solid fa-location-dot"
+                                                     icon={faPenToSquare}></FontAwesomeIcon>
+
+                                    <div className={"edit_address_checkout"}>
+                                        <div className={"edit_address_btn"}>
+                                            <FontAwesomeIcon style={{color: "black"}}
+                                                             className="fa-solid fa-location-dot"
+                                                             icon={faPen}></FontAwesomeIcon> Chỉnh sửa
+                                        </div>
+                                        <div className={"delete_address_btn"}>
+                                            <FontAwesomeIcon style={{color: "black"}}
+                                                             className="fa-solid fa-location-dot"
+                                                             icon={faTrash}></FontAwesomeIcon> Xóa
                                         </div>
                                     </div>
                                 </div>
                             </div>
+
                         </div>
                     ))}
                 </div>

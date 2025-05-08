@@ -28,9 +28,12 @@ import Header from './component/user/header';
 
 import AuthCallback from './pages/auth/google/callback';
 import OAuth2RedirectHandler from "./pages/auth/google/OAuth2RedirectHandler"
-import AddToCart from "./pages/user/checkout-choose-address"
+import AddToCart from "./pages/user/OrderDetail"
+import OrderDetail from "./pages/user/OrderDetail"
 import { ToastContainer } from 'react-toastify';
 import VNPayReturn from './pages/user/vnpay-return';
+
+import Btntest from "./pages/admin/testButoon";
 function App() {
   return (
       <Router>
@@ -50,11 +53,15 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
 
-            <Route path="/AddToCart" element={<AddToCart />} />
+            {/*<Route path="/AddToCart" element={<AddToCart />} />*/}
+            <Route path="/AddToCart" element={<LayoutUser><OrderDetail /></LayoutUser>} />
+
 
             <Route path="/chatbox" element={<Chatbox />} />
 
             <Route path="/header" element={<Header/>}/>
+
+            <Route path="/btntest" element={<Btntest />}/>
 
             <Route path="*" element={<h1>404 Not Found</h1>} />
             <Route path="/auth/google/callback" element={<AuthCallback />} />
@@ -65,7 +72,7 @@ function App() {
 
             <Route path="/admin" element={<LayoutAdmin><Admin /></LayoutAdmin>} />
             <Route path="/admin-list-user" element={<LayoutAdmin><UserList /></LayoutAdmin>} />
-            <Route path="/admin-add-product" element={<AddProduct />} />
+            <Route path="/admin-add-product" element={<LayoutAdmin><AddProduct /></LayoutAdmin>} />
             <Route path="/user-password-edit" element={<LayoutUser><UserPasswordEdit/></LayoutUser>}/>
             <Route path="/user-profile-edit" element={<LayoutUser><UserProfileEdit/></LayoutUser>}/>
             <Route path="/admin-index" element={<LayoutAdmin><AdminIndex /></LayoutAdmin>} />
