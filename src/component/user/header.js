@@ -141,8 +141,9 @@ const Header = () => {
                                     <li>
                                         <a href="#">Pages</a>
                                         <ul className="dropdown">
-                                            <li><Link to="/login">Đăng nhập</Link></li>
-                                            <li> <Link to="/user-password-edit">ddoi pass</Link></li>
+                                            <li><Link to="/import-order">Nhap hang</Link></li>
+                                            <li><Link to="/list-import-order">List Nhap hang</Link></li>
+                                            <li><Link to="/user-password-edit">ddoi pass</Link></li>
                                             <li><Link to="/product-detail">Chi tiết sản phẩm</Link></li>
                                             <li><Link to="/checkout">Thanh toán</Link></li>
                                             <li><Link to="/blog-detail">Blog Detail</Link></li>
@@ -260,22 +261,6 @@ const Header = () => {
                                                     </ul>
                                                 </li>
                                             </ul>
-                                            {/*<span style={{marginRight: '10px'}}>👋 Xin chào, {username}</span>*/}
-                                            {/*<button*/}
-                                            {/*    onClick={() => {*/}
-                                            {/*        console.log("Button clicked!"); // Add this log to ensure the button is clicked*/}
-                                            {/*        handleLogout();*/}
-                                            {/*    }}*/}
-                                            {/*    style={{*/}
-                                            {/*        border: 'none',*/}
-                                            {/*        background: 'none',*/}
-                                            {/*        color: 'blue',*/}
-                                            {/*        cursor: 'pointer'*/}
-                                            {/*    }}*/}
-                                            {/*>*/}
-                                            {/*    Đăng xuất*/}
-                                            {/*</button>*/}
-                                            {/*<Link to="/user-profile-edit">Sua thong tin</Link>*/}
                                         </>
                                     ) : (
                                         <>

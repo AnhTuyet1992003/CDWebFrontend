@@ -180,13 +180,13 @@ const UserProfileEdit = () => {
         })
             .then(res => {
                 const userData = res.data;
-                const formattedBirthday = userData.birthday + "T00:00:00"; // ghép thêm giờ phút giây
+                const formattedBirthday = userData.birthday; // ghép thêm giờ phút giây
                 setUser({
                     fullname: userData.fullname || '',
                     //username: userData.username || '',
                     phone: userData.phone || '',
                     address: userData.address || '',
-                    birthday: userData.formattedBirthday || '',
+                    birthday: formattedBirthday || '',
                     avatar: userData.avatar || 'https://res.cloudinary.com/dorz7ucva/image/upload/v1745202292/image_2820bc603a47efcf17a0806b81ca92bff7ea2905.png'
                 });
                 setUserId(userData.id);

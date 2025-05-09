@@ -3,9 +3,6 @@ import { useNavigate,Link  } from 'react-router-dom';
 const Header = () => {
     const navigate = useNavigate();
 
-
-
-
     return (
         <>
             {/* Menu */}
