@@ -40,6 +40,8 @@ import Btntest from "./pages/admin/testButoon";
 import ForgotPassword from "./pages/user/forgot-password";
 import ValidateOtp from "./pages/user/validate-otp";
 import NewPassword from "./pages/user/new-password"
+import ImportOrder from "./pages/admin/import-order";
+import ListImportOrder from "./pages/admin/list-import-order";
 
 function App() {
   return (
@@ -88,6 +90,8 @@ function App() {
             <Route path="/user-profile-edit" element={<LayoutUser><UserProfileEdit/></LayoutUser>}/>
             <Route path="/admin-index" element={<LayoutAdmin><AdminIndex /></LayoutAdmin>} />
             <Route path="/admin-index" element={<LayoutAdmin><AdminIndex /></LayoutAdmin>} />
+            <Route path="/import-order" element={<LayoutAdmin><ImportOrder /></LayoutAdmin>} />
+            <Route path="/list-import-order" element={<LayoutAdmin><ListImportOrder /></LayoutAdmin>} />
 
             {/*<Route path="/admin-list-user" element={<AdminListUser/>} />*/}
           {/*/!* Admin Routes *!/*/}
