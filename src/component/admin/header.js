@@ -235,10 +235,23 @@ const Header = () => {
                             <div className="text-truncate" data-i18n="Chat">Danh sách User</div>
                         </Link>
                     </li>
+
                     <li className="menu-item">
-                        <Link to="/admin-add-product" style={{cursor: 'pointer'}} className="menu-link"><i
+                        <Link to="/btntest" style={{cursor: 'pointer'}} className="menu-link"><i
                             className="menu-icon tf-icons bx bx-chat"></i>
-                            <div className="text-truncate" data-i18n="Chat">Form add product</div>
+                            <div className="text-truncate" data-i18n="Chat">Button á</div>
+                        </Link>
+                    </li>
+                    <li className="menu-item">
+                        <Link to="/admin-add-product" style={{cursor: 'pointer'}} className="menu-link" ><i
+                            className="menu-icon tf-icons bx bx-chat"></i>
+                            <div className="text-truncate" data-i18n="Chat">Thêm sản phẩm</div>
+                        </Link>
+                    </li>
+                    <li className="menu-item">
+                        <Link to="/admin-list-product" style={{cursor: 'pointer'}} className="menu-link"><i
+                            className="menu-icon tf-icons bx bx-chat"></i>
+                            <div className="text-truncate" data-i18n="Chat">Danh sách sản phẩm</div>
                         </Link>
                     </li>
                     <li className="menu-item">

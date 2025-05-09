@@ -116,3 +116,31 @@
         color: white;
     }
 }
+.edit_address_checkout{
+    position: absolute;
+    background: #FFFFFF;
+    z-index: 1000;
+    width: 120px;
+    height: 80px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18);
+    border-radius: 10px;
+    right: 10px;
+    top: 30px;
+    padding: 10px;
+    font-size: 13px;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    flex-direction: column;
+    /*display: none;*/
+}
+.edit_address_checkout .edit_address_btn{
+    padding-bottom: 10px;
+}
+.edit_address_checkout .delete_address_btn,.edit_address_checkout .edit_address_btn{
+    width: 100%;
+    padding: 5px;
+}
+.edit_address_checkout .edit_address_btn:hover,.edit_address_checkout .delete_address_btn:hover{
+    background: #cacaca;
+}

@@ -4,7 +4,7 @@ import axios from 'axios';
 import './AddToCart.css'
 import CheckoutChooseAddress from './checkout-choose-address';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import {faLocationDot, faTicket} from '@fortawesome/free-solid-svg-icons';
+import {faLocationDot, faTicket, faPenToSquare, faPen, faTrash} from '@fortawesome/free-solid-svg-icons';
 import Swal from 'sweetalert2';
 const Checkout = () => {
     const [showAddressForm, setShowAddressForm] = useState(false);
@@ -163,24 +163,28 @@ const Checkout = () => {
                 return;
             }
 
-            const response = await fetch("https://localhost:8443/api/v1/oders/add-shipping-address", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/x-www-form-urlencoded",
-                    Authorization: `Bearer ${token}`
-                },
-                credentials: "include",
-                body: new URLSearchParams({
-                    receiver_name: formData.receiverName,
-                    receiver_phone: formData.receiverPhone,
-                    province: formData.province,
-                    district: formData.district,
-                    ward: formData.ward,
-                    address_detail: formData.addressDetail
-                }).toString()
+            const urlParams = new URLSearchParams({
+                receiver_name: formData.receiverName,
+                receiver_phone: formData.receiverPhone,
+                province: formData.province,
+                district: formData.district,
+                ward: formData.ward,
+                address_detail: formData.addressDetail
             });
 
-            const result = await response.json();
+            const response = await axios.post(
+                "https://localhost:8443/api/v1/oders/add-shipping-address", // ✅ sửa "oders" thành "orders"
+                urlParams,
+                {
+                    headers: {
+                        "Content-Type": "application/x-www-form-urlencoded",
+                        Authorization: `Bearer ${token}`
+                    },
+                    withCredentials: true
+                }
+            );
+
+            const result = response.data;
             if (result.status === "success") {
                 setSelectedAddress(result.data);  // Cập nhật địa chỉ vừa thêm
                 setShowAddressForm(false);        // Ẩn form
@@ -296,18 +300,19 @@ const Checkout = () => {
             formData.append("note", note || "");
             formData.append("paymentId", paymentId);
 
-            const orderResponse = await fetch("https://localhost:8443/api/v1/oders/add-order", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/x-www-form-urlencoded",
-                    Authorization: `Bearer ${token}`,
+            const orderResponse = await axios.post(
+                "https://localhost:8443/api/v1/oders/add-order",
+                formData,
+                {
+                    headers: {
+                        "Content-Type": "application/x-www-form-urlencoded",
+                        Authorization: `Bearer ${token}`
+                    },
+                    withCredentials: true
+                }
+            );
 
-                },
-                credentials: "include",
-                body: formData.toString()
-            });
-
-            const orderData = await orderResponse.json();
+            const orderData = orderResponse.data;
 
             if (orderData.status !== "success") {
                 Swal.fire({
@@ -352,50 +357,79 @@ const Checkout = () => {
                 console.log("VNPay params:", vnpayParams.toString());
                 console.log("Token before calling /create-payment:", token);
 
+                // try {
+                //     const vnpayResponse = await fetch("https://localhost:8443/api/v1/payments/create-payment", {
+                //         method: "POST",
+                //         headers: {
+                //             "Content-Type": "application/x-www-form-urlencoded",
+                //             Authorization: `Bearer ${token}`,
+                //             Accept: "application/json"
+                //         },
+                //         credentials: "include",
+                //         body: vnpayParams.toString()
+                //     });
+
                 try {
-                    const vnpayResponse = await fetch("https://localhost:8443/api/v1/payments/create-payment", {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/x-www-form-urlencoded",
-                            Authorization: `Bearer ${token}`,
-                            Accept: "application/json"
-                        },
-                        credentials: "include",
-                        body: vnpayParams.toString()
-                    });
+                    const vnpayResponse = await axios.post(
+                        "https://localhost:8443/api/v1/payments/create-payment",
+                        vnpayParams,
+                        {
+                            headers: {
+                                "Content-Type": "application/x-www-form-urlencoded",
+                                Authorization: `Bearer ${token}`,
+                                Accept: "application/json"
+                            },
+                            withCredentials: true
+                        }
+                    );
 
                     console.log("vnpayResponse:  "+vnpayResponse)
 
-                    if (!vnpayResponse.ok) {
-                        const errorText = await vnpayResponse.text();
-                        console.error("VNPay API error:", {
-                            status: vnpayResponse.status,
-                            statusText: vnpayResponse.statusText,
-                            body: errorText
-                        });
+                    // if (!vnpayResponse.ok) {
+                    //     const errorText = await vnpayResponse.text();
+                    //     console.error("VNPay API error:", {
+                    //         status: vnpayResponse.status,
+                    //         statusText: vnpayResponse.statusText,
+                    //         body: errorText
+                    //     });
+                    //     Swal.fire({
+                    //         icon: "error",
+                    //         title: "❌ Lỗi khi gọi API thanh toán!",
+                    //         text: `Status: ${vnpayResponse.status}, Error: ${errorText}`,
+                    //     });
+                    //     setIsLoading(false);
+                    //     return;
+                    // }
+
+                    // Kiểm tra lỗi nếu có
+                    if (vnpayResponse.status !== 200) {
+                        console.error("VNPay API error:", vnpayResponse);
                         Swal.fire({
                             icon: "error",
                             title: "❌ Lỗi khi gọi API thanh toán!",
-                            text: `Status: ${vnpayResponse.status}, Error: ${errorText}`,
+                            text: `Status: ${vnpayResponse.status}, Error: ${vnpayResponse.statusText}`,
                         });
                         setIsLoading(false);
                         return;
                     }
 
-                    let vnpayData;
-                    try {
-                        vnpayData = await vnpayResponse.json();
-                        console.log("VNPay response data:", JSON.stringify(vnpayData, null, 2));
-                    } catch (error) {
-                        console.error("JSON parse error:", error);
-                        Swal.fire({
-                            icon: "error",
-                            title: "❌ Lỗi khi xử lý response!",
-                            text: "Dữ liệu trả về không đúng định dạng. Vui lòng thử lại.",
-                        });
-                        setIsLoading(false);
-                        return;
-                    }
+
+                    const vnpayData = vnpayResponse.data;
+                    // let vnpayData;
+                    // try {
+                    //     // const vnpayData = vnpayResponse.data;
+                    //     // vnpayData = await vnpayResponse.json();
+                    //     console.log("VNPay response data:", JSON.stringify(vnpayData, null, 2));
+                    // } catch (error) {
+                    //     console.error("JSON parse error:", error);
+                    //     Swal.fire({
+                    //         icon: "error",
+                    //         title: "❌ Lỗi khi xử lý response!",
+                    //         text: "Dữ liệu trả về không đúng định dạng. Vui lòng thử lại.",
+                    //     });
+                    //     setIsLoading(false);
+                    //     return;
+                    // }
 
                     if (vnpayData.status == "00") { // Sử dụng so sánh lỏng để xử lý chuỗi/số
                         console.log("Redirecting to VNPay URL:", vnpayData.data);
@@ -466,7 +500,10 @@ const Checkout = () => {
                                         {selectedAddress ? (
                                             <div className={"checkout_choose_address"}
                                                  onClick={() => setShowAddressModal(true)}>
-                                                <div style={{display: "flex", flexDirection: "row"}}>
+                                                <div style={{display: "flex", flexDirection: "row", justifyContent: "space-between", width: "100%"}}>
+                                                    <div style={{display: "flex", flexDirection: "row"}}>
+
+
                                                     <FontAwesomeIcon style={{color: "red"}}
                                                                      className="fa-solid fa-location-dot"
                                                                      icon={faLocationDot}></FontAwesomeIcon>
@@ -487,12 +524,15 @@ const Checkout = () => {
                                                         <div className="address">
                                                             <p>
                                                                 <b>Địa chỉ: </b><br/>
-                                                                {selectedAddress.addressDetails}<br/>
+                                                                {selectedAddress.addressDetail}<br/>
                                                                 {selectedAddress.ward}, {selectedAddress.district}, {selectedAddress.province}
                                                             </p>
                                                         </div>
-
                                                     </div>
+                                                    </div>
+                                                    <FontAwesomeIcon style={{color: "black"}}
+                                                                     className="fa-solid fa-location-dot"
+                                                                     icon={faPenToSquare}></FontAwesomeIcon>
                                                 </div>
                                             </div>
                                         ) : (
