@@ -6,18 +6,44 @@ const ListProduct = () => {
     const [products, setProducts] = useState([]);
     const navigate = useNavigate();
 
+    const [currentPage, setCurrentPage] = useState(0);
+    const [totalPages, setTotalPages] = useState(1);
+    const [pageSize, setPageSize] = useState(9);
+
     const formatVND = (money) => {
         return new Intl.NumberFormat('vi-VN').format(money) + " ₫";
     };
+    // useEffect(() => {
+    //     axios.get("https://localhost:8443/api/v1/products/list", { withCredentials: true })
+    //         .then((response) => {
+    //             setProducts(response.data);
+    //         })
+    //         .catch((error) => {
+    //             console.error("Lỗi khi lấy sản phẩm:", error);
+    //         });
+    // }, []);
+
+
     useEffect(() => {
-        axios.get("https://localhost:8443/api/v1/products/list", { withCredentials: true })
-            .then((response) => {
-                setProducts(response.data);
-            })
-            .catch((error) => {
-                console.error("Lỗi khi lấy sản phẩm:", error);
-            });
-    }, []);
+        fetchProducts(currentPage, pageSize);
+    }, [currentPage, pageSize]);
+
+
+    const fetchProducts = async (page, size) => {
+        try {
+            const res = await axios.get(`https://localhost:8443/api/v1/products/list_page?page=${page}&size=${size}`);
+            setProducts(res.data.products);
+            setCurrentPage(res.data.currentPage);
+            setPageSize(res.data.pageSize)
+            setTotalPages(res.data.totalPages);
+        } catch (error) {
+            console.error('Lỗi khi tải sản phẩm:', error);
+        }
+    };
+    const handlePageSizeChange = (newSize) => {
+        setPageSize(Number(newSize));
+        setCurrentPage(0); // reset về trang đầu tiên
+    };
 
     const handleDeleteProduct = (productId) => {
         const token = document.cookie
@@ -85,9 +111,24 @@ const ListProduct = () => {
             <div className="container-xxl flex-grow-1 container-p-y">
 
                 <div className="card">
-                    <h5 className="card-header">Danh sách sản phẩm</h5>
+                    <div style={{display: "flex", justifyContent: "space-between"}}>
+                        <h5 className="card-header">Danh sách sản phẩm</h5>
+                        {/* Bộ chọn số sản phẩm/trang */}
+                        <div style={{display: "flex", alignItems: "center", justifyContent: "center"}}>
+                            <select
+                                value={pageSize}
+                                onChange={(e) => handlePageSizeChange(e.target.value)}
+                                className="form-select form-select-sm"
+                            >
+                                <option value="3">3 / trang</option>
+                                <option value="6">6 / trang</option>
+                                <option value="9">9 / trang</option>
+                                <option value="12">12 / trang</option>
+                            </select>
+                        </div>
+                    </div>
                     <div className="table-responsive text-nowrap">
-                        <table className="table">
+                    <table className="table">
                             <thead className="table-light">
                             <tr>
                                 <th></th>
@@ -120,7 +161,10 @@ const ListProduct = () => {
                                             alt="product"
                                         />
                                     </td>
-                                    <td><h6>{product.nameProduct}</h6></td>
+                                    <td style={{maxWidth: "150px", whiteSpace: "normal", wordWrap: "break-word"}}>
+                                        <p style={{margin: 0, fontSize: "12px"}}>{product.nameProduct}</p>
+                                    </td>
+
                                     <td>{product.stock}</td>
                                     <td>
                                         <p style={{color: "red", fontWeight: "bold"}}>
@@ -132,18 +176,13 @@ const ListProduct = () => {
                                             {formatVND(product.price)}
                                         </p>
                                     </td>
-                                    <td>
-                                        {product.sizeColorVariants.length > 0 ? (
-                                            product.sizeColorVariants.map((variant, idx) => (
-                                                <span key={idx} className="badge bg-label-primary me-1">
-                                                {variant.color}
-                                            </span>
-                                            ))
-                                        ) : (
-                                            <span className="text-muted">-</span>
-                                        )}
+                                    <td style={{maxWidth: "150px", whiteSpace: "normal", wordWrap: "break-word"}}>
+                                        {product.sizeColorVariants.length > 0
+                                            // ? (product.sizeColorVariants.map((variant, idx) => (
+                                            ? product.sizeColorVariants.map((variant) => variant.color).join(", ")
+                                            : "-"}
                                     </td>
-                                    <td>
+                                    <td style={{maxWidth: "150px", whiteSpace: "normal", wordWrap: "break-word"}}>
                                         {product.sizeColorVariants.length > 0
                                             ? product.sizeColorVariants.map((variant) => variant.size).join(", ")
                                             : "-"}
@@ -175,7 +214,49 @@ const ListProduct = () => {
                             ))}
                             </tbody>
                         </table>
+
                     </div>
+                    <div style={{
+                        display: "flex",
+                        justifyContent: "flex-end",
+                        alignItems: "center",
+                        marginTop: "20px",
+                        paddingRight: "30px"
+                    }}>
+
+
+                        {/* Phân trang */}
+                        <nav aria-label="Page navigation">
+                            <ul className="pagination pagination-sm">
+                                {/* Nút Prev */}
+                                <li className={`page-item ${currentPage === 0 ? "disabled" : ""}`}>
+                                    <button className="page-link" onClick={() => setCurrentPage(currentPage - 1)}
+                                            disabled={currentPage === 0}>
+                                        <i className="icon-base bx bx-chevrons-left icon-xs"></i>
+                                    </button>
+                                </li>
+
+                                {/* Các nút số trang */}
+                                {Array.from({length: totalPages}, (_, i) => (
+                                    <li key={i} className={`page-item ${i === currentPage ? "active" : ""}`}>
+                                        <button className="page-link" onClick={() => setCurrentPage(i)}>
+                                            {i + 1}
+                                        </button>
+                                    </li>
+                                ))}
+
+                                {/* Nút Next */}
+                                <li className={`page-item ${currentPage >= totalPages - 1 ? "disabled" : ""}`}>
+                                    <button className="page-link" onClick={() => setCurrentPage(currentPage + 1)}
+                                            disabled={currentPage >= totalPages - 1}>
+                                        <i className="icon-base bx bx-chevrons-right icon-xs"></i>
+                                    </button>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+
+
                 </div>
 
                 <hr className="my-12"/>

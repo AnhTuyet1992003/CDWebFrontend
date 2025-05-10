@@ -8,17 +8,47 @@ const Home = () => {
     const [products, setProducts] = useState([]);
     const [showAddToCart, setShowAddToCart] = useState(false);
     const [selectedProductId, setSelectedProductId] = useState(null);
+
+    const [currentPage, setCurrentPage] = useState(0);
+    const [totalPages, setTotalPages] = useState(1);
+    const [pageSize, setPageSize] = useState(9);
     useEffect(() => {
-        axios.get("https://localhost:8443/api/v1/products/list", {
-            withCredentials: true
-        })
-            .then(reponse => {
-                setProducts(reponse.data);
-            })
-            .catch(error => {
-                console.error("Lỗi khi lấy sản phẩm:", error);
-            });
-    }, []);
+        fetchProducts(currentPage, pageSize);
+    }, [currentPage, pageSize]);
+
+
+    const fetchProducts = async (page, size) => {
+        try {
+            const res = await axios.get(`https://localhost:8443/api/v1/products/list_page?page=${page}&size=${size}`);
+            setProducts(res.data.products);
+            setCurrentPage(res.data.currentPage);
+            setPageSize(res.data.pageSize)
+            setTotalPages(res.data.totalPages);
+        } catch (error) {
+            console.error('Lỗi khi tải sản phẩm:', error);
+        }
+    };
+    const handlePageSizeChange = (newSize) => {
+        setPageSize(Number(newSize));
+        setCurrentPage(0); // reset về trang đầu tiên
+    };
+
+
+    // useEffect(() => {
+    //     axios.get("https://localhost:8443/api/v1/products/list", {
+    //         withCredentials: true
+    //     })
+    //         .then(reponse => {
+    //             setProducts(reponse.data);
+    //         })
+    //         .catch(error => {
+    //             console.error("Lỗi khi lấy sản phẩm:", error);
+    //         });
+    // }, []);
+
+    const handlePageClick = (page) => {
+        setCurrentPage(page);
+    };
 
     const handleOpenAddToCart = (producId) => {
       setSelectedProductId(producId);
@@ -265,6 +295,62 @@ const Home = () => {
                             </div>
                         </div>
                         <div className="col-lg-9 col-md-9">
+                            <div className="col-lg-12"
+                                 style={{marginBottom:"30px", position: "relative", height: "40px"}}>
+                                {/* Select nằm sát trái */}
+                                <div style={{position: "absolute", left: 0, top: "50%", transform: "translateY(-50%)"}}>
+                                    <label style={{marginRight: "8px", fontWeight: "500"}}></label>
+                                    <select
+                                        defaultValue="9"
+                                        style={{
+                                        padding: "6px 12px",
+                                        borderRadius: "5px",
+                                        border: "1px solid #ccc",
+                                        fontSize: "14px",
+                                        backgroundColor: "#fff",
+                                        cursor: "pointer"
+                                    }}
+                                            onChange={(e) => handlePageSizeChange(e.target.value)}
+                                    >
+                                        <option value="3">3 / trang</option>
+                                        <option value="6">6 / trang</option>
+                                        <option defaultChecked={true}  value="9">9 / trang</option>
+                                        <option value="12">12 / trang</option>
+                                    </select>
+                                </div>
+
+
+                                {/* Phân trang nằm chính giữa */}
+                                <div style={{
+                                    position: "absolute",
+                                    left: "50%",
+                                    top: "50%",
+                                    transform: "translate(-50%, -50%)"
+                                }}>
+                                    <div className="pagination__option">
+                                        {[...Array(totalPages)].map((_, index) => (
+                                            <a key={index} href="#" onClick={(e) => {
+                                                e.preventDefault();
+                                                handlePageClick(index);
+                                            }}
+                                               className={currentPage === index ? "active" : ""}
+                                            >
+                                                {index + 1}
+                                            </a>
+                                        ))}
+                                        {currentPage < totalPages - 1 && (
+                                            <a href="#" onClick={(e) => {
+                                                e.preventDefault();
+                                                handlePageClick(currentPage + 1);
+                                            }}>
+                                                <i className="fa fa-angle-right"></i>
+                                            </a>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+
+
                             <div className="row">
                                 {/** nhãn new **/}
                                 {/*<div className="col-lg-4 col-md-6">*/}
@@ -293,38 +379,38 @@ const Home = () => {
                                 {/*    </div>*/}
                                 {/*</div>*/}
                                 {products.map((product) => (
-                                <div className="col-lg-4 col-md-6" key={product.id}>
-                                    <div className="product__item">
-                                        <div className="product__item__pic set-bg"
-                                             style={{ backgroundImage: `url('${product.image}')` }}>
-                                            <ul className="product__hover">
-                                                <li><a href={product.image} className="image-popup"><span
-                                                    className="arrow_expand"></span></a></li>
-                                                <li><a href="#"><span className="icon_heart_alt"></span></a></li>
-                                                <li><a href="#" onClick={(e) => {
-                                                    e.preventDefault();
-                                                    handleOpenAddToCart(product.id);
-                                                }}>
-                                                    <span className="icon_bag_alt"></span></a></li>
-                                            </ul>
-                                        </div>
-                                        <div className="product__item__text">
-                                            <h6><a href="#">{product.nameProduct}</a></h6>
-                                            <div className="rating">
-                                                <i className="fa fa-star"></i>
-                                                <i className="fa fa-star"></i>
-                                                <i className="fa fa-star"></i>
-                                                <i className="fa fa-star"></i>
-                                                <i className="fa fa-star"></i>
+                                    <div className="col-lg-4 col-md-6" key={product.id}>
+                                        <div className="product__item">
+                                            <div className="product__item__pic set-bg"
+                                                 style={{backgroundImage: `url('${product.image}')`}}>
+                                                <ul className="product__hover">
+                                                    <li><a href={product.image} className="image-popup"><span
+                                                        className="arrow_expand"></span></a></li>
+                                                    <li><a href="#"><span className="icon_heart_alt"></span></a></li>
+                                                    <li><a href="#" onClick={(e) => {
+                                                        e.preventDefault();
+                                                        handleOpenAddToCart(product.id);
+                                                    }}>
+                                                        <span className="icon_bag_alt"></span></a></li>
+                                                </ul>
                                             </div>
-                                            <div className="product__price">{product.price.toLocaleString()}₫</div>
+                                            <div className="product__item__text">
+                                                <h6><a href="#">{product.nameProduct}</a></h6>
+                                                <div className="rating">
+                                                    <i className="fa fa-star"></i>
+                                                    <i className="fa fa-star"></i>
+                                                    <i className="fa fa-star"></i>
+                                                    <i className="fa fa-star"></i>
+                                                    <i className="fa fa-star"></i>
+                                                </div>
+                                                <div className="product__price">{product.price.toLocaleString()}₫</div>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
                                 ))}
 
                                 {showAddToCart && (
-                                    <AddToCart productId={selectedProductId} onClose={handleCloseAddToCart} />
+                                    <AddToCart productId={selectedProductId} onClose={handleCloseAddToCart}/>
                                 )}
 
                                 {/** nhãn sale **/}
@@ -382,10 +468,24 @@ const Home = () => {
                                 {/*</div>*/}
                                 <div className="col-lg-12 text-center">
                                     <div className="pagination__option">
-                                        <a href="#">1</a>
-                                        <a href="#">2</a>
-                                        <a href="#">3</a>
-                                        <a href="#"><i className="fa fa-angle-right"></i></a>
+                                        {[...Array(totalPages)].map((_, index) => (
+                                            <a key={index} href="#" onClick={(e) => {
+                                                e.preventDefault();
+                                                handlePageClick(index);
+                                            }}
+                                               className={currentPage === index ? "active" : ""}
+                                            >
+                                                {index + 1}
+                                            </a>
+                                        ))}
+                                        {currentPage < totalPages - 1 && (
+                                            <a href="#" onClick={(e) => {
+                                                e.preventDefault();
+                                                handlePageClick(currentPage + 1);
+                                            }}>
+                                                <i className="fa fa-angle-right"></i>
+                                            </a>
+                                        )}
                                     </div>
                                 </div>
                             </div>
