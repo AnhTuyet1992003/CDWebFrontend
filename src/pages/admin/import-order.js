@@ -762,35 +762,128 @@ const ImportOrder = () => {
             console.error('Lỗi khi lấy product_size_colorId:', error);
             setMessage('Lỗi khi lấy ID tổ hợp sản phẩm.');
             return null;
+        }finally {
+
         }
     };
 
     // Xử lý thay đổi thông tin sản phẩm trong bảng
+    // const handleProductChange = async (index, field, value) => {
+    //     const newProducts = [...formData.products];
+    //     newProducts[index][field] = value;
+    //
+    //     // Nếu thay đổi color hoặc size, lấy lại product_size_colorId
+    //     if (field === 'color' || field === 'size') {
+    //         const product = newProducts[index];
+    //         const productId = product.productId;
+    //         const color = colors[productId]?.find((c) => c.name === product.color);
+    //         const size = sizes[productId]?.find((s) => s.name === product.size);
+    //
+    //         if (color?.id && size?.id) {
+    //             const productSizeColorId = await fetchProductSizeColorId(productId, color.id, size.id);
+    //             alert("product size color: "+ productSizeColorId)
+    //             if (productSizeColorId) {
+    //                 newProducts[index].product_size_colorId = productSizeColorId;
+    //             } else {
+    //                 newProducts[index].product_size_colorId = '';
+    //                 setErrors((prev) => ({
+    //                     ...prev,
+    //                     products: prev.products || [],
+    //                     [index]: { ...prev[index], product_size_colorId: 'Không tìm thấy tổ hợp sản phẩm.' },
+    //                 }));
+    //             }
+    //         } else {
+    //             newProducts[index].product_size_colorId = '';
+    //         }
+    //     }
+    //
+    //     setFormData({ ...formData, products: newProducts });
+    // };
     const handleProductChange = async (index, field, value) => {
+        console.log(`handleProductChange called: index=${index}, field=${field}, value=${value}`);
+
         const newProducts = [...formData.products];
         newProducts[index][field] = value;
 
-        // Nếu thay đổi color hoặc size, lấy lại product_size_colorId
         if (field === 'color' || field === 'size') {
             const product = newProducts[index];
             const productId = product.productId;
-            const color = colors[productId]?.find((c) => c.name === product.color);
-            const size = sizes[productId]?.find((s) => s.name === product.size);
 
-            if (color?.id && size?.id) {
-                const productSizeColorId = await fetchProductSizeColorId(productId, color.id, size.id);
+            console.log('Product:', product);
+            console.log('Colors for productId:', colors[productId]);
+            console.log('Sizes for productId:', sizes[productId]);
+
+            // Kiểm tra xem colors và sizes đã được tải chưa
+            if (!colors[productId] || !sizes[productId]) {
+                console.warn('Colors hoặc Sizes chưa được tải:', { colors: colors[productId], sizes: sizes[productId] });
+                setErrors((prev) => ({
+                    ...prev,
+                    products: {
+                        ...prev.products,
+                        [index]: {
+                            ...prev.products?.[index],
+                            [field]: `Vui lòng chờ tải danh sách ${field === 'color' ? 'màu sắc' : 'kích thước'}.`,
+                        },
+                    },
+                }));
+                setFormData({ ...formData, products: newProducts });
+                return;
+            }
+
+            // Tìm color và size dựa trên giá trị đã chọn
+            const color = colors[productId].find((c) => c.name === product.color);
+            const size = sizes[productId].find((s) => s.name === product.size);
+
+            console.log('Selected color:', product.color, 'Found color:', color);
+            console.log('Selected size:', product.size, 'Found size:', size);
+
+            if (!color?.id || !size?.size_id) {
+                console.warn('Color hoặc Size không hợp lệ:', { color, size });
+                newProducts[index].product_size_colorId = '';
+                setErrors((prev) => ({
+                    ...prev,
+                    products: {
+                        ...prev.products,
+                        [index]: {
+                            ...prev.products?.[index],
+                            product_size_colorId: `Vui lòng chọn ${!color?.id ? 'màu sắc' : 'kích thước'} hợp lệ.`,
+                        },
+                    },
+                }));
+            } else {
+                console.log('Chuẩn bị gọi fetchProductSizeColorId với:', {
+                    productId,
+                    colorId: color.id,
+                    sizeId: size.size_id,
+                });
+                const productSizeColorId = await fetchProductSizeColorId(productId, color.id, size.size_id);
                 if (productSizeColorId) {
+                    console.log('Cập nhật product_size_colorId:', productSizeColorId);
                     newProducts[index].product_size_colorId = productSizeColorId;
+                    setErrors((prev) => ({
+                        ...prev,
+                        products: {
+                            ...prev.products,
+                            [index]: {
+                                ...prev.products?.[index],
+                                product_size_colorId: undefined,
+                            },
+                        },
+                    }));
                 } else {
+                    console.warn('Không nhận được product_size_colorId:', productSizeColorId);
                     newProducts[index].product_size_colorId = '';
                     setErrors((prev) => ({
                         ...prev,
-                        products: prev.products || [],
-                        [index]: { ...prev[index], product_size_colorId: 'Không tìm thấy tổ hợp sản phẩm.' },
+                        products: {
+                            ...prev.products,
+                            [index]: {
+                                ...prev.products?.[index],
+                                product_size_colorId: 'Không tìm thấy tổ hợp sản phẩm.',
+                            },
+                        },
                     }));
                 }
-            } else {
-                newProducts[index].product_size_colorId = '';
             }
         }
 
@@ -843,6 +936,7 @@ const ImportOrder = () => {
         const productErrors = formData.products.map((product, index) => {
             const errors = {};
             if (!product.product_size_colorId || isNaN(product.product_size_colorId) || parseInt(product.product_size_colorId) <= 0) {
+                //product.product_size_colorId=2
                 errors.product_size_colorId = 'Vui lòng chọn màu và kích thước hợp lệ.';
             }
             if (!product.quantity || isNaN(product.quantity) || parseInt(product.quantity) <= 0) {
@@ -1059,7 +1153,7 @@ const ImportOrder = () => {
                                         <td>
                                             <input
                                                 type="number"
-                                                value={product.id}
+                                                value={product.productId}
                                                 onChange={(e) => handleProductChange(index, 'product_size_colorId', e.target.value)}
                                                 required
                                                 className="form-control"
@@ -1106,7 +1200,7 @@ const ImportOrder = () => {
                                             >
                                                 <option value="">Chọn kích thước</option>
                                                 {(sizes[product.productId] || []).map((size) => (
-                                                    <option key={size.id} value={size.name}>
+                                                    <option key={size.size_id} value={size.name}>
                                                         {size.name}
                                                     </option>
                                                 ))}
