@@ -277,6 +277,7 @@ const Cart = () => {
         "Xanh": "#0b77e1",
         "Xanh Demin": "#286fb5",
         "Be": "#F5F5DC",
+        "Hồng": "#ff0099"
     };
     const handleColorSelect = (color, itemId) => {
         setSelectedColor(prevColor => {

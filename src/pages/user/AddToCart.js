@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import './AddToCart.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCartShopping, faXmark } from '@fortawesome/free-solid-svg-icons';
@@ -14,6 +14,20 @@ const AddToCart = ({ productId, onClose }) => {
     const [selectedSize, setSelectedSize] = useState(null);
     const [quantity, setQuantity] = useState(1);
     const navigate = useNavigate();
+
+    const [selectedImage, setSelectedImage] = useState(null);
+    const [imageList, setImageList] = useState([]);
+    const [selectedImageIndex, setSelectedImageIndex] = useState(0); // Giả sử mặc định chọn ảnh đầu tiên
+
+    const thumbnailRef = useRef(null);
+
+    const scrollThumbnails = (direction) => {
+        if (thumbnailRef.current) {
+            const scrollAmount = 60; // mỗi lần cuộn khoảng 60px
+            thumbnailRef.current.scrollLeft += direction * scrollAmount;
+        }
+    };
+
     // const token = Cookies.get('token');
     const token = localStorage.getItem('accessToken');
     useEffect(() => {
@@ -21,9 +35,27 @@ const AddToCart = ({ productId, onClose }) => {
             axios.get(`https://localhost:8443/api/v1/products/getProduct/${productId}`, { withCredentials: true })
                 .then(response => {
                     setProduct(response.data);
+                    setSelectedImage(response.data.image);
+
+                    const colorImageMap = new Map();
+
+// Duyệt qua các biến thể, lưu ảnh đầu tiên của mỗi màu
+                    response.data.sizeColorVariants.forEach(variant => {
+                        if (!colorImageMap.has(variant.color)) {
+                            colorImageMap.set(variant.color, variant.image);
+                        }
+                    });
+
+                    const uniqueColorImages = Array.from(colorImageMap.values());
+
+                    setImageList(uniqueColorImages);
+                    setSelectedImage(uniqueColorImages[0]);
+                    console.log("image", uniqueColorImages);
+
                 })
                 .catch(error => {
                     console.error("Lỗi khi lấy thông tin sản phẩm:", error);
+                    Swal.fire('Lỗi!', 'Lỗi khi lấy thông tin sản phẩm.', 'error');
                 });
         }
     }, [productId]);
@@ -52,6 +84,13 @@ const AddToCart = ({ productId, onClose }) => {
             if (!validSizes.includes(selectedSize)) {
                 setSelectedSize(null);
             }
+
+            // Cập nhật ảnh theo màu
+            const colorImage = product.sizeColorVariants.find(variant => variant.color === newColor)?.image;
+            setSelectedImage(colorImage || product.image); // fallback ảnh chính nếu không có ảnh màu
+
+
+
 
             return newColor;
         });
@@ -109,15 +148,6 @@ const AddToCart = ({ productId, onClose }) => {
                 withCredentials: true // nếu backend yêu cầu cookie session
             })
                 .then(response => {
-                    // toast.success('✅ Sản phẩm đã được thêm vào giỏ hàng', {
-                    //     position: 'top-right',
-                    //     autoClose: 2000,
-                    //     hideProgressBar: false,
-                    //     closeOnClick: true,
-                    //     pauseOnHover: true,
-                    //     draggable: true,
-                    //     theme: 'light'
-                    // });
                     Swal.fire({
                         icon: 'success',
                         title: '✅ Đã thêm vào giỏ hàng!',
@@ -154,15 +184,111 @@ const AddToCart = ({ productId, onClose }) => {
         "Xanh": "#0b77e1",
         "Xanh Demin": "#286fb5",
         "Be": "#F5F5DC",
+        "Hồng": "#ff0099"
     };
 
     return (
         <div className="AddToCart">
             <div className="content">
                 <div className="information_product">
-                    <div className="img_product">
-                        <img src={product.image} alt={product.nameProduct}/>
+                    {/*<div className="img_product">*/}
+                    {/*    <img src={selectedImage || product.image} alt={product.nameProduct}/>*/}
+                    {/*</div>*/}
+                    <div style={{display: "flex", flexDirection: "column"}}>
+                        <div className="img_product">
+                            <img src={selectedImage || product.image} alt={product.nameProduct}/>
+                        </div>
+
+                        {/* Danh sách ảnh nhỏ dưới ảnh chính */}
+                        {/*<div className="image_thumbnails">*/}
+                        {/*    {imageList.map((image, index) => (*/}
+                        {/*        <img*/}
+                        {/*            key={index}*/}
+                        {/*            src={image}*/}
+                        {/*            alt={`Variant ${index}`}*/}
+                        {/*            onClick={() => {*/}
+                        {/*                setSelectedImage(image); // Cập nhật ảnh khi người dùng click vào ảnh nhỏ*/}
+                        {/*                setSelectedImageIndex(index); // Cập nhật chỉ số ảnh đã chọn*/}
+                        {/*            }}*/}
+                        {/*            className={selectedImageIndex === index ? 'selected' : ''}*/}
+                        {/*            style={{width: 50, height: 50, cursor: 'pointer', margin: '5px', position: "relative", zIndex: "100000"}}*/}
+                        {/*        />*/}
+                        {/*    ))}*/}
+                        {/*</div>*/}
+                        <div style={{position: 'relative', width: 'max-content'}}>
+                            {/* Nút điều hướng trái */}
+                            <button className={"btn_left_img"}
+                                onClick={() => scrollThumbnails(-1)}
+                                style={{
+                                    position: 'absolute',
+                                    left: 0,
+                                    top: '50%',
+                                    transform: 'translateY(-50%)',
+                                    zIndex: 10,
+                                    background: 'rgba(46,46,46,0.3)',
+                                    border: 'none',
+                                    fontSize: '20px',
+                                    cursor: 'pointer',
+                                }}
+                            >
+                                &lt;
+                            </button>
+
+                            {/* Khung cuộn ảnh */}
+                            <div
+                                ref={thumbnailRef}
+                                style={{
+                                    display: 'flex',
+                                    overflowX: 'hidden', // Ẩn thanh cuộn
+                                    maxWidth: '220px',
+                                    scrollBehavior: 'smooth',
+                                }}
+                            >
+                                {imageList.map((image, index) => (
+                                    <img
+                                        key={index}
+                                        src={image}
+                                        alt={`Variant ${index}`}
+                                        onClick={() => {
+                                            setSelectedImage(image);
+                                            setSelectedImageIndex(index);
+                                        }}
+                                        style={{
+                                            width: 50,
+                                            height: 50,
+                                            cursor: 'pointer',
+                                            marginRight: '5px',
+                                            flexShrink: 0,
+                                            border: selectedImageIndex === index ? '2px solid blue' : '1px solid #ccc',
+                                            borderRadius: '4px',
+                                        }}
+                                    />
+                                ))}
+                            </div>
+
+                            {/* Nút điều hướng phải */}
+                            <button
+                                className={"btn_right_img"}
+                                onClick={() => scrollThumbnails(1)}
+                                style={{
+                                    position: 'absolute',
+                                    right: 0,
+                                    top: '50%',
+                                    transform: 'translateY(-50%)',
+                                    zIndex: 10,
+                                    background: 'rgba(46,46,46,0.3)',
+                                    border: 'none',
+                                    fontSize: '20px',
+                                    cursor: 'pointer',
+                                }}
+                            >
+                                &gt;
+                            </button>
+                        </div>
+
                     </div>
+
+
                     <div className="content_product">
                         <div className="row row_name">
                             <p style={{color: "black"}}>
