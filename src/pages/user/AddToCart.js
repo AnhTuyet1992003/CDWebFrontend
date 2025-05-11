@@ -154,6 +154,7 @@ const AddToCart = ({ productId, onClose }) => {
                         showConfirmButton: false,
                         timer: 1500
                     });
+                    window.dispatchEvent(new Event("cartUpdated"));
                     onClose();
                 })
                 .catch(error => {

@@ -42,7 +42,10 @@ const VNPayReturn = () => {
                         text: response.data.message,
                         confirmButtonText: 'OK',
                     }).then(() => {
-                        navigate('/shop');
+
+                        navigate('/order/confirmation', {
+                            state: { orderId: response.data.data.id }
+                        });
                         localStorage.removeItem("preparedOrder");
                     });
                 } else {

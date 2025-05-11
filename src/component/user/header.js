@@ -14,6 +14,45 @@ const Header = () => {
     });
 
     const [userId, setUserId] = useState(null);
+
+
+
+
+    const [cartQuantity, setCartQuantity] = useState(0);
+
+    const fetchCart = async () => {
+        const token = document.cookie
+            .split('; ')
+            .find(row => row.startsWith('token='))?.split('=')[1];
+        if (!token) return;
+
+        try {
+            const res = await axios.get('https://localhost:8443/api/v1/carts', {
+                headers: { Authorization: `Bearer ${token}` },
+                withCredentials: true
+            });
+            setCartQuantity(res.data.data.totalQuantityProduct || 0);
+        } catch (err) {
+            console.error("Lỗi khi lấy giỏ hàng:", err);
+        }
+    };
+
+    useEffect(() => {
+        fetchCart();
+
+        const handleCartUpdated = () => {
+            fetchCart(); // gọi lại API khi có sự kiện "cartUpdated"
+        };
+
+        window.addEventListener("cartUpdated", handleCartUpdated);
+        return () => {
+            window.removeEventListener("cartUpdated", handleCartUpdated);
+        };
+    }, []);
+
+
+
+
     useEffect(() => {
         const loadUsername = () => {
             let storedUsername = localStorage.getItem('username');
@@ -233,13 +272,15 @@ const Header = () => {
                                                             </a>
                                                         </li>
                                                         <li>
-                                                            <a className="dropdown-item" href="#">
-                        <span className="d-flex align-items-center align-middle">
+
+                                                            <Link className="dropdown-item" to="/order"> <span
+                                                                className="d-flex align-items-center align-middle">
                           <i className="flex-shrink-0 icon-base bx bx-credit-card icon-md me-3"></i
-                          ><span className="flex-grow-1 align-middle">Billing Plan</span>
+                          ><span className="flex-grow-1 align-middle">Đơn hàng của bạn</span>
                           <span className="flex-shrink-0 badge rounded-pill bg-danger">4</span>
                         </span>
-                                                            </a>
+                                                            </Link>
+
                                                         </li>
                                                         <li>
                                                             <div className="dropdown-divider my-1"></div>
@@ -280,7 +321,7 @@ const Header = () => {
                                     </li>
                                     <li>
                                         <Link to="/cart"><span className="icon_bag_alt"/>
-                                            <div className="tip">2</div>
+                                            <div className="tip">{cartQuantity}</div>
                                         </Link>
                                     </li>
                                 </ul>

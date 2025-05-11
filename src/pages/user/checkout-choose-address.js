@@ -10,6 +10,7 @@ const CheckoutChooseAddress = ({ onClose, onSelectAddress, toggleAddressForm }) 
     const [addresses, setAddresses] = useState([]);
     const [selectedIndex, setSelectedIndex] = useState(null);
     const [selectedEditAddress, setEditAddress] = useState(null);
+    const [editVisibleIndex, setEditVisibleIndex] = useState(null);
 
     useEffect(() => {
         const fetchAddresses = async () => {
@@ -19,7 +20,7 @@ const CheckoutChooseAddress = ({ onClose, onSelectAddress, toggleAddressForm }) 
                     .find(row => row.startsWith('token='))
                     ?.split('=')[1];
 
-                const response = await axios.get('https://localhost:8443/api/v1/oders/get-shipping-address', {
+                const response = await axios.get('https://localhost:8443/api/v1/orders/get-shipping-address', {
                     headers: {
                         'Authorization': `Bearer ${token}`,
                         'Content-Type': 'multipart/form-data'
@@ -64,6 +65,53 @@ const CheckoutChooseAddress = ({ onClose, onSelectAddress, toggleAddressForm }) 
         fetchAddresses();
     }, []);
 
+
+// Xóa địa chỉ
+    const handleDeleteAddress = async (id) => {
+        const result = await Swal.fire({
+            title: 'Bạn có chắc chắn muốn xoá địa chỉ này?',
+            text: "Hành động này không thể hoàn tác!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Xoá',
+            cancelButtonText: 'Huỷ'
+        });
+
+        if (result.isConfirmed) {
+            try {
+                const token = document.cookie
+                    .split('; ')
+                    .find(row => row.startsWith('token='))?.split('=')[1];
+
+                const response = await axios.delete(`https://localhost:8443/api/v1/orders/delete-shipping-address`, {
+                    params: { id },
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    withCredentials: true
+                });
+
+                if (response.data.status === "success") {
+                    Swal.fire('✅ Xóa thành công!', '', 'success');
+                    // Cập nhật danh sách địa chỉ sau khi xóa
+                    setAddresses(prev => prev.filter(addr => addr.id !== id));
+                    setEditAddress(false)
+                } else {
+                    Swal.fire('❌ Xóa thất bại!', response.data.message, 'error');
+                }
+            } catch (err) {
+                console.error("Lỗi xoá địa chỉ:", err);
+                Swal.fire('❌ Lỗi server!', '', 'error');
+            }
+        }
+    };
+
+
+
+
     const handleSelect = (index) => {
         setSelectedIndex(index);
     };
@@ -77,7 +125,7 @@ const CheckoutChooseAddress = ({ onClose, onSelectAddress, toggleAddressForm }) 
                     .find(row => row.startsWith('token='))
                     ?.split('=')[1];
 
-                const response = await axios.put('https://localhost:8443/api/v1/oders/choose-shipping-address', null, {
+                const response = await axios.put('https://localhost:8443/api/v1/orders/choose-shipping-address', null, {
                     headers: {
                         'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json'
@@ -115,6 +163,12 @@ const CheckoutChooseAddress = ({ onClose, onSelectAddress, toggleAddressForm }) 
         toggleAddressForm();
     };
 
+    const handleEditsAddress = (address) => {
+        onClose();
+        toggleAddressForm(address);
+    };
+
+
     return (
         <div className="ChooseAddress">
             <div className="content">
@@ -151,22 +205,39 @@ const CheckoutChooseAddress = ({ onClose, onSelectAddress, toggleAddressForm }) 
                                         </div>
                                     </div>
 
-                                    <FontAwesomeIcon style={{color: "black"}}
-                                                     className="fa-solid fa-location-dot"
-                                                     icon={faPenToSquare}></FontAwesomeIcon>
+                                    <FontAwesomeIcon
+                                        style={{ color: "black", cursor: "pointer" }}
+                                        icon={faPenToSquare}
+                                        onClick={(e) => {
+                                            e.stopPropagation(); // tránh ảnh hưởng đến việc chọn địa chỉ
+                                            setEditVisibleIndex(index === editVisibleIndex ? null : index);
+                                        }}
+                                    />
 
-                                    <div className={"edit_address_checkout"}>
-                                        <div className={"edit_address_btn"}>
-                                            <FontAwesomeIcon style={{color: "black"}}
-                                                             className="fa-solid fa-location-dot"
-                                                             icon={faPen}></FontAwesomeIcon> Chỉnh sửa
+                                    {editVisibleIndex === index && (
+                                        <div className={"edit_address_checkout"}>
+                                            <div
+                                                className={"edit_address_btn"}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleEditsAddress(address);
+                                                    console.log("Edit:", address);
+                                                }}
+                                            >
+                                                <FontAwesomeIcon style={{ color: "black" }} icon={faPen} /> Chỉnh sửa
+                                            </div>
+                                            <div
+                                                className={"delete_address_btn"}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleDeleteAddress(address.id);
+                                                    console.log("Delete:", address);
+                                                }}
+                                            >
+                                                <FontAwesomeIcon style={{ color: "black" }} icon={faTrash} /> Xóa
+                                            </div>
                                         </div>
-                                        <div className={"delete_address_btn"}>
-                                            <FontAwesomeIcon style={{color: "black"}}
-                                                             className="fa-solid fa-location-dot"
-                                                             icon={faTrash}></FontAwesomeIcon> Xóa
-                                        </div>
-                                    </div>
+                                    )}
                                 </div>
                             </div>
 
