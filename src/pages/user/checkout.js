@@ -19,6 +19,10 @@ const Checkout = () => {
         ward: "",
         addressDetail: ""
     });
+
+    const [editingAddressId, setEditingAddressId] = useState(null);
+
+
     const [note, setNote] = useState("");
     const [paymentId, setPaymentId] = useState("1");
 
@@ -70,7 +74,7 @@ const Checkout = () => {
                 }
 
                 // Gọi API để lấy địa chỉ giao hàng đã chọn
-                const response = await axios.get('https://localhost:8443/api/v1/oders/get-selected-shipping-address', {
+                const response = await axios.get('https://localhost:8443/api/v1/orders/get-selected-shipping-address', {
                     headers: {
                         'Authorization': `Bearer ${token}`,  // Gửi token trong header
                         'Content-Type': 'application/json'
@@ -102,9 +106,9 @@ const Checkout = () => {
         fetchSelectedAddress();
     }, []);
 
-    const toggleAddressForm = () => {
-        setShowAddressForm(!showAddressForm);
-    };
+    // const toggleAddressForm = () => {
+    //     setShowAddressForm(!showAddressForm);
+    // };
 
     const validateForm = () => {
         if (!formData.receiverName || !formData.receiverPhone || !formData.province || !formData.district || !formData.ward || !formData.addressDetail) {
@@ -125,17 +129,21 @@ const Checkout = () => {
 
         // Hiển thị hộp thoại xác nhận trước khi lưu địa chỉ
         const result = await Swal.fire({
-            title: 'Bạn có chắc chắn muốn lưu địa chỉ này làm địa chỉ mặc định không?',
-            icon: 'question',  // Chọn icon dạng câu hỏi
+            title: editingAddressId
+                ? 'Bạn có chắc chắn muốn cập nhật địa chỉ này không?'
+                : 'Bạn có chắc chắn muốn lưu địa chỉ này làm địa chỉ mặc định không?',
+            icon: 'question',
             showCancelButton: true,
             confirmButtonText: 'OK',
             cancelButtonText: 'Hủy'
         });
 
 
+
         if (!result.isConfirmed) {
             return; // Nếu người dùng không bấm "OK", dừng lại
         }
+
         if (!paymentId) {
             Swal.fire({
                 icon: "warning",
@@ -171,18 +179,31 @@ const Checkout = () => {
                 ward: formData.ward,
                 address_detail: formData.addressDetail
             });
-
-            const response = await axios.post(
-                "https://localhost:8443/api/v1/oders/add-shipping-address", // ✅ sửa "oders" thành "orders"
-                urlParams,
-                {
+            let response;
+            if (editingAddressId) {
+                // 🛠 Gọi API chỉnh sửa
+                urlParams.append("id", editingAddressId);
+                response = await axios.post("https://localhost:8443/api/v1/orders/edit-shipping-address", urlParams, {
                     headers: {
                         "Content-Type": "application/x-www-form-urlencoded",
-                        Authorization: `Bearer ${token}`
+                        Authorization: `Bearer ${token}`,
                     },
-                    withCredentials: true
-                }
-            );
+                    withCredentials: true,
+                });
+            } else {
+
+                 response = await axios.post(
+                    "https://localhost:8443/api/v1/orders/add-shipping-address",
+                    urlParams,
+                    {
+                        headers: {
+                            "Content-Type": "application/x-www-form-urlencoded",
+                            Authorization: `Bearer ${token}`
+                        },
+                        withCredentials: true
+                    }
+                );
+            }
 
             const result = response.data;
             if (result.status === "success") {
@@ -190,13 +211,13 @@ const Checkout = () => {
                 setShowAddressForm(false);        // Ẩn form
                 Swal.fire({
                     icon: 'success',
-                    title: '✅ Đã lưu địa chỉ mặc định thành công!',
+                    title: editingAddressId ? '✅ Cập nhật địa chỉ thành công!' : '✅ Đã lưu địa chỉ mặc định thành công!',
                     confirmButtonText: 'OK',
                 });
             } else {
                 Swal.fire({
                     icon: 'error',
-                    title: '❌ Lỗi khi thêm địa chỉ!',
+                    title: editingAddressId ? '❌ Lỗi khi chỉnh sửa địa chỉ!' : '❌ Lỗi khi thêm địa chỉ!',
                     text: result.message
                 });
             }
@@ -204,7 +225,7 @@ const Checkout = () => {
             console.error("Lỗi khi thêm địa chỉ:", error);
             Swal.fire({
                 icon: 'error',
-                title: '❌ Lỗi khi thêm địa chỉ!',
+                title: '❌ Lỗi',
             });
         }
     };
@@ -301,7 +322,7 @@ const Checkout = () => {
             formData.append("paymentId", paymentId);
 
             const orderResponse = await axios.post(
-                "https://localhost:8443/api/v1/oders/add-order",
+                "https://localhost:8443/api/v1/orders/add-order",
                 formData,
                 {
                     headers: {
@@ -455,9 +476,11 @@ const Checkout = () => {
                 Swal.fire({
                     icon: "success",
                     title: "✅ Đặt hàng thành công!",
-                    text: orderData.message,
                 }).then(() => {
-                    navigate("/shop");
+                    navigate('/order/confirmation', {
+                        state: { orderId: orderData.data.id }
+                    });
+
                     localStorage.removeItem("preparedOrder");
                 });
             }
@@ -473,6 +496,31 @@ const Checkout = () => {
         }
     };
 
+    const toggleAddressForm = (address = null) => {
+        if (address) {
+            setFormData({
+                receiverName: address.receiverName,
+                receiverPhone: address.receiverPhone,
+                province: address.province,
+                district: address.district,
+                ward: address.ward,
+                addressDetail: address.addressDetail,
+            });
+            setEditingAddressId(address.id);
+        } else {
+            // Reset form khi thêm mới
+            setFormData({
+                receiverName: "",
+                receiverPhone: "",
+                province: "",
+                district: "",
+                ward: "",
+                addressDetail: "",
+            });
+            setEditingAddressId(null);
+        }
+        setShowAddressForm(true);
+    };
 
     return (
         <>

@@ -498,7 +498,7 @@ const Cart = () => {
 
         try {
             const query = selectedItems.map(id => `cart_item_id=${id}`).join('&');
-            const url = `https://localhost:8443/api/v1/oders/prepare?${query}`;
+            const url = `https://localhost:8443/api/v1/orders/prepare?${query}`;
             const response = await fetch(url, {
                 method: "POST",
                 headers: {

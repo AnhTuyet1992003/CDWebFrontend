@@ -3,14 +3,19 @@
 .Order_Detail .content{
     position: relative;
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
     padding: 20px;
-    z-index: 100000;
+    /*z-index: 100000;*/
+
     width: 100%;
-    background: rgb(255, 255, 255);
+    background: #efefef;
     overflow: visible;
+}
+.Order_Detail .content .row{
+
+    width: 100%;
 }
 
 .Order_Detail .content .detail_order{
@@ -35,9 +40,10 @@
     flex-direction: column;
     min-width: 0;
     word-wrap: break-word;
-    background-color: #fff;
+    background: white;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
     background-clip: border-box;
-    border: 0 solid rgba(0,0,0,.125);
+    border: 0 solid rgba(0, 0, 0, 0.41);
     border-radius: 1rem;
 }
 .Order_Detail .content .text-reset {
@@ -47,4 +53,148 @@
 .Order_Detail .content  a {
     color: #5465ff;
     text-decoration: none;
+}
+.Order_Detail .content .card-body{
+    /*min-width: 500px;*/
+    width: auto;
+}
+.order_user{
+    padding-top: 20px
+}
+.order_user .order_user_containt {
+    display: flex;
+    flex-direction: column;
+}
+.order_user .order_user_containt .order_status_content .order_status {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    font-size: 15px;
+    font-weight: bold;
+    color: #4a4a4a;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+    padding: 10px;
+    height: 50px;
+    background: #FFFFFF;
+    border: 0 solid rgba(0, 0, 0, 0.97);
+    transition: all 0.3s ease;
+    margin-bottom: 5px;
+    border-radius: 10px;
+}
+
+.order_user .order_user_containt .order_status_content .order_status:hover {
+    transform: scale(1.1);
+}
+
+.order_user .order_user_containt .order_status_content .order_status:active {
+    background: #c1c1c1;
+}
+
+/* CSS cho thẻ đang được chọn */
+.order_user .order_user_containt .order_status_content .order_status.active {
+    background: #ffffff;
+    transform: scale(1.1);
+}
+
+.order_user_content{
+    .content{
+        width: 100%;
+        background: #ffffff;
+        border: 0 solid rgba(0, 0, 0, 0.97);
+        box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+        padding: 10px;
+        border-radius: 10px;
+        margin-bottom: 10px;
+        .inf_product_order{
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            /*height: 100px;*/
+            .product_detail_order{
+                padding: 5px;
+                display: flex;
+                flex-direction: row;
+                .img_product_order{
+                    width: 100%;
+                    display: flex;
+                    flex-direction: row;
+                    justify-content: space-between;
+                    img{
+                        height: 60px;
+                        width: 60px;
+                    }
+                    .nameProduct{
+                        display: flex;
+                        flex-direction: column;
+                        padding-left: 10px;
+                    }
+                    .status_price{
+                        display: flex;
+                        flex-direction: column;
+                        justify-content: space-between;
+                        padding-right: 10px;
+                        align-items: flex-end;
+                    }
+
+                }
+            }
+            .product_price_order{
+                width: 100%;
+                display: flex;
+                flex-direction: row;
+                justify-content: space-between;
+            }
+            .btn_status_order{
+                display: flex;
+                flex-direction: row;
+                justify-content: space-between;
+                width: 100%;
+                padding-top: 10px;
+                .btn_orderDetail .btn {
+                    padding: 5px;
+                    width: auto;
+                    min-width: 70px;
+                    height: 30px;
+                    margin-right: 8px;
+                    color: #fff;
+                    font-size: 12px;
+                    text-align: center;
+                    line-height: 20px;
+                    border-radius: 4px;
+                    cursor: pointer;
+                }
+
+                .btn.cancel-btn {
+                    background-color: #dc3545; /* đỏ */
+                }
+
+                .btn.return-btn {
+                    background-color: #ffc107; /* vàng */
+                }
+
+                .btn.undo-btn {
+                    background-color: #17a2b8; /* xanh dương nhạt */
+                }
+
+                .btn.rebuy-btn {
+                    background-color: #28a745; /* xanh lá */
+                }
+
+                .btn.pay-btn {
+                    background-color: #007bff; /* xanh dương */
+                }
+
+            }
+        }
+    }
+}
+.view-detail {
+    font-size: 10px;
+    transition: all 0.3s ease;
+}
+
+.view-detail:hover {
+    color: #0275d8;
+    font-size: 11px;
+    cursor: pointer;
 }
