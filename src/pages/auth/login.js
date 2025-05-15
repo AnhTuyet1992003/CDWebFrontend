@@ -118,6 +118,9 @@ const Login = () => {
                             <Link to="/register" className="signup-image-link">
                                 <FontAwesomeIcon style={{ fontSize: '22px' }} icon={faUser} /> Tạo tài khoản
                             </Link>
+                            <Link to="/forgot-password" className="signup-image-link">
+                                <FontAwesomeIcon style={{ fontSize: '22px' }} icon={faUser} /> Quên mật khẩu
+                            </Link>
                         </div>
 
                         <div className="signin-form">
