@@ -66,11 +66,21 @@ const ValidateOtp = () => {
     };
 
     return (
-        <div className="container-fluid">
+        <div className="container-fluid d-flex justify-content-center align-items-center" style={{
+            height: '110vh',
+
+            backgroundColor: '#81b8ee' // xanh dương nhạt
+        }}>
             <div className="row">
                 <div className="col-lg-6 col-md-6 form-container">
                     <div className="col-lg-8 col-md-12 col-sm-9 col-xs-12 form-box">
-                        <div className="reset-form d-block">
+                        <div className="reset-form d-block" style={{
+                            width: '70vh',
+                            padding: '10px',
+                            backgroundColor: '#ffffff', // xanh dương nhạt
+                            border: '2px solid #000000', // viền đen
+                            borderRadius: '8px' //
+                        }}>
                             <form className="reset-password-form" onSubmit={handleInputOtpSubmit} method="post">
                                 <h4 className="mb-3">Xác thực OTP</h4>
                                 <p>Nhập mã OTP đã được gửi đến email của bạn.</p>

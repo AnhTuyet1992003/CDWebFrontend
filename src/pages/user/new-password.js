@@ -1,10 +1,13 @@
 
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import {Link, useNavigate} from 'react-router-dom';
 import Cookies from 'js-cookie';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './user-profile-edit.css';
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import {faEnvelope, faLock, faUser} from "@fortawesome/free-solid-svg-icons";
+import Swal from "sweetalert2";
 
 const NewPassword = () => {
     const navigate = useNavigate();
@@ -57,7 +60,12 @@ const NewPassword = () => {
                     { email, newPassword: user.newPassword },
                     { withCredentials: true }
                 );
-                alert('Cập nhật mật khẩu thành công!');
+                Swal.fire({
+                    icon: 'success',
+                    title: '✅ Cập nhật mật khẩu thành công!',
+                    showConfirmButton: false,
+                    timer: 1500
+                });
                 // Xóa cookie sau khi cập nhật thành công
                 Cookies.remove('email');
                 Cookies.remove('otp');
@@ -67,15 +75,16 @@ const NewPassword = () => {
                 if (error.response) {
                     const { status, data } = error.response;
                     if (status === 401) {
-                        setMessage('Phiên xác thực không hợp lệ. Vui lòng thử lại.');
+                        Swal.fire('Lỗi!', 'Phiên xác thực không hợp lệ. Vui lòng thử lại.', 'error');
+                        //setMessage('.');
                         navigate('/forgot-password');
                     } else if (status === 400) {
-                        setMessage(data || 'Dữ liệu không hợp lệ.');
+                        Swal.fire('Lỗi!', 'Dữ liệu không hợp lệ. Vui lòng thử lại.', 'error');
                     } else {
-                        setMessage('Lỗi khi cập nhật mật khẩu. Vui lòng thử lại.');
+                        Swal.fire('Lỗi!', 'Lỗi khi cập nhật mật khẩu. Vui lòng thử lại.', 'error');
                     }
                 } else {
-                    setMessage('Không thể kết nối đến server. Vui lòng kiểm tra lại.');
+                    Swal.fire('Lỗi!', 'Không thể kết nối đến server. Vui lòng kiểm tra lại.', 'error');
                 }
             }
         }
@@ -88,7 +97,14 @@ const NewPassword = () => {
     useEffect(() => {
         const email = Cookies.get('email');
         if (!email) {
-            setMessage('Vui lòng xác thực OTP trước.');
+            Swal.fire({
+                icon: 'warning',
+                title: '⚠️ Vui lòng xác thực OTP trước!',
+                confirmButtonText: 'OK',
+                customClass: {
+                    popup: 'swal2-rounded'  // nếu muốn bo góc đẹp
+                }
+            });
             navigate('/forgot-password');
         }
         console.log('email forgot pass: ' + email);
@@ -96,63 +112,78 @@ const NewPassword = () => {
 
     return (
         <div className="containerEdit light-style flex-grow-1 container-p-y">
-            <h4 className="font-weight-bold py-3 mb-4">Đặt lại mật khẩu</h4>
-            <form onSubmit={handleUpdatePassword} className="space-y-4">
-                <div className="card2-body pb-2">
-                    {message && (
-                        <div className="alert alert-danger" role="alert">
-                            {message}
-                        </div>
-                    )}
+            <section className="signup">
+                <div className="container-auth">
+                    <div className="signup-content">
+                        <form className="signup-form" onSubmit={handleUpdatePassword}>
+                            <h2 className="form-title">Đặt lại mật khẩu</h2>
+                            <div className="form-group">
+                                <label><FontAwesomeIcon icon={faLock}/></label>
 
-                    {errors.newPassword && (
-                        <div className="error-container">
-                            <small className="error">{errors.newPassword}</small>
-                        </div>
-                    )}
-                    <div className="form-group">
-                        <label className="form-label">Mật khẩu mới</label>
-                        <input
-                            type="password"
-                            name="newPassword"
-                            value={user.newPassword}
-                            onChange={handleChange}
-                            required={true}
-                            className="form-control"
-                        />
-                    </div>
+                                <input
+                                    type="password"
+                                    name="newPassword"
+                                    value={user.newPassword}
+                                    onChange={handleChange}
+                                    required={true}
+                                    className="form-control"
+                                />
+                            </div>
 
-                    {errors.reNewPassword && (
-                        <div className="error-container">
-                            <small className="error">{errors.reNewPassword}</small>
-                        </div>
-                    )}
-                    <div className="form-group">
-                        <label className="form-label">Nhập lại mật khẩu</label>
-                        <input
-                            type="password"
-                            name="reNewPassword"
-                            value={user.reNewPassword}
-                            onChange={handleChange}
-                            required={true}
-                            className="form-control"
-                        />
-                    </div>
+                            {errors.newPassword && (
+                                <div className="error-container">
+                                    <small className="error">{errors.newPassword}</small>
+                                </div>
+                            )}
 
-                    <div className="text-right mt-3">
-                        <button type="submit" className="btn btn-primary">
-                            Lưu thay đổi
-                        </button>{' '}
-                        <button
-                            type="button"
-                            className="btn btn-default"
-                            onClick={handleCancel}
-                        >
-                            Hủy
-                        </button>
+                            {/* Retype Password */}
+                            <div className="form-group">
+                                <label><FontAwesomeIcon icon={faLock}/></label>
+                                <input
+                                    type="password"
+                                    name="reNewPassword"
+                                    value={user.reNewPassword}
+                                    onChange={handleChange}
+                                    required={true}
+                                    className="form-control"
+                                />
+                            </div>
+                            {errors.reNewPassword && (
+                                <div className="error-container">
+                                    <small className="error">{errors.reNewPassword}</small>
+                                </div>
+                            )}
+
+                            {/* Submit Button */}
+                            <div className="form-group form-button">
+                                <input type="submit" className="form-submit" value="Lưu thay đổi"/>
+                                <button
+                                    type="button"
+                                    className="btn btn-default"
+                                    onClick={handleCancel}
+                                >
+                                    Hủy
+                                </button>
+                            </div>
+
+                            {/* Tổng lỗi chung (nếu có) */}
+                            {message && (
+                                <p style={{color: 'red', whiteSpace: 'pre-wrap'}}>{message}</p>
+                            )}
+                        </form>
+
+                        {/* Hình ảnh + link chuyển login */}
+                        <div className="signup-image">
+                            <figure>
+                                <img width={500} height={500} src="/img/fashion4.png" alt="sign up"/>
+                            </figure>
+                            <Link to="/login" className="signup-image-link" style={{fontSize: '18px'}}>
+                                Đã có tài khoản? Đăng nhập!
+                            </Link>
+                        </div>
                     </div>
                 </div>
-            </form>
+            </section>
         </div>
     );
 };

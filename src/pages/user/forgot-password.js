@@ -8,6 +8,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import 'font-awesome/css/font-awesome.min.css';
 import axios from 'axios';
 import Cookies from 'js-cookie';
+import {colors} from "@mui/material";
 
 const ForgotPassword = () => {
     const navigate = useNavigate();
@@ -91,11 +92,25 @@ const ForgotPassword = () => {
     };
 
     return (
-        <div className="container-fluid">
+        // <div className="container-fluid" >
+        <div
+            className="container-fluid d-flex justify-content-center align-items-center"
+            style={{
+                height: '110vh',
+
+                backgroundColor: '#81b8ee' // xanh dương nhạt
+            }}
+        >
             <div className="row">
                 <div className="col-lg-6 col-md-6 form-container">
                     <div className="col-lg-8 col-md-12 col-sm-9 col-xs-12 form-box">
-                        <div className="reset-form d-block">
+                        <div className="reset-form d-block" style={{
+                            width: '70vh',
+                            padding: '10px',
+                            backgroundColor: '#ffffff', // xanh dương nhạt
+                            border: '2px solid #000000', // viền đen
+                            borderRadius: '8px' // (tuỳ chọn) bo góc nhẹ cho đẹp
+                        }}>
                             <form className="reset-password-form" onSubmit={handleForgotPassSubmit} method="post">
                                 <h4 className="mb-3">Cấp lại mật khẩu</h4>
                                 <p>Thực hiện việc thay đổi mật khẩu theo 3 bước sau để bảo mật an toàn:</p>
@@ -123,7 +138,7 @@ const ForgotPassword = () => {
                                         placeholder="Email của bạn"
                                         value={email}
                                         onChange={(e) => setEmail(e.target.value)}
-                                        style={{ fontFamily: 'Courier New' }}
+                                        style={{fontFamily: 'Courier New'}}
                                         disabled={isLoading}
                                     />
                                 </div>
@@ -132,7 +147,7 @@ const ForgotPassword = () => {
                                         {isLoading ? 'Đang gửi...' : 'Gửi mã OTP'}
                                     </button>
                                     <Link to="/login" className="signup-image-link">
-                                        <FontAwesomeIcon style={{ fontSize: '22px' }} icon={faUser} /> Quay lại
+                                        <FontAwesomeIcon style={{fontSize: '22px'}} icon={faUser}/> Quay lại
                                     </Link>
                                 </div>
                             </form>
