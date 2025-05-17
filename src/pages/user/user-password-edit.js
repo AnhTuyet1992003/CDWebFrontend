@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import axios, {post} from 'axios';
 import { jwtDecode } from 'jwt-decode';
 import Chatbox from './Chatbox';
+import Swal from 'sweetalert2';
+import {Link, useNavigate} from 'react-router-dom';
 
 import Cookies from 'js-cookie';
 
@@ -15,9 +17,12 @@ import $ from 'jquery';
 
 // Bootstrap JS (bundle includes popper.js)
 import 'bootstrap/dist/js/bootstrap.bundle.min';
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import {faEnvelope, faLock, faUser} from "@fortawesome/free-solid-svg-icons";
 
 
 const UserPasswordEdit = () => {
+    const navigate = useNavigate();
     const [user2, setUser2] = useState({
         password: '',
         newPassword: '',
@@ -80,22 +85,32 @@ const UserPasswordEdit = () => {
                     withCredentials: true,
                 }
             );
-            setMessage('Cập nhật thông tin thành công!');
+            Swal.fire({
+                icon: 'success',
+                title: '✅ Đã cập nhật mật khẩu thành công!',
+                showConfirmButton: false,
+                timer: 1500
+            }).then(() => {
+                navigate('/home');
+            });
         } catch (error) {
             console.error(error);
 
-            // Kiểm tra lỗi từ response
-            if (error.response && error.response.data) {
-                // Nếu có lỗi từ backend, lấy thông điệp từ response và hiển thị
-                setMessage(error.response.data);  // Hiển thị thông điệp lỗi từ backend
+            if (error.response) {
+                if (error.response.status === 403) {
+                    Swal.fire('Lỗi!', 'Mật khẩu bạn nhập vào không đúng.', 'error');
+                } else if (error.response.data) {
+                    setMessage(error.response.data);  // hoặc hiển thị alert tùy bạn
+                } else {
+                    Swal.fire('Lỗi!', 'Đã xảy ra lỗi khi cập nhật mật khẩu.', 'error');
+                }
             } else {
-                // Nếu không có lỗi response, hiển thị thông báo chung
-                setMessage('Lỗi khi cập nhật thông tin');
+                Swal.fire('Lỗi!', 'Không thể kết nối đến máy chủ.', 'error');
             }
         }
     };
 
-    useEffect(() => {
+        useEffect(() => {
         // const token = document.cookie
         //     .split('; ')
         //     .find(row => row.startsWith('token='))
@@ -105,11 +120,16 @@ const UserPasswordEdit = () => {
 
         console.log("token profile: "+token)
 
+            if (!token) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: '⚠️ Bạn chưa đăng nhập.',
+                    confirmButtonText: 'OK',
+                }).then(() => {
+                    navigate('/login');
+                });
+            }
 
-        if (!token) {
-            setMessage('Bạn chưa đăng nhập');
-            return;
-        }
 
         const decoded = jwtDecode(token);
 
@@ -125,7 +145,8 @@ const UserPasswordEdit = () => {
             })
             .catch(err => {
                 console.error(err);
-                setMessage('Lỗi khi tải thông tin người dùng');
+                Swal.fire('Lỗi!', 'Lỗi khi tải thông tin người dùng.', 'error');
+                // setMessage('Lỗi khi tải thông tin người dùng');
             });
     }, []);
 
@@ -133,59 +154,69 @@ const UserPasswordEdit = () => {
         <>
 
             <div className="containerEdit light-style flex-grow-1 container-p-y">
+                <section className="signup">
+                    <div className="container-auth">
+                        <div className="signup-content">
+                            <form className="signup-form" onSubmit={handleUpdatePassword}>
+                                <h2 className="form-title">Chỉnh sửa mật khẩu </h2>
 
-                <h4 className="font-weight-bold py-3 mb-4">
-                    Chỉnh sửa thông tin cá nhân
-                </h4>
-                <form onSubmit={handleUpdatePassword} className="space-y-4">
-                    <div className="card2-body pb-2">
+                                <div className="form-group">
+                                    {/*<label><FontAwesomeIcon icon={faLock}/></label>*/}
+                                    <input type="password" name="password" value={user2.password}
+                                           onChange={handleChange}
+                                           required={true} className="form-control"
+                                           placeholder="Mật khẩu"/>
+                                </div>
+                                {errors.password && (
+                                    <div className="error-container">
+                                        <small className="error">{errors.password}</small>
+                                    </div>
+                                )}
 
-                        {errors.password && (
-                            <div className="error-container">
-                                <small className="error">{errors.password}</small>
-                            </div>
-                        )}
-                        <div className="form-group">
-                            <label className="form-label"></label>
-                            <input type="password" name="password" value={user2.password} onChange={handleChange}
-                                   required={true} className="form-control"/>
+                                <div className="form-group">
+                                    {/*<label><FontAwesomeIcon icon={faLock}/></label>*/}
+                                    <input type="password" name="newPassword" value={user2.newPassword}
+                                           onChange={handleChange}
+                                           required={true} className="form-control"
+                                           placeholder="Mật khẩu mới"/>
+                                </div>
+                                {errors.newPassword && (
+                                    <div className="error-container">
+                                        <small className="error">{errors.newPassword}</small>
+                                    </div>
+                                )}
+
+
+                                {/* Retype Password */}
+                                <div className="form-group">
+                                    {/*<label><FontAwesomeIcon icon={faLock}/></label>*/}
+                                    <input type="password" name="reNewPassword" value={user2.reNewPassword}
+                                           onChange={handleChange} required={true} className="form-control"
+                                           placeholder="Nhập lại mật khẩu mới"/>
+                                </div>
+                                {errors.reNewPassword && (
+                                    <div className="error-container">
+                                        <small className="error">{errors.reNewPassword}</small>
+                                    </div>
+                                )}
+
+
+                                {/* Submit Button */}
+                                <div className="form-group form-button">
+                                    <button type="submit" className="btn btn-primary">Lưu thay đổi</button>
+                                    <button type="button" className="btn btn-default">Hủy</button>
+                                </div>
+
+                                {/* Tổng lỗi chung (nếu có) */}
+                                {message && (
+                                    <p style={{color: 'red', whiteSpace: 'pre-wrap'}}>{message}</p>
+                                )}
+                            </form>
+
                         </div>
-                        {errors.newPassword && (
-                            <div className="error-container">
-                                <small className="error">{errors.newPassword}</small>
-                            </div>
-                        )}
-
-                        <div className="form-group">
-                            <label className="form-label"></label>
-                            <input type="password" name="newPassword" value={user2.newPassword} onChange={handleChange}
-                                   required={true} className="form-control"/>
-                        </div>
-                        {errors.reNewPassword && (
-                            <div className="error-container">
-                                <small className="error">{errors.reNewPassword}</small>
-                            </div>
-                        )}
-
-                        <div className="form-group">
-                            <label className="form-label"></label>
-                            <input type="password" name="reNewPassword" value={user2.reNewPassword}
-                                   onChange={handleChange} required={true} className="form-control"/>
-                        </div>
-                        {errors.password && (
-                            <div className="error-container">
-                                <small className="error">{errors.password}</small>
-                            </div>
-                        )}
-
-                        <div className="text-right mt-3">
-                            <button type="submit" className="btn btn-primary">Save changes</button>
-                            &nbsp;
-                            <button type="button" className="btn btn-default">Cancel</button>
-                        </div>
-
                     </div>
-                </form>
+                </section>
+
             </div>
 
         </>
