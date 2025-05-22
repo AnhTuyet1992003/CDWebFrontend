@@ -7,9 +7,9 @@ import { format } from 'date-fns';
 
 // Cấu hình API base URL và endpoint
 const API_BASE_URL = 'https://localhost:8443/api/v1';
-const DAILY_REVENUE_ENDPOINT = '/oders/daily-revenue-between';
-const YEARLY_REVENUE_ENDPOINT = '/oders/list-total-revenue-by-year';
-const TOP_PRODUCTS_ENDPOINT = '/oders/top-10-best-selling-products';
+const DAILY_REVENUE_ENDPOINT = '/orders/daily-revenue-between';
+const YEARLY_REVENUE_ENDPOINT = '/orders/list-total-revenue-by-year';
+const TOP_PRODUCTS_ENDPOINT = '/orders/top-10-best-selling-products';
 
 // Bỏ qua kiểm tra SSL cho localhost (chỉ dùng trong phát triển)
 if (process.env.NODE_ENV === 'development') {

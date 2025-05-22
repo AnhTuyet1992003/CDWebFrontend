@@ -21,6 +21,7 @@
     "apexcharts": "^4.5.0",
     "axios": "^1.9.0",
     "bootstrap": "^4.4.1",
+    "boxicons": "^2.1.4",
     "datatables.net-autofill-dt": "^2.7.0",
     "datatables.net-buttons-dt": "^3.2.2",
     "datatables.net-colreorder-dt": "^2.0.4",
