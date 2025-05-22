@@ -1,0 +1,195 @@
+
+.dt-container {
+    padding: 1.5rem;
+    background: #fff;
+    border-radius: 0.5rem;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+.card-header {
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.card-title {
+    font-size: 1.25rem;
+    font-weight: 500;
+}
+
+.dt-buttons .btn {
+    margin-right: 0.5rem;
+}
+
+.dt-length label,
+.dt-search label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.dt-length select,
+.dt-search input {
+    width: auto;
+    display: inline-block;
+}
+
+.table {
+    margin-bottom: 0;
+}
+
+.table th,
+.table td {
+    vertical-align: middle;
+}
+
+.table th {
+    background-color: #748bd2;
+    font-weight: 600;
+}
+
+.table .dt-select {
+    width: 50px;
+    text-align: center;
+}
+
+.table .emp_name {
+    font-weight: 500;
+}
+
+.table .emp_name:hover {
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.table .dropdown-toggle::after {
+    display: none;
+}
+
+.table .dropdown-menu {
+    min-width: 120px;
+}
+
+.dt-info {
+    padding: 0.75rem 0;
+    font-size: 0.875rem;
+}
+
+.dt-paging .pagination {
+    margin: 0;
+}
+
+.dt-paging .page-link {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+}
+
+
+   .dt-container {
+       padding: 1.5rem;
+       background: #fff;
+       border-radius: 0.5rem;
+       box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+       width: 100%; /* Đảm bảo container mở rộng hết không gian */
+       max-width: 100%; /* Loại bỏ giới hạn chiều rộng */
+   }
+
+
+.dt-layout-table {
+    width: 100%; /* Đảm bảo div bao quanh bảng mở rộng */
+}
+
+.table {
+    margin-bottom: 0;
+    width: 100%; /* Bảng mở rộng hết không gian */
+}
+
+.table th,
+.table td {
+    vertical-align: middle;
+    padding: 0.75rem; /* Tăng padding để cột rộng rãi hơn */
+}
+
+/* Đặt chiều rộng tối thiểu cho từng cột */
+.table th.dt-select,
+.table td.dt-select {
+    width: 5%; /* Checkbox nhỏ gọn */
+    min-width: 50px;
+    text-align: center;
+}
+
+.table th:nth-child(2), /* Cột ID */
+.table td:nth-child(2) {
+    width: 15%;
+    min-width: 100px;
+}
+
+.table th:nth-child(3), /* Cột Ngày Nhập */
+.table td:nth-child(3) {
+    width: 20%;
+    min-width: 120px;
+}
+
+.table th:nth-child(4), /* Cột Người Nhập */
+.table td:nth-child(4) {
+    width: 20%;
+    min-width: 150px;
+}
+
+.table th:nth-child(5), /* Cột Tổng Tiền */
+.table td:nth-child(5) {
+    width: 20%;
+    min-width: 120px;
+}
+
+.table th:nth-child(6), /* Cột Actions */
+.table td:nth-child(6) {
+    width: 10%;
+    min-width: 100px;
+}
+
+
+
+.table .emp_name {
+    font-weight: 500;
+}
+
+.table .emp_name:hover {
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.table .dropdown-toggle::after {
+    display: none;
+}
+
+.table .dropdown-menu {
+    min-width: 120px;
+}
+
+.dt-info {
+    padding: 0.75rem 0;
+    font-size: 0.875rem;
+}
+
+.dt-paging .pagination {
+    margin: 0;
+}
+
+.dt-paging .page-link {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+}
+
+.dt-paging .page-item.active .page-link {
+    background-color: #007bff;
+    border-color: #007bff;
+}
+
+.dt-paging .page-item.disabled .page-link {
+    cursor: not-allowed;
+    opacity: 0.65;
+}
+
+.alert {
+    margin: 1rem 0;
+}
