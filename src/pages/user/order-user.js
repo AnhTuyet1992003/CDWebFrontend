@@ -5,8 +5,11 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {faClock, faTruckFast, faBox, faCircleXmark, faCircleCheck, faBan, faCreditCard, faRotateLeft, faWarehouse, faTrashArrowUp} from '@fortawesome/free-solid-svg-icons';
 import axios from "axios";
 import Swal from "sweetalert2";
+import {useTranslation} from "react-i18next";
 
 const OrderUser = () => {
+    const { t } = useTranslation('translation');
+
     const [status, setStatus] = useState([]);
     const navigate = useNavigate();
     const [ordersByStatus, setOrdersByStatus] = useState([]);
@@ -25,7 +28,7 @@ const OrderUser = () => {
         if (!token) {
             Swal.fire({
                 icon: 'warning',
-                title: '⚠️ Bạn chưa đăng nhập.',
+                title: t('login.error_login'),
                 confirmButtonText: 'OK',
             }).then(() => {
                 navigate('/login');
@@ -118,27 +121,27 @@ const OrderUser = () => {
     const getIconAndColor = (statusId) => {
         switch (statusId) {
             case 1:
-                return { icon: faClock, color: '#f0ad4e', title: 'Chờ xác nhận' };
+                return { icon: faClock, color: '#f0ad4e', title:  t('order_status.order_status_1')};
             case 2:
-                return { icon: faBox, color: '#5bc0de', title: 'Đang đóng gói' };
+                return { icon: faBox, color: '#5bc0de', title: t('order_status.order_status_2') };
             case 3:
-                return { icon: faTruckFast, color: '#0275d8', title: 'Đang giao hàng' };
+                return { icon: faTruckFast, color: '#0275d8', title: t('order_status.order_status_3') };
             case 4:
-                return { icon: faCircleCheck, color: '#5cb85c', title: 'Giao thành công' };
+                return { icon: faCircleCheck, color: '#5cb85c', title: t('order_status.order_status_4') };
             case 5:
-                return { icon: faTrashArrowUp, color: '#f86c6b', title: 'Yêu cầu hủy' };
+                return { icon: faTrashArrowUp, color: '#f86c6b', title: t('order_status.order_status_5')};
             case 6:
-                return { icon: faCircleXmark, color: '#999', title: 'Đã hủy' };
+                return { icon: faCircleXmark, color: '#999', title: t('order_status.order_status_6') };
             case 7:
-                return { icon: faCreditCard, color: '#f7a35c', title: 'Chờ thanh toán' };
+                return { icon: faCreditCard, color: '#f7a35c', title: t('order_status.order_status_7') };
             case 8:
-                return { icon: faRotateLeft, color: '#ff6666', title: 'Yêu cầu hoàn' };
+                return { icon: faRotateLeft, color: '#ff6666', title: t('order_status.order_status_8') };
             case 9:
-                return { icon: faBan, color: '#9966cc', title: 'Đã hoàn' };
+                return { icon: faBan, color: '#9966cc', title: t('order_status.order_status_9')};
             case 10:
-                return { icon: faWarehouse, color: '#6c757d', title: 'Trả về kho' };
+                return { icon: faWarehouse, color: '#6c757d', title: t('order_status.order_status_10') };
             default:
-                return { icon: faClock, color: '#999', title: 'Không xác định' };
+                return { icon: faClock, color: '#999', title: t('order_status.order_status_11') };
         }
     };
 
@@ -150,9 +153,8 @@ const OrderUser = () => {
                     <div className="row">
                         <div className="col-lg-12">
                             <div className="breadcrumb__links">
-                                <Link to="/home" style={{cursor: 'pointer'}}><i className="fa fa-home"></i>Trang
-                                    chủ</Link>
-                                <a href="#">Đơn hàng của bạn</a>
+                                <Link to="/home" style={{cursor: 'pointer'}}><i className="fa fa-home"></i>{t('order.home')}</Link>
+                                <a href="#">{t('order.order')}</a>
                             </div>
                         </div>
                     </div>
@@ -182,7 +184,7 @@ const OrderUser = () => {
                                             >
                                                 <div className="title" style={{color}}>
                                                     <FontAwesomeIcon icon={icon} style={{marginRight: 8}}/>
-                                                    {item.name}
+                                                    {getIconAndColor(item.status_id).title}
                                                 </div>
                                                 <div className="title">{count}</div>
                                             </div>
@@ -199,7 +201,7 @@ const OrderUser = () => {
 
                                 {ordersByStatus.length === 0 ? (
                                     <div style={{ textAlign: "center", fontSize: "16px", color: "gray", marginTop: "20px" }}>
-                                        Không có sản phẩm nào
+                                        {t('order.empty')}
                                     </div>
                                 ) : (
                                     ordersByStatus.map((order, index) => {
@@ -217,7 +219,7 @@ const OrderUser = () => {
                                                                     <div><b>{firstItem.nameProduct}</b> <span
                                                                         style={{ fontSize: "12px" }}>x {firstItem.quantity}</span></div>
                                                                     <span
-                                                                        style={{ fontSize: "10px" }}>Kích thước: {firstItem.size}, Màu sắc: {firstItem.color}</span>
+                                                                        style={{ fontSize: "10px" }}>{t('order.size')}: {firstItem.size}, {t('order.color')}: {firstItem.color}</span>
                                                                 </div>
                                                             </div>
                                                             <div className={"status_price"}>
@@ -233,13 +235,13 @@ const OrderUser = () => {
                                                     <div className={"product_price_order"}>
                                                         <div className="view-detail"
                                                              onClick={() => handleOrderDetail(order.id)}>
-                                                            Xem chi tiết ({totalItems} sản phẩm)
+                                                            {t('order.view_detail')} ({totalItems} {t('order.product')})
                                                         </div>
                                                         <div style={{
                                                             fontWeight: "bold",
                                                             color: "red",
                                                             fontSize: "12px"
-                                                        }}>Tổng thanh toán: {formatVND(order.finalPrice)}</div>
+                                                        }}>{t('order.total')}: {formatVND(order.finalPrice)}</div>
                                                     </div>
                                                     <hr style={{ marginTop: "0", marginBottom: "0" }}/>
                                                     <div className={"btn_status_order"}>
@@ -259,29 +261,29 @@ const OrderUser = () => {
 
                                                                 if ([1, 2].includes(id)) {
                                                                     buttons.push(<div className="btn cancel-btn"
-                                                                                      key="cancel">Hủy</div>);
+                                                                                      key="cancel">{t('order.btn_cancel')}</div>);
                                                                 }
 
                                                                 if (id === 7) {
                                                                     buttons.push(<div className="btn cancel-btn"
-                                                                                      key="cancel">Hủy</div>);
+                                                                                      key="cancel">{t('order.btn_cancel')}</div>);
                                                                     buttons.push(<div className="btn pay-btn"
-                                                                                      key="pay">Thanh toán</div>);
+                                                                                      key="pay">{t('order.btn_buy')}</div>);
                                                                 }
 
                                                                 if (id === 4) {
                                                                     buttons.push(<div className="btn return-btn"
-                                                                                      key="return">Yêu cầu hoàn</div>);
+                                                                                      key="return">{t('order.btn_return')}</div>);
                                                                 }
 
                                                                 if ([5, 8].includes(id)) {
                                                                     buttons.push(<div className="btn undo-btn"
-                                                                                      key="undo">Hủy yêu cầu</div>);
+                                                                                      key="undo">{t('order.btn_cancel_ask')}</div>);
                                                                 }
 
                                                                 if ([6, 9].includes(id)) {
                                                                     buttons.push(<div className="btn rebuy-btn"
-                                                                                      key="rebuy">Mua lại</div>);
+                                                                                      key="rebuy">{t('order.btn_reBuy')}</div>);
                                                                 }
 
                                                                 return buttons;

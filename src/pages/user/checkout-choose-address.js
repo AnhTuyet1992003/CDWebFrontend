@@ -5,8 +5,10 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {faCartShopping, faLocationDot, faPen, faPenToSquare, faTrash, faXmark} from '@fortawesome/free-solid-svg-icons';
 import axios from 'axios';
 import Swal from 'sweetalert2';
+import {useTranslation} from "react-i18next";
 
 const CheckoutChooseAddress = ({ onClose, onSelectAddress, toggleAddressForm }) => {
+    const { t } = useTranslation('translation');
     const [addresses, setAddresses] = useState([]);
     const [selectedIndex, setSelectedIndex] = useState(null);
     const [selectedEditAddress, setEditAddress] = useState(null);
@@ -69,14 +71,14 @@ const CheckoutChooseAddress = ({ onClose, onSelectAddress, toggleAddressForm }) 
 // Xóa địa chỉ
     const handleDeleteAddress = async (id) => {
         const result = await Swal.fire({
-            title: 'Bạn có chắc chắn muốn xoá địa chỉ này?',
-            text: "Hành động này không thể hoàn tác!",
+            title: t('checkout_choose_address.warning_delete_address_title'),
+            text:t('checkout_choose_address.warning_delete_address_text'),
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#d33',
             cancelButtonColor: '#3085d6',
-            confirmButtonText: 'Xoá',
-            cancelButtonText: 'Huỷ'
+            confirmButtonText: t('checkout_choose_address.btn_delete'),
+            cancelButtonText: t('checkout_choose_address.btn_cancel'),
         });
 
         if (result.isConfirmed) {
@@ -95,16 +97,16 @@ const CheckoutChooseAddress = ({ onClose, onSelectAddress, toggleAddressForm }) 
                 });
 
                 if (response.data.status === "success") {
-                    Swal.fire('✅ Xóa thành công!', '', 'success');
+                    Swal.fire(t('checkout_choose_address.success_delete_address'), '', 'success');
                     // Cập nhật danh sách địa chỉ sau khi xóa
                     setAddresses(prev => prev.filter(addr => addr.id !== id));
                     setEditAddress(false)
                 } else {
-                    Swal.fire('❌ Xóa thất bại!', response.data.message, 'error');
+                    Swal.fire(t('checkout_choose_address.error_delete_address'), response.data.message, 'error');
                 }
             } catch (err) {
                 console.error("Lỗi xoá địa chỉ:", err);
-                Swal.fire('❌ Lỗi server!', '', 'error');
+                Swal.fire(t('checkout_choose_address.error'), '', 'error');
             }
         }
     };
@@ -172,7 +174,7 @@ const CheckoutChooseAddress = ({ onClose, onSelectAddress, toggleAddressForm }) 
     return (
         <div className="ChooseAddress">
             <div className="content">
-                <div className="title">Địa chỉ của bạn</div>
+                <div className="title">{t('checkout_choose_address.title')}</div>
                 <div className="address_content">
                     {addresses.map((address, index) => (
                         <div className="contain_address" key={address.id} onClick={() => handleSelect(index)}>
@@ -191,13 +193,13 @@ const CheckoutChooseAddress = ({ onClose, onSelectAddress, toggleAddressForm }) 
                                         <div style={{paddingLeft: "10px", display: "flex", flexDirection: "column"}}>
                                             <div className="name">
                                                 <p>
-                                                    <b>Tên người nhận: </b> {address.receiverName}<br/>
-                                                    <b>Số điện thoại:</b> {address.receiverPhone}
+                                                    <b>{t('checkout_choose_address.name')}: </b> {address.receiverName}<br/>
+                                                    <b>{t('checkout_choose_address.phone')}:</b> {address.receiverPhone}
                                                 </p>
                                             </div>
                                             <div className="address">
                                                 <p>
-                                                    <b>Địa chỉ: </b><br/>
+                                                    <b>{t('checkout_choose_address.address')}: </b><br/>
                                                     {address.addressDetail}<br/>
                                                     {address.ward}, {address.district}, {address.province}
                                                 </p>
@@ -224,7 +226,7 @@ const CheckoutChooseAddress = ({ onClose, onSelectAddress, toggleAddressForm }) 
                                                     console.log("Edit:", address);
                                                 }}
                                             >
-                                                <FontAwesomeIcon style={{ color: "black" }} icon={faPen} /> Chỉnh sửa
+                                                <FontAwesomeIcon style={{ color: "black" }} icon={faPen} /> {t('checkout_choose_address.edit')}
                                             </div>
                                             <div
                                                 className={"delete_address_btn"}
@@ -234,7 +236,7 @@ const CheckoutChooseAddress = ({ onClose, onSelectAddress, toggleAddressForm }) 
                                                     console.log("Delete:", address);
                                                 }}
                                             >
-                                                <FontAwesomeIcon style={{ color: "black" }} icon={faTrash} /> Xóa
+                                                <FontAwesomeIcon style={{ color: "black" }} icon={faTrash} /> {t('checkout_choose_address.delete')}
                                             </div>
                                         </div>
                                     )}
@@ -245,8 +247,8 @@ const CheckoutChooseAddress = ({ onClose, onSelectAddress, toggleAddressForm }) 
                     ))}
                 </div>
                 <div className="btn_address">
-                    <div className="add_new_address" onClick={handleAddNewAddress}>Thêm địa chỉ mới</div>
-                    <div className="confirm" onClick={handleConfirm}>Xác nhận</div>
+                    <div className="add_new_address" onClick={handleAddNewAddress}>{t('checkout_choose_address.add_address')}</div>
+                    <div className="confirm" onClick={handleConfirm}>{t('checkout_choose_address.btn_confirm')}</div>
                 </div>
                 <div className="close_ChooseAddress" onClick={onClose}>
                     <FontAwesomeIcon icon={faXmark}/>

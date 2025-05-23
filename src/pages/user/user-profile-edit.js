@@ -15,9 +15,13 @@ import $ from 'jquery';
 
 // Bootstrap JS (bundle includes popper.js)
 import 'bootstrap/dist/js/bootstrap.bundle.min';
+import {useTranslation} from "react-i18next";
+import {useNavigate} from "react-router-dom";
 
 
 const UserProfileEdit = () => {
+    const { t, i18n } = useTranslation();
+    const navigate = useNavigate();
     const [user, setUser] = useState({
         fullname: '',
         //username: '',
@@ -38,30 +42,30 @@ const UserProfileEdit = () => {
     const handleAvatarChange = (e) => {
         const files = e.target.files;
         if (!files || files.length === 0) {
-            console.log("No file selected"); // 👉 sẽ không log dòng này nếu chọn đúng
-            setMessage("Vui lòng chọn một ảnh hợp lệ.");
+            console.log("No file selected");
+            setMessage(t('profile.message_choose_avatar_valid'));
 
             // Hiển thị Swal yêu cầu chọn ảnh hợp lệ
             Swal.fire({
                 icon: 'warning',
-                title: '⚠️ Vui lòng chọn một ảnh hợp lệ.',
+                title: t('profile.warning_choose_avatar'),
                 confirmButtonText: 'OK',
             });
             return;
         }
 
         const file = files[0];
-        console.log("File selected:", file); // ✅ kiểm tra đúng file chưa
+        console.log("File selected:", file);
 
         // Kiểm tra định dạng file (ảnh)
         const validImageTypes = ['image/jpeg', 'image/png', 'image/jpg'];
         if (!validImageTypes.includes(file.type)) {
             Swal.fire({
                 icon: 'error',
-                title: '❌ Chỉ hỗ trợ ảnh JPEG, PNG hoặc JPG!',
+                title: t('profile.error_choose_avatar'),
                 confirmButtonText: 'OK',
             });
-            setMessage("Chỉ hỗ trợ ảnh JPEG, PNG hoặc JPG.");
+            setMessage(t('profile.message_choose_avatar'));
             return;
         }
 
@@ -76,7 +80,7 @@ const UserProfileEdit = () => {
         // Hiển thị thông báo chọn ảnh thành công
         Swal.fire({
             icon: 'success',
-            title: '✅ Ảnh đã được chọn thành công!',
+            title: t('profile.success_choose_avatar'),
             timer: 1500,
             showConfirmButton: false,
         });
@@ -88,7 +92,7 @@ const UserProfileEdit = () => {
         if (!avatarFile){
             Swal.fire({
                 icon: 'warning',
-                title: '⚠️ Vui lòng chọn một ảnh để tải lên.',
+                title: t('profile.warning_choose_avatar_up'),
                 confirmButtonText: 'OK',
             });
             return;
@@ -97,10 +101,10 @@ const UserProfileEdit = () => {
         // Xác nhận người dùng có muốn tải ảnh không
         const confirmUpload = await Swal.fire({
             icon: 'question',
-            title: 'Bạn có chắc chắn muốn cập nhật ảnh đại diện?',
+            title: t('profile.question_choose_avatar_title'),
             showCancelButton: true,
-            confirmButtonText: 'Tải lên',
-            cancelButtonText: 'Hủy',
+            confirmButtonText: t('profile.btn_choose_avatar_up'),
+            cancelButtonText: t('profile.btn_cancel'),
         });
 
         // Nếu người dùng xác nhận thì thực hiện tải ảnh
@@ -123,8 +127,8 @@ const UserProfileEdit = () => {
                 // Hiển thị thông báo thành công
                 Swal.fire({
                     icon: 'success',
-                    title: '✅ Tải ảnh lên thành công!',
-                    text: 'Ảnh đại diện đã được cập nhật.',
+                    title: t('profile.success_up_avatar_title'),
+                    text: t('profile.success_up_avatar_text'),
                     timer: 2000,
                     showConfirmButton: false,
                 });
@@ -134,16 +138,16 @@ const UserProfileEdit = () => {
                 console.error(error);
                 Swal.fire({
                     icon: 'error',
-                    title: '❌ Lỗi khi tải ảnh',
-                    text: 'Có lỗi xảy ra trong quá trình tải ảnh. Vui lòng thử lại.',
+                    title:t('profile.error_up_avatar_title'),
+                    text: t('profile.error_up_avatar_text'),
                 });
             }
         } else {
             // Nếu người dùng hủy bỏ, hiển thị thông báo
             Swal.fire({
                 icon: 'info',
-                title: 'Hủy tải ảnh',
-                text: 'Bạn đã hủy việc tải ảnh lên.',
+                title:t('profile.info_up_avatar_title'),
+                text: t('profile.info_up_avatar_text'),
             });
         }
     };
@@ -165,7 +169,13 @@ const UserProfileEdit = () => {
 
 
         if (!token) {
-            setMessage('Bạn chưa đăng nhập');
+            Swal.fire({
+                icon: 'warning',
+                title: t('login.error_login'),
+                confirmButtonText: 'OK',
+            }).then(() => {
+                navigate('/login');
+            });
             return;
         }
 
@@ -194,7 +204,7 @@ const UserProfileEdit = () => {
             })
             .catch(err => {
                 console.error(err);
-                setMessage('Lỗi khi tải thông tin người dùng');
+                setMessage(t('profile.error_information_user'));
             });
 
         //chat tu dong
@@ -363,7 +373,7 @@ const UserProfileEdit = () => {
             <div className="containerEdit light-style flex-grow-1 container-p-y">
 
                 <h4 className="font-weight-bold py-3 mb-4">
-                    Chỉnh sửa thông tin cá nhân
+                    {t('profile.title')}
                 </h4>
 
                 <div className="card overflow-hidden">
@@ -371,13 +381,13 @@ const UserProfileEdit = () => {
                         <div className="col-md-3 pt-0">
                             <div className="list-group list-group-flush account2-settings-links">
                                 <a className="list-group-item list-group-item-action active" data-toggle="list"
-                                   href="#account2-general">Thông tin cá nhân</a>
+                                   href="#account2-general">{t('profile.information')}</a>
                                 <a className="list-group-item list-group-item-action" data-toggle="list"
-                                   href="#account2-change-password">Đổi mật khẩu</a>
+                                   href="#account2-change-password">{t('profile.change_pass')}</a>
                                 <a className="list-group-item list-group-item-action" data-toggle="list"
-                                   href="#account2-info">Thông tin chung</a>
+                                   href="#account2-info">{t('profile.info_general')}</a>
                                 <a className="list-group-item list-group-item-action" data-toggle="list"
-                                   href="#account2-social-links">Social links</a>
+                                   href="#account2-social-links">{t('profile.social_link')}</a>
                                 <a className="list-group-item list-group-item-action" data-toggle="list"
                                    href="#account2-connections">Connections</a>
                                 <a className="list-group-item list-group-item-action" data-toggle="list"
@@ -396,7 +406,7 @@ const UserProfileEdit = () => {
                                         />
                                         <div className="media-body ml-4">
                                             <label className="btn btn-outline-primary upload-photo-label">
-                                                Tải hình mới lên
+                                                {t('profile.up_avatar')}
                                                 <input
                                                     type="file"
                                                     accept="image/*"
@@ -407,12 +417,10 @@ const UserProfileEdit = () => {
                                             </label> &nbsp;
                                             <button type="button"
                                                     className="btn btn-default md-btn-flat"
-                                                    onClick={handleUploadAvatar}>Tải ảnh
+                                                    onClick={handleUploadAvatar}>{t('profile.up')}
                                             </button>
 
-                                            <div className="text-light small mt-1">Cho phép JPG, GIF hoặc PNG. Kích
-                                                thước tối đa là
-                                                800K
+                                            <div className="text-light small mt-1">{t('profile.condition')}
                                             </div>
                                         </div>
                                     </div>

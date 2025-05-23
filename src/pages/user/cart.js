@@ -6,9 +6,11 @@ import './AddToCart.css'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTicket, faHeart } from '@fortawesome/free-solid-svg-icons';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess'; // ^
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore'; // v
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import {useTranslation} from "react-i18next"; // v
 
 const Cart = () => {
+    const { t } = useTranslation('translation');
     const [cart, setCart] = useState(null);
     const [quantity, setQuantity] = useState(1);
     const navigate = useNavigate();
@@ -75,7 +77,7 @@ const Cart = () => {
                 if (!token) {
                     Swal.fire({
                         icon: 'warning',
-                        title: '⚠️ Bạn chưa đăng nhập.',
+                        title: t('login.error_login'),
                         confirmButtonText: 'OK',
                     }).then(() => {
                         navigate('/login');
@@ -94,7 +96,7 @@ const Cart = () => {
                 if (!data.items || data.items.length === 0) {
                     Swal.fire({
                         icon: 'warning',
-                        title: '⚠️ Giỏ hàng của bạn đang trống.',
+                        title: t('cart.error_empty_cart'),
                         confirmButtonText: 'OK',
                     }).then(() => {
                         navigate('/shop');
@@ -116,10 +118,10 @@ const Cart = () => {
     const handleRemoveItem = (cartItemId) => {
         Swal.fire({
             icon: 'warning',
-            title: 'Bạn có chắc chắn muốn xoá sản phẩm này khỏi giỏ hàng?',
+            title:t('cart.delete_product_cart'),
             showCancelButton: true,
-            confirmButtonText: 'Xoá',
-            cancelButtonText: 'Huỷ',
+            confirmButtonText:t('cart.btn_delete'),
+            cancelButtonText:t('cart.btn_cancel'),
         }).then(async (result) => {
             if (result.isConfirmed) {
                 try {
@@ -130,7 +132,7 @@ const Cart = () => {
                     if (!token) {
                         Swal.fire({
                             icon: 'warning',
-                            title: '⚠️ Bạn chưa đăng nhập.',
+                            title: t('login.error_login'),
                             confirmButtonText: 'OK',
                         }).then(() => {
                             navigate('/login');
@@ -151,7 +153,7 @@ const Cart = () => {
                     if (!updatedCart.cart_items || updatedCart.cart_items.length === 0) {
                         Swal.fire({
                             icon: 'warning',
-                            title: '⚠️ Giỏ hàng của bạn đang trống.',
+                            title: t('cart.error_empty_cart'),
                             confirmButtonText: 'OK',
                         }).then(() => {
                             navigate('/shop');
@@ -176,15 +178,15 @@ const Cart = () => {
 
                     Swal.fire({
                         icon: 'success',
-                        title: '✅ Đã xóa sản phẩm khỏi giỏ hàng!',
+                        title: t('cart.success_delete_product_cart'),
                         confirmButtonText: 'OK',
                     });
                 } catch (error) {
                     console.error("Error removing item: ", error);
                     Swal.fire({
                         icon: 'error',
-                        title: '❌ Xảy ra lỗi khi xóa!',
-                        text: error.response?.data?.message || error.message,
+                        title: t('cart.error_delete_product'),
+                        // text: error.response?.data?.message || error.message,
                     });
                 }
             }
@@ -202,7 +204,7 @@ const Cart = () => {
             if (!token) {
                 Swal.fire({
                     icon: 'warning',
-                    title: '⚠️ Bạn chưa đăng nhập.',
+                    title: t('login.error_login'),
                     confirmButtonText: 'OK',
                 }).then(() => {
                     navigate('/login');
@@ -227,8 +229,8 @@ const Cart = () => {
             console.error("Error updating quantity: ", error);
             Swal.fire({
                 icon: 'error',
-                title: '❌ Cập nhật thất bại!',
-                text: error.response?.data?.message || error.message,
+                title: t('cart.error_update_quantity_product'),
+                // text: error.response?.data?.message || error.message,
             });
         }
     };
@@ -318,7 +320,7 @@ const Cart = () => {
             if (!token) {
                 Swal.fire({
                     icon: 'warning',
-                    title: '⚠️ Bạn chưa đăng nhập.',
+                    title: t('login.error_login'),
                     confirmButtonText: 'OK',
                 }).then(() => {
                     navigate('/login');
@@ -349,8 +351,8 @@ const Cart = () => {
             console.error("Error updating quantity: ", error);
             Swal.fire({
                 icon: 'error',
-                title: '❌ Cập nhật thất bại!',
-                text: error.response?.data?.message || error.message,
+                title: t('cart.error_update_size_color_product'),
+                // text: error.response?.data?.message || error.message,
             });
         }
     };
@@ -364,8 +366,8 @@ const Cart = () => {
             setOpenSelectorId(null);
             Swal.fire({
                 icon: 'warning',
-                title: '⚠️ Không hợp lệ!',
-                text: 'Vui lòng chọn lại đầy đủ màu và kích cỡ.',
+                title: t('cart.warning_update_size_color_title'),
+                text: t('cart.warning_update_size_color_text'),
             });
             return;
         }
@@ -374,12 +376,12 @@ const Cart = () => {
         setOpenSelectorId(null);
 
         Swal.fire({
-            title: 'Xác nhận thay đổi?',
-            text: `Bạn có chắc muốn đổi sang ${selectedColor} / ${selectedSize}?`,
+            title: t('cart.change_size_color_title'),
+            text: `${t('cart.change_size_color_text')} ${selectedColor} / ${selectedSize}?`,
             icon: 'question',
             showCancelButton: true,
-            confirmButtonText: 'Xác nhận',
-            cancelButtonText: 'Hủy'
+            confirmButtonText: t('cart.btn_change_size_color_confirm'),
+            cancelButtonText: t('cart.btn_change_size_color_cancel'),
         }).then(result => {
             if (result.isConfirmed) {
                 updateColorAndSize(itemId, variant.id); // Gọi API
@@ -391,7 +393,7 @@ const Cart = () => {
         if (selectedItems.length === 0) {
             Swal.fire({
                 icon: 'info',
-                title: 'Bạn chưa chọn sản phẩm nào để xoá.',
+                title: t('cart.info_choose_delete_product'),
                 confirmButtonText: 'OK',
             });
             return;
@@ -399,10 +401,10 @@ const Cart = () => {
 
         Swal.fire({
             icon: 'warning',
-            title: 'Bạn có chắc chắn muốn xoá các sản phẩm đã chọn?',
+            title: t('cart.warning_delete_select_product'),
             showCancelButton: true,
-            confirmButtonText: 'Xoá',
-            cancelButtonText: 'Huỷ',
+            confirmButtonText: t('cart.btn_delete'),
+            cancelButtonText: t('cart.btn_cancel'),
         }).then(async (result) => {
             if (result.isConfirmed) {
                 try {
@@ -414,7 +416,7 @@ const Cart = () => {
                     if (!token) {
                         Swal.fire({
                             icon: 'warning',
-                            title: '⚠️ Bạn chưa đăng nhập.',
+                            title:  t('login.error_login'),
                             confirmButtonText: 'OK',
                         }).then(() => {
                             navigate('/login');
@@ -438,7 +440,7 @@ const Cart = () => {
                     if (!updatedCart.items || updatedCart.items.length === 0) {
                         Swal.fire({
                             icon: 'warning',
-                            title: '⚠️ Giỏ hàng của bạn đang trống.',
+                            title: t('cart.error_empty_cart'),
                             confirmButtonText: 'OK',
                         }).then(() => {
                             navigate('/shop');
@@ -452,15 +454,15 @@ const Cart = () => {
 
                     Swal.fire({
                         icon: 'success',
-                        title: '✅ Đã xoá các sản phẩm khỏi giỏ hàng!',
+                        title: t('cart.success_delete_select_product'),
                         confirmButtonText: 'OK',
                     });
                 } catch (error) {
                     console.error("Error removing selected items: ", error);
                     Swal.fire({
                         icon: 'error',
-                        title: '❌ Xảy ra lỗi khi xoá!',
-                        text: error.response?.data?.message || error.message,
+                        title: t('cart.error_delete_product'),
+                        // text: error.response?.data?.message || error.message,
                     });
                 }
             }
@@ -477,7 +479,7 @@ const Cart = () => {
         if (!token) {
             Swal.fire({
                 icon: 'warning',
-                title: '⚠️ Bạn chưa đăng nhập.',
+                title: t('login.error_login'),
                 confirmButtonText: 'OK',
             }).then(() => {
                 navigate('/login');
@@ -488,8 +490,8 @@ const Cart = () => {
         if (selectedItems.length === 0) {
             Swal.fire({
                 icon: 'warning',
-                title: 'Bạn chưa chọn sản phẩm nào!',
-                text: 'Vui lòng chọn ít nhất một sản phẩm để tiếp tục.',
+                title: t('cart.warning_choose_product_buy_title'),
+                text: t('cart.warning_choose_product_buy_text'),
                 confirmButtonText: 'OK',
             });
             return;
@@ -515,7 +517,7 @@ const Cart = () => {
 
                 navigate('/checkout');
             } else {
-                Swal.fire({ icon: 'error', title: 'Lỗi', text: result.message });
+                Swal.fire({ icon: 'error', title:  t('cart.error'), text: result.message });
             }
         } catch (error) {
             console.error("Lỗi khi chuẩn bị đơn hàng:", error);
@@ -531,10 +533,9 @@ const Cart = () => {
                     <div className="row">
                         <div className="col-lg-12">
                             <div className="breadcrumb__links">
-                                <Link to="/home" style={{cursor: 'pointer'}}><i className="fa fa-home"></i>Trang
-                                    chủ</Link>
+                                <Link to="/home" style={{cursor: 'pointer'}}><i className="fa fa-home"></i>{ t('cart.home')}</Link>
 
-                                <span>Giỏ hàng</span>
+                                <span>{ t('cart.title')}</span>
                             </div>
                         </div>
                     </div>
@@ -550,19 +551,14 @@ const Cart = () => {
                                     <thead>
                                     <tr>
                                         <th>
-                                            {/*<input*/}
-                                            {/*    type="checkbox"*/}
-                                            {/*    onChange={handleSelectAll}*/}
-                                            {/*    checked={isAllSelected}  // Thêm điều kiện để kiểm tra nếu tất cả sản phẩm đã được chọn*/}
-                                            {/*/>*/}
                                             <input className={"check_product"} type={"checkbox"}
                                                    onChange={handleSelectAll}
                                                    checked={isAllSelected}/>
                                         </th>
-                                        <th>Sản phẩm</th>
-                                        <th>Giá</th>
-                                        <th>Số lượng</th>
-                                        <th>Tổng tiền</th>
+                                        <th>{ t('cart.product')}</th>
+                                        <th>{ t('cart.price')}</th>
+                                        <th>{ t('cart.quantity')}</th>
+                                        <th>{ t('cart.total_price')}</th>
                                         <th></th>
                                     </tr>
                                     </thead>
@@ -570,11 +566,6 @@ const Cart = () => {
                                     {cart.items.map(item => (
                                         <tr key={item.id}>
                                             <td>
-                                                {/*<input*/}
-                                                {/*    type="checkbox"*/}
-                                                {/*    checked={selectedItems.includes(item.id)}  // Kiểm tra nếu item này có trong danh sách đã chọn*/}
-                                                {/*    onChange={() => handleSelectItem(item.id)}  // Gọi hàm chọn/tắt chọn sản phẩm*/}
-                                                {/*/>*/}
                                                 <input className={"check_product"} type={"checkbox"}
                                                        checked={selectedItems.includes(item.id)}
                                                        onChange={() => handleSelectItem(item.id)}/>
@@ -595,7 +586,7 @@ const Cart = () => {
                                                             onClick={() => handleClickColorSizeProduct(item.id, item.productId, item.color, item.size)}
                                                         >
                                                         <span>
-                                                            Màu sắc: {item.color} | Kích thước: {item.size}
+                                                            { t('cart.color')}: {item.color} | { t('cart.size')}: {item.size}
                                                             <ExpandMoreIcon
                                                                 style={{fontSize: '16px', marginLeft: '5px'}}/>
                                                         </span>
@@ -605,7 +596,7 @@ const Cart = () => {
                                                             <div className="open_choose_size_color">
                                                                 <div className="choose_color">
                                                                     <div className="color_title">
-                                                                        <p>Màu sắc</p>
+                                                                        <p>{ t('cart.color')}</p>
                                                                     </div>
                                                                     <div style={{
                                                                         display: 'flex',
@@ -633,7 +624,7 @@ const Cart = () => {
                                                                 <div className="choose_size"
                                                                      style={{marginTop: '10px'}}>
                                                                     <div className="size_title">
-                                                                        <p>Kích cỡ</p>
+                                                                        <p>{ t('cart.size')}</p>
                                                                     </div>
                                                                     <div style={{
                                                                         display: 'flex',
@@ -661,7 +652,7 @@ const Cart = () => {
                                                                     className="btn_choose_color_size"
                                                                     onClick={() => handleConfirmVariantChange(item.id)}
                                                                 >
-                                                                    Xác Nhận
+                                                                    { t('cart.btn_confirm')}
                                                                 </div>
 
 
@@ -719,13 +710,13 @@ const Cart = () => {
                                        onChange={handleSelectAll}
                                        checked={isAllSelected}/>
                                 <span
-                                    style={{paddingLeft: "15px"}}>   Chọn tất cả ({cart.totalQuantityProduct})  </span>
+                                    style={{paddingLeft: "15px"}}>   { t('cart.choose_product_all')} ({cart.totalQuantityProduct})  </span>
                                 <button
                                     style={{paddingLeft: "15px"}}
                                     className="delete_all_product"
                                     onClick={handleRemoveSelectedItems}
                                 >
-                                    Xóa
+                                    { t('cart.btn_delete')}
                                 </button>
 
                             </div>
@@ -734,17 +725,16 @@ const Cart = () => {
                             {/*</div>*/}
                             <div className={"coupon_product"}>
                                 <div className={"coupon_product_btn"}>
-                                    <FontAwesomeIcon className={"ticket"} icon={faTicket}/> Mã giảm giá
+                                    <FontAwesomeIcon className={"ticket"} icon={faTicket}/> { t('cart.choose_coupon')}
                                 </div>
-                                <div style={{paddingLeft: "10px"}} className={"coupon_is_choose"}>Đã
-                                    giảm {formatVND(10000)}
+                                <div style={{paddingLeft: "10px"}} className={"coupon_is_choose"}>{ t('cart.is_coupon_price')} {formatVND(10000)}
                                 </div>
                             </div>
                             <div className={"product_total_price"}>
-                                <div className={"total_price"}>Tổng tiền <span style={{fontSize: "12px"}}>( {selectedSummary.totalQuantityProduct} sản phẩm)</span><p
+                                <div className={"total_price"}>{ t('cart.total_price')} <span style={{fontSize: "12px"}}>( {selectedSummary.totalQuantityProduct} { t('cart.product')})</span><p
                                     className={"total"}>  {formatVND(selectedSummary.totalPrice)}</p></div>
                             </div>
-                            <div className={"btn_checkout_order"} onClick={handleCheckout}>Mua hàng</div>
+                            <div className={"btn_checkout_order"} onClick={handleCheckout}>{ t('cart.btn_buy')}</div>
                         </div>
                     </div>
                 </div>

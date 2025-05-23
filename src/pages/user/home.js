@@ -3,8 +3,10 @@ import {Link} from "react-router-dom";
 import Chatbox from './Chatbox';
 import axios from "axios";  // đúng đường dẫn file Chatbox bạn tạo
 import AddToCart from "./AddToCart";
+import { useTranslation } from 'react-i18next';
 import './AddToCart.css'
 const Home = () => {
+    const { t } = useTranslation('translation');
     const [products, setProducts] = useState([]);
     const [showAddToCart, setShowAddToCart] = useState(false);
     const [selectedProductId, setSelectedProductId] = useState(null);
@@ -66,9 +68,8 @@ const Home = () => {
                     <div className="row">
                         <div className="col-lg-12">
                             <div className="breadcrumb__links">
-                                <Link to="/home" style={{cursor: 'pointer'}}><i className="fa fa-home"></i>Trang
-                                    chủ</Link>
-                                <span>Sản phẩm</span>
+                                <Link to="/home" style={{cursor: 'pointer'}}><i className="fa fa-home"></i>{t('products.home')}</Link>
+                                <span>{t('products.title')}</span>
                             </div>
                         </div>
                     </div>
@@ -82,7 +83,7 @@ const Home = () => {
                             <div className="shop__sidebar">
                                 <div className="sidebar__categories">
                                     <div className="section-title">
-                                        <h4>Danh mục</h4>
+                                        <h4>{t('products.menu')}</h4>
                                     </div>
                                     <div className="categories__accordion">
                                         <div className="accordion" id="accordionExample">
@@ -312,10 +313,10 @@ const Home = () => {
                                     }}
                                             onChange={(e) => handlePageSizeChange(e.target.value)}
                                     >
-                                        <option value="3">3 / trang</option>
-                                        <option value="6">6 / trang</option>
-                                        <option defaultChecked={true}  value="9">9 / trang</option>
-                                        <option value="12">12 / trang</option>
+                                        <option value="3">3 / {t('products.page')}</option>
+                                        <option value="6">6 / {t('products.page')}</option>
+                                        <option defaultChecked={true}  value="9">9 / {t('products.page')}</option>
+                                        <option value="12">12 / {t('products.page')}</option>
                                     </select>
                                 </div>
 
