@@ -607,6 +607,7 @@ import axios from 'axios';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './import-order.css';
 import { debounce } from 'lodash';
+import Swal from "sweetalert2";
 
 // Component quản lý form nhập hàng
 const ImportOrder = () => {
@@ -994,7 +995,12 @@ const ImportOrder = () => {
                         Authorization: `Bearer ${token}`,
                     },
                 });
-                alert('Thêm đơn hàng thành công!');
+                Swal.fire({
+                    icon: 'success',
+                    title: '✅ Thêm đơn hàng thành công!',
+                    showConfirmButton: false,
+                    timer: 1500
+                });
                 setFormData({
                     username: '',
                     importPrice: 0,
