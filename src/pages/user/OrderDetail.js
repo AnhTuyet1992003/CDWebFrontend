@@ -6,7 +6,10 @@ import './OrderDetail.css'
 
 import axios from 'axios';
 import Swal from 'sweetalert2';
+import {useTranslation} from "react-i18next";
 const OrderDetail = () => {
+    const { t } = useTranslation('translation');
+
     const location = useLocation();
     const orderId = location.state?.orderId;
     const [order, setOrder] = useState(null);
@@ -24,7 +27,7 @@ const OrderDetail = () => {
             if (!token) {
                 Swal.fire({
                     icon: 'warning',
-                    title: '⚠️ Bạn chưa đăng nhập.',
+                    title: t('login.error_login'),
                     confirmButtonText: 'OK',
                 }).then(() => {
                     navigate('/login');
@@ -33,7 +36,7 @@ const OrderDetail = () => {
             }
 
             if (!orderId) {
-                Swal.fire("Không tìm thấy đơn hàng!").then(() => navigate("/home"));
+                Swal.fire( t('order_detail.error_empty_order')).then(() => navigate("/home"));
                 return;
             }
 
@@ -51,14 +54,14 @@ const OrderDetail = () => {
             } catch (error) {
                 Swal.fire({
                     icon: 'error',
-                    title: 'Lỗi',
-                    text: 'Không thể tải đơn hàng. Vui lòng thử lại!',
+                    title:  t('order_detail.error'),
+                    text:  t('order_detail.error_order'),
                 });
             }
         };
         fetchOrder();
     }, [orderId]);
-    if (!order) return <p>Đang tải...</p>;
+    if (!order) return <p>  {t('order_detail.order_empty')}</p>;
 
 
     const formatVND = (money) => {
@@ -67,7 +70,7 @@ const OrderDetail = () => {
     return (
         <div className={"Order_Detail"}>
             <div className={"content"}>
-                <div style={{paddingBottom: "20px"}}><h3>Chi tiết đơn hàng của bạn</h3></div>
+                <div style={{paddingBottom: "20px"}}><h3>{t('order_detail.title')}</h3></div>
                 <div className="row">
                     <div className="col-lg-8">
                         {/* Details */}
@@ -79,35 +82,35 @@ const OrderDetail = () => {
                                         <span className="me-3">ID:MDH{order.id}</span>
                                         <span className="me-3">
                                                 {order.paymentId === 1
-                                                ? 'Thanh toán khi nhận hàng'
+                                                ? t('payment.payment_1')
                                                 : order.paymentId === 2
-                                                ? 'Thanh toán qua MoMo'
+                                                ? t('payment.payment_2')
                                                 : order.paymentId === 3
-                                                ? 'Thanh toán qua VNPAY'
-                                                : 'Không xác định'}
+                                                ? t('payment.payment_3')
+                                                : t('payment.payment_4')}
                                         </span>
                                         <span className="badge rounded-pill bg-info">
                                             {order.statusOrderId === 1
-                                                    ? 'Chờ xác nhận'
+                                                    ? t('order_status.order_status_1')
                                                     : order.statusOrderId === 2
-                                                    ? 'Đang đóng gói'
+                                                    ? t('order_status.order_status_2')
                                                     : order.statusOrderId === 3
-                                                    ? 'Đang giao hàng'
+                                                    ? t('order_status.order_status_3')
                                                     : order.statusOrderId === 4
-                                                    ? 'Giao thành công'
+                                                    ? t('order_status.order_status_4')
                                                     : order.statusOrderId === 5
-                                                    ? 'Yêu cầu hủy'
+                                                    ? t('order_status.order_status_5')
                                                     : order.statusOrderId === 6
-                                                    ? 'Đã hủy'
+                                                    ? t('order_status.order_status_6')
                                                     : order.statusOrderId === 7
-                                                    ? 'Chờ thanh toán'
+                                                    ? t('order_status.order_status_7')
                                                     : order.statusOrderId === 8
-                                                    ? 'Yêu cầu hoàn'
+                                                    ? t('order_status.order_status_8')
                                                     : order.statusOrderId === 9
-                                                    ? 'Đã hoàn'
+                                                    ? t('order_status.order_status_9')
                                                     : order.statusOrderId === 10
-                                                    ? 'Trả về kho'
-                                                    : 'Không xác định'}
+                                                    ? t('order_status.order_status_10')
+                                                    : t('order_status.order_status_11')}
                                         </span>
                                     </div>
                                     <div className="d-flex">
@@ -145,11 +148,11 @@ const OrderDetail = () => {
                                                         <h6 className="small mb-0">
                                                             <a href="#" className="text-reset">
 
-                                                               <b> Product {item.nameProduct}</b>
+                                                               <b> {item.nameProduct}</b>
                                                             </a>
                                                         </h6>
-                                                        <span className="small">Size: {item.size}</span><br />
-                                                        <span className="small">Color: {item.color}</span>
+                                                        <span className="small">{t('order_detail.size')}: {item.size}</span><br />
+                                                        <span className="small">{t('order_detail.color')}: {item.color}</span>
                                                     </div>
                                                 </div>
                                             </td>
@@ -160,19 +163,19 @@ const OrderDetail = () => {
                                     </tbody>
                                     <tfoot>
                                     <tr>
-                                        <td colSpan={2}>Tổng tiền</td>
+                                        <td colSpan={2}>{t('order_detail.price_total')}</td>
                                         <td className="text-end">{formatVND(order.totalPrice)}</td>
                                     </tr>
                                     <tr>
-                                        <td colSpan={2}>Tiền ship</td>
+                                        <td colSpan={2}>{t('order_detail.price_ship')}</td>
                                         <td className="text-end">{formatVND(order.shippingFee)}</td>
                                     </tr>
                                     <tr>
-                                        <td colSpan={2}>Giảm giá (Code: NEWYEAR)</td>
+                                        <td colSpan={2}>{t('order_detail.price_coupon')} (Code: NEWYEAR)</td>
                                         <td className="text-danger text-end">{formatVND(0)}</td>
                                     </tr>
                                     <tr className="fw-bold">
-                                        <td colSpan={2}>Tổng thanh toán</td>
+                                        <td colSpan={2}>{t('order_detail.price_final')}</td>
                                         <td className="text-end">{formatVND(order.finalPrice)}</td>
                                     </tr>
                                     </tfoot>
@@ -184,11 +187,11 @@ const OrderDetail = () => {
                             <div className="card-body">
                                 <div className="row">
                                     <div className="col-lg-6">
-                                        <h3 className="h6">Phương thức thanh toán</h3>
+                                        <h3 className="h6">{t('order_detail.size')}</h3>
                                         {order.paymentId === 1 ? (
-                                            <p>Thanh toán khi nhận hàng</p>
+                                            <p>{t('payment.payment_1')}</p>
                                         ) : order.paymentId === 2 ? (
-                                            <p>Thanh toán qua MoMo <br/>
+                                            <p>{t('payment.payment_2')} <br/>
                                                 Total: {order.finalPrice.toLocaleString('en-US', {
                                                     style: 'currency',
                                                     currency: 'USD'
@@ -196,30 +199,30 @@ const OrderDetail = () => {
                                                 <span className="badge bg-success rounded-pill">PAID</span>
                                             </p>
                                         ) : order.paymentId === 3 ? (
-                                            <p>Thanh toán qua VNPAY <br/>
-                                                Tổng thanh toán: {formatVND(order.finalPrice)}
+                                            <p>{t('payment.payment_3')}<br/>
+                                                {t('order_detail.price_final')}: {formatVND(order.finalPrice)}
                                                 <br/>
                                                 {order.statusOrderId === 1
                                                     ? (
-                                                        <span className="badge bg-success rounded-pill">Đã thanh toán</span>
+                                                        <span className="badge bg-success rounded-pill">{t('order_detail.payment_ok')}</span>
                                                     )
                                                             : (
                                                         <span
-                                                            className="badge bg-danger rounded-pill">Chưa thanh toán</span>
+                                                            className="badge bg-danger rounded-pill">{t('order_detail.payment_no')}</span>
                                                     )}
                                             </p>
                                         ) : (
-                                            <p>Không xác định phương thức thanh toán</p>
+                                            <p>{t('payment.payment_4')}</p>
                                         )}
                                     </div>
 
                                     <div className="col-lg-6">
-                                        <h3 className="h6"> Địa chỉ</h3>
+                                        <h3 className="h6"> {t('order_detail.address')}</h3>
                                         <address>
                                             <strong>{order.receiverName}</strong><br/>
                                             {order.addressDetails}<br/>
                                             {order.district}, {order.ward}, {order.province}<br/>
-                                            <abbr title="Phone">Số điện thoại:</abbr> {order.receiverPhone}
+                                            {t('order_detail.phone')}: {order.receiverPhone}
                                         </address>
                                     </div>
                                 </div>
@@ -230,24 +233,24 @@ const OrderDetail = () => {
                         {/* Customer Notes */}
                         <div className="card mb-4">
                             <div className="card-body">
-                                <h3 className="h6">Ghi chú của khách hàng</h3>
-                                <p>{order.note ? order.note : 'Không có ghi chú'}</p>
+                                <h3 className="h6">{t('order_detail.note')}</h3>
+                                <p>{order.note ? order.note : t('order_detail.no_note')}</p>
                             </div>
                         </div>
                         <div className="card mb-4">
                             {/* Shipping information */}
                             <div className="card-body">
-                                <h3 className="h6">Thông tin vận chuyển</h3>
-                                <strong>Mã vận chuyển</strong>
+                                <h3 className="h6">{t('order_detail.shipping_information')}</h3>
+                                <strong>{t('order_detail.code_shipping')}</strong>
                                 <span><a href="#" className="text-decoration-underline" target="_blank">FF1234567890</a> <i
                                     className="bi bi-box-arrow-up-right"/> </span>
                                 <hr/>
-                                <h3 className="h6">Địa chỉ</h3>
+                                <h3 className="h6">{t('order_detail.address')}</h3>
                                 <address>
                                     <strong>{order.receiverName}</strong><br/>
                                     {order.addressDetails}<br/>
                                     {order.district}, {order.ward}, {order.province}<br/>
-                                    <abbr title="Phone">Số điện thoại:</abbr> {order.receiverPhone}
+                                    {t('order_detail.phone')}: {order.receiverPhone}
                                 </address>
                             </div>
                         </div>

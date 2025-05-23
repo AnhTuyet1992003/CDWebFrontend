@@ -7,8 +7,10 @@ import Cookies from "js-cookie";
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import Swal from 'sweetalert2';
+import {useTranslation} from "react-i18next";
 
 const AddToCart = ({ productId, onClose }) => {
+    const { t } = useTranslation('translation');
     const [product, setProduct] = useState(null);
     const [selectedColor, setSelectedColor] = useState(null);
     const [selectedSize, setSelectedSize] = useState(null);
@@ -55,7 +57,7 @@ const AddToCart = ({ productId, onClose }) => {
                 })
                 .catch(error => {
                     console.error("Lỗi khi lấy thông tin sản phẩm:", error);
-                    Swal.fire('Lỗi!', 'Lỗi khi lấy thông tin sản phẩm.', 'error');
+                    Swal.fire(t('add_to_cart.error'), t('add_to_cart.error_get_product'), 'error');
                 });
         }
     }, [productId]);
@@ -128,7 +130,7 @@ const AddToCart = ({ productId, onClose }) => {
         if (!token) {
             Swal.fire({
                 icon: 'warning',
-                title: '⚠️ Bạn chưa đăng nhập.',
+                title: t('login.error_login'),
                 confirmButtonText: 'OK',
             }).then(() => {
                 navigate('/login');
@@ -150,7 +152,7 @@ const AddToCart = ({ productId, onClose }) => {
                 .then(response => {
                     Swal.fire({
                         icon: 'success',
-                        title: '✅ Đã thêm vào giỏ hàng!',
+                        title: t('add_to_cart.success_add_to_cart'),
                         showConfirmButton: false,
                         timer: 1500
                     });
@@ -160,13 +162,13 @@ const AddToCart = ({ productId, onClose }) => {
                 .catch(error => {
                     console.error("Lỗi khi thêm vào giỏ hàng:", error);
                     // toast.error('❌ Lỗi khi thêm vào giỏ hàng!');
-                    Swal.fire('Lỗi!', 'Không thể thêm vào giỏ hàng.', 'error');
+                    Swal.fire(t('add_to_cart.error'), t('add_to_cart.error_add_to_cart'), 'error');
                 });
         } else {
             // toast.warning('⚠️ Vui lòng chọn kích cỡ và màu sắc!');
             Swal.fire({
                 icon: 'warning',
-                title: '⚠️ Vui lòng chọn kích cỡ và màu sắc!',
+                title: t('add_to_cart.choose_size_color'),
                 confirmButtonText: 'OK',
                 customClass: {
                     popup: 'swal2-rounded'  // nếu muốn bo góc đẹp
@@ -311,7 +313,7 @@ const AddToCart = ({ productId, onClose }) => {
                         </div>
                         <div className="row row_color">
                             <div className="color_title">
-                                <p>Màu sắc</p>
+                                <p>{t('cart.color')}</p>
                             </div>
                             {product.sizeColorVariants?.reduce((acc, variant) => {
                                 if (!acc.includes(variant.color)) acc.push(variant.color);
@@ -341,7 +343,7 @@ const AddToCart = ({ productId, onClose }) => {
 
                         <div className="row row_size">
                             <div className="size_title">
-                                <p>Kích cỡ</p>
+                                <p>{t('cart.size')}</p>
                             </div>
                             {product.sizeColorVariants?.reduce((acc, variant) => {
                                 if (!acc.includes(variant.size)) acc.push(variant.size);
@@ -370,7 +372,7 @@ const AddToCart = ({ productId, onClose }) => {
 
                         <div className="row row_quantity">
                             <div className="quantity_title">
-                                <p>Số lượng</p>
+                                <p>{t('cart.quantity')}</p>
                             </div>
                             <div className="btn_quantity">
                                 <div className="btn_quantity_de" onClick={handleDecrease}>-</div>
@@ -380,16 +382,18 @@ const AddToCart = ({ productId, onClose }) => {
                         </div>
                         <div className="row row_button">
                             <div className="button_addToCart" onClick={handleAddToCart}>
-                                <span><FontAwesomeIcon icon={faCartShopping}/> Thêm vào giỏ hàng</span>
+                                <span><FontAwesomeIcon icon={faCartShopping}/>
+                                    {t('add_to_cart.btn_add_to_cart')}
+                                    </span>
                             </div>
                             <div className="button_buy">
-                                Mua
+                                { t('cart.btn_buy')}
                             </div>
                         </div>
                     </div>
                 </div>
                 <div className="description_product">
-                    <p id="descriptionText"><b>* Mô Tả</b> {product.description}
+                    <p id="descriptionText"><b>* {t('add_to_cart.description')}</b> {product.description}
                         <br/>
                         <b>* Brand</b> {product.brandName}
                     </p>
