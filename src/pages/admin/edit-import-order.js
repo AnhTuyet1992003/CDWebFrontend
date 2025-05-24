@@ -710,10 +710,12 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import './import-order.css';
 import { debounce } from 'lodash';
 import Swal from 'sweetalert2';
+import { useNavigate } from 'react-router-dom';
 
 // Component quản lý form chỉnh sửa đơn nhập hàng
 const EditImportOrder = () => {
   const { id } = useParams(); // Lấy id từ URL
+    const navigate = useNavigate();
 
   // State lưu dữ liệu form
   const [formData, setFormData] = useState({
@@ -1152,6 +1154,7 @@ const handleSubmit = async (e) => {
                 showConfirmButton: false,
                 timer: 1500,
             });
+
             setFormData({
                 username: '',
                 importPrice: 0,
@@ -1161,6 +1164,8 @@ const handleSubmit = async (e) => {
             setErrors({});
             setColors({});
             setSizes({});
+
+            navigate('/list-import-order');
         } catch (error) {
             Swal.fire('Lỗi!', 'Lỗi khi cập nhật đơn hàng!', 'error');
             console.error('Lỗi:', error);
