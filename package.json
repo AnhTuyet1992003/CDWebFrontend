@@ -75,7 +75,23 @@
     "extends": [
       "react-app",
       "react-app/jest"
-    ]
+    ],
+    "env": {
+      "browser": true,
+      "es2021": true,
+      "amd": true
+    },
+    "rules": {
+      "no-unused-expressions": "error",
+      "no-undef": "error",
+      "no-restricted-globals": [
+        "error",
+        {
+          "name": "self",
+          "message": "Use window or WorkerGlobalScope instead of self"
+        }
+      ]
+    }
   },
   "browserslist": {
     "production": [
