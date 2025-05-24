@@ -4,8 +4,32 @@ import Cookies from 'js-cookie';
 import {jwtDecode} from "jwt-decode";
 import axios from "axios";
 import '../../pages/user/AddToCart.css'
-
+import { useTranslation } from 'react-i18next';
+import Swal from 'sweetalert2';
 const Header = () => {
+
+
+    // đa ngôn ngữ
+    const { t, i18n } = useTranslation();
+
+    const changeLanguage = (lng) => {
+        console.log('Changing language to:', lng);
+        i18n.changeLanguage(lng);
+    };
+
+
+
+    // Danh sách ngôn ngữ
+    const languages = [
+        { code: 'vi', name: t('translation.vi') },
+        { code: 'en', name: t('translation.en') },
+        { code: 'fr', name: t('translation.fr') },      // Tiếng pháp
+        { code: 'es', name: t('translation.es') },       // Tiếng Tây Ban Nha
+        { code: 'ja', name: t('translation.ja')},         // Tiếng Nhật
+        { code: 'ko', name: t('translation.ko') },         // Tiếng Hàn
+        { code: 'zh', name: t('translation.zh') }        // Tiếng Trung (Giản thể)
+    ];
+
     const navigate = useNavigate();
     const [username, setUsername] = useState('');
     const [user, setUser] = useState({
@@ -14,6 +38,45 @@ const Header = () => {
     });
 
     const [userId, setUserId] = useState(null);
+
+
+
+
+    const [cartQuantity, setCartQuantity] = useState(0);
+
+    const fetchCart = async () => {
+        const token = document.cookie
+            .split('; ')
+            .find(row => row.startsWith('token='))?.split('=')[1];
+        if (!token) return;
+
+        try {
+            const res = await axios.get('https://localhost:8443/api/v1/carts', {
+                headers: { Authorization: `Bearer ${token}` },
+                withCredentials: true
+            });
+            setCartQuantity(res.data.data.totalQuantityProduct || 0);
+        } catch (err) {
+            console.error("Lỗi khi lấy giỏ hàng:", err);
+        }
+    };
+
+    useEffect(() => {
+        fetchCart();
+
+        const handleCartUpdated = () => {
+            fetchCart(); // gọi lại API khi có sự kiện "cartUpdated"
+        };
+
+        window.addEventListener("cartUpdated", handleCartUpdated);
+        return () => {
+            window.removeEventListener("cartUpdated", handleCartUpdated);
+        };
+    }, []);
+
+
+
+
     useEffect(() => {
         const loadUsername = () => {
             let storedUsername = localStorage.getItem('username');
@@ -69,7 +132,11 @@ const Header = () => {
     }, []);
 
     const handleLogout = () => {
-        alert('Bạn đã đăng xuất thành công!');
+        Swal.fire({
+            icon: 'success',
+            title: t('header.success_logout'),
+            confirmButtonText: 'OK',
+        })
 
         // Remove the token and username from cookies/localStorage
         Cookies.remove('token');
@@ -117,7 +184,10 @@ const Header = () => {
             })
             .catch(err => {
                 console.error(err);
-                alert('Lỗi khi tải thông tin người dùng');
+                Swal.fire({
+                    icon: 'error',
+                    title: t('header.error_information_user'),
+                })
             });
     }, []);
 
@@ -136,8 +206,8 @@ const Header = () => {
                         <div className="col-xl-6 col-lg-7">
                             <nav className="header__menu">
                                 <ul>
-                                    <li className="active"><Link to="/home">Trang chủ</Link></li>
-                                    <li><Link to="/shop">Sản phẩm</Link></li>
+                                    <li className="active"><Link to="/home">{t('header.home')}</Link></li>
+                                    <li><Link to="/shop">{t('header.products')}</Link></li>
                                     <li>
                                         <a href="#">Pages</a>
                                         <ul className="dropdown">
@@ -149,16 +219,46 @@ const Header = () => {
                                             <li><Link to="/blog-detail">Blog Detail</Link></li>
                                         </ul>
                                     </li>
-                                    <li><Link to="/blog">Blog</Link></li>
-                                    <li><Link to="/contact">Liên hệ</Link></li>
+                                    <li><Link to="/blog">{t('header.about')}</Link></li>
+                                    <li><Link to="/contact">{t('header.contact')}</Link></li>
                                     <li><Link to="/admin-index">Admin</Link></li>
-                                    <li><Link to="/AddToCart">Cart</Link></li>
                                 </ul>
                             </nav>
                         </div>
                         <div className="col-lg-3">
                             <div className="header__right">
                                 <div className="header__right__auth">
+                                    <div  style={{display: "flex", flexDirection: "row", justifyItems: "center", alignItems: "center"}}>
+                                    <a
+                                        className="nav-link dropdown-toggle hide-arrow"
+                                        href="#"
+                                        data-bs-toggle="dropdown"
+                                        style={{fontsize: "15px",
+                                            textAlign: "center",
+                                            border: "1px solid rgba(0, 0, 0, 0.97)",
+                                            padding: "3px",
+                                            borderRadius: "5px",
+                                            boxShadow: "0 -2px 10px rgba(0, 0, 0, 0.1)"
+                                        }}
+                                    >
+                                                      <span style={{fontsize: "15px"}}>
+                                                        {languages.find((lang) => lang.code === i18n.language)?.name ||
+                                                            'Tiếng Việt'}
+                                                      </span>
+                                    </a>
+                                    <ul className="dropdown-menu dropdown-menu-end">
+                                        {languages.map((lang) => (
+                                            <li key={lang.code}>
+                                                <button
+                                                    className="dropdown-item"
+                                                    onClick={() => changeLanguage(lang.code)}
+                                                >
+                                                    {lang.name}
+                                                </button>
+                                            </li>
+                                        ))}
+                                    </ul>
+
                                     {username ? (
                                         <>
                                             <ul className="navbar-nav flex-row align-items-center ms-md-auto">
@@ -189,7 +289,7 @@ const Header = () => {
                                                     <ul className="dropdown-menu dropdown-menu-end">
                                                         <li>
                                                             <a className="dropdown-item" href="#">
-                                                            <div className="d-flex">
+                                                                <div className="d-flex">
                                                                     <div className="flex-shrink-0 me-3">
                                                                         <div className="avatar avatar-online"
                                                                              style={{
@@ -224,22 +324,24 @@ const Header = () => {
                                                         </li>
                                                         <li>
                                                             <Link className="dropdown-item" to="/user-profile-edit"><i
-                                                                className="icon-base bx bx-user icon-md me-3"></i><span>Thông tin của tôi</span></Link>
+                                                                className="icon-base bx bx-user icon-md me-3"></i><span>{t('header.information')}</span></Link>
                                                         </li>
                                                         <li>
 
                                                             <a className="dropdown-item" href="#">
-                                                                <i className="icon-base bx bx-cog icon-md me-3"></i><span>Settings</span>
+                                                                <i className="icon-base bx bx-cog icon-md me-3"></i><span>{t('header.setting')}</span>
                                                             </a>
                                                         </li>
                                                         <li>
-                                                            <a className="dropdown-item" href="#">
-                        <span className="d-flex align-items-center align-middle">
+
+                                                            <Link className="dropdown-item" to="/order"> <span
+                                                                className="d-flex align-items-center align-middle">
                           <i className="flex-shrink-0 icon-base bx bx-credit-card icon-md me-3"></i
-                          ><span className="flex-grow-1 align-middle">Billing Plan</span>
+                          ><span className="flex-grow-1 align-middle">{t('header.order')}</span>
                           <span className="flex-shrink-0 badge rounded-pill bg-danger">4</span>
                         </span>
-                                                            </a>
+                                                            </Link>
+
                                                         </li>
                                                         <li>
                                                             <div className="dropdown-divider my-1"></div>
@@ -254,7 +356,7 @@ const Header = () => {
                                                                 }}
                                                             >
                                                                 <i className="icon-base bx bx-power-off icon-md me-3"></i>
-                                                                <span>Đăng xuất</span>
+                                                                <span>{t('header.logout')}</span>
                                                             </a>
 
                                                         </li>
@@ -264,11 +366,12 @@ const Header = () => {
                                         </>
                                     ) : (
                                         <>
-                                            <Link to="/login">Đăng nhập</Link>
-                                            <Link to="/register">Đăng ký</Link>
-                                            <Link to="/forgot-password">Quên mật khẩu</Link>
+                                            <Link to="/login">{t('header.login')}</Link>
+                                            <Link to="/register">{t('header.register')}</Link>
+                                            <Link to="/forgot-password">{t('header.forget_password')}</Link>
                                         </>
                                     )}
+                                    </div>
                                 </div>
                                 <ul className="header__right__widget">
 
@@ -280,7 +383,7 @@ const Header = () => {
                                     </li>
                                     <li>
                                         <Link to="/cart"><span className="icon_bag_alt"/>
-                                            <div className="tip">2</div>
+                                            <div className="tip">{cartQuantity}</div>
                                         </Link>
                                     </li>
                                 </ul>

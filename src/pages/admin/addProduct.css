@@ -23,3 +23,34 @@
 .add_product_table{
     width: 100%;
 }
+.pagination__option a.active {
+    background: #e64949;
+    border-color: #e64949;
+    color: #FFFFFF;
+}
+.inline-container {
+    text-align: center;
+    white-space: nowrap; /* giữ tất cả trên một hàng */
+}
+
+.select-wrapper, .pagination__option {
+    display: inline-block;
+    vertical-align: middle;
+    margin-right: 10px; /* tùy chỉnh khoảng cách nếu cần */
+}
+
+/*.pagination__option a.active {*/
+/*    !*display: flex;*!*/
+/*    justify-content: center;*/
+/*    align-content: center;*/
+/*    color: white;*/
+/*    background-color: #e91e63;*/
+/*    padding: 5px 10px;*/
+/*    border-radius: 50%;*/
+/*}*/
+/*.pagination__option a.active {*/
+/*    color: white;*/
+/*    background-color: #e91e63;*/
+/*    padding: 5px 10px;*/
+/*    border-radius: 5px;*/
+/*}*/

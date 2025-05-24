@@ -43,7 +43,7 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 650px;
+    width: 670px;
     min-height: 400px;
     background: rgb(255, 255, 255);
     border-radius: 12px;
@@ -75,10 +75,16 @@
 .AddToCart .content .img_product{
 
     width: 280px;
-    height: 360px;
+    height: 300px;
     margin-right: 10px;
     background: #0c2b4b;
     position: relative;
+
+}
+.AddToCart .content .image_thumbnails{
+    position: relative;
+    margin-right: 10px;
+    height: 60px;
 }
 .AddToCart .content .img_product img {
     width: 100%;
@@ -105,7 +111,7 @@
 
 }
 .AddToCart .content .content_product .row.row_name p{
-    font-size: 24px;
+    font-size: 22px;
     word-break: break-word;
     white-space: normal;
     margin: 0;
@@ -852,4 +858,7 @@ padding-right: 15px;
 }
 .edit_address_checkout .edit_address_btn:hover,.edit_address_checkout .delete_address_btn:hover{
     background: #cacaca;
+}
+.btn_right_img:hover{
+    background: rgba(46, 46, 46, 0.56);
 }
