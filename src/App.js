@@ -33,6 +33,7 @@ import AddToCart from "./pages/user/OrderDetail"
 import OrderDetail from "./pages/user/OrderDetail"
 import { ToastContainer } from 'react-toastify';
 import VNPayReturn from './pages/user/vnpay-return';
+import OrderUser from './pages/user/order-user'
 
 
 import Btntest from "./pages/admin/testButoon";
@@ -66,8 +67,8 @@ function App() {
             <Route path="/validate-otp" element={<ValidateOtp />} />
             <Route path="/new-password" element={<NewPassword />} />
 
-            {/*<Route path="/AddToCart" element={<AddToCart />} />*/}
-            <Route path="/AddToCart" element={<LayoutUser><OrderDetail /></LayoutUser>} />
+            <Route path="/order/confirmation" element={<LayoutUser><OrderDetail /></LayoutUser>} />
+            <Route path="/order" element={<LayoutUser><OrderUser /></LayoutUser>} />
 
 
             <Route path="/chatbox" element={<Chatbox />} />

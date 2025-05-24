@@ -6,7 +6,9 @@ import CheckoutChooseAddress from './checkout-choose-address';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {faLocationDot, faTicket, faPenToSquare, faPen, faTrash} from '@fortawesome/free-solid-svg-icons';
 import Swal from 'sweetalert2';
+import {useTranslation} from "react-i18next";
 const Checkout = () => {
+    const { t } = useTranslation('translation');
     const [showAddressForm, setShowAddressForm] = useState(false);
     const [showAddressModal, setShowAddressModal] = useState(false);
     const [selectedAddress, setSelectedAddress] = useState(null);
@@ -19,6 +21,10 @@ const Checkout = () => {
         ward: "",
         addressDetail: ""
     });
+
+    const [editingAddressId, setEditingAddressId] = useState(null);
+
+
     const [note, setNote] = useState("");
     const [paymentId, setPaymentId] = useState("1");
 
@@ -61,7 +67,7 @@ const Checkout = () => {
                 if (!token) {
                     Swal.fire({
                         icon: 'warning',
-                        title: '⚠️ Bạn chưa đăng nhập.',
+                        title: t('login.error_login'),
                         confirmButtonText: 'OK',
                     }).then(() => {
                         navigate('/login');
@@ -70,7 +76,7 @@ const Checkout = () => {
                 }
 
                 // Gọi API để lấy địa chỉ giao hàng đã chọn
-                const response = await axios.get('https://localhost:8443/api/v1/oders/get-selected-shipping-address', {
+                const response = await axios.get('https://localhost:8443/api/v1/orders/get-selected-shipping-address', {
                     headers: {
                         'Authorization': `Bearer ${token}`,  // Gửi token trong header
                         'Content-Type': 'application/json'
@@ -87,7 +93,7 @@ const Checkout = () => {
                     console.error("Lỗi khi lấy địa chỉ:", response.data.message);
                     Swal.fire({
                         icon: 'error',
-                        title: '❌ Lỗi khi thêm địa chỉ!',
+                        title: t('checkout.error_save_new_address'),
                         text: response.data.message
                     });
                 }
@@ -102,15 +108,15 @@ const Checkout = () => {
         fetchSelectedAddress();
     }, []);
 
-    const toggleAddressForm = () => {
-        setShowAddressForm(!showAddressForm);
-    };
+    // const toggleAddressForm = () => {
+    //     setShowAddressForm(!showAddressForm);
+    // };
 
     const validateForm = () => {
         if (!formData.receiverName || !formData.receiverPhone || !formData.province || !formData.district || !formData.ward || !formData.addressDetail) {
             Swal.fire({
                 icon: 'warning',
-                title: '⚠️ Vui lòng điền đầy đủ thông tin!',
+                title: t('checkout.warning_empty_information'),
                 confirmButtonText: 'OK',
             });
             return false;
@@ -125,21 +131,25 @@ const Checkout = () => {
 
         // Hiển thị hộp thoại xác nhận trước khi lưu địa chỉ
         const result = await Swal.fire({
-            title: 'Bạn có chắc chắn muốn lưu địa chỉ này làm địa chỉ mặc định không?',
-            icon: 'question',  // Chọn icon dạng câu hỏi
+            title: editingAddressId
+                ? t('checkout.question_update_address')
+                : t('checkout.question_save_new_address_default'),
+            icon: 'question',
             showCancelButton: true,
             confirmButtonText: 'OK',
-            cancelButtonText: 'Hủy'
+            cancelButtonText:   t('checkout.btn_cancel'),
         });
+
 
 
         if (!result.isConfirmed) {
             return; // Nếu người dùng không bấm "OK", dừng lại
         }
+
         if (!paymentId) {
             Swal.fire({
                 icon: "warning",
-                title: "⚠️ Bạn chưa chọn phương thức thanh toán!",
+                title:t('checkout.warning_choose_payment'),
                 confirmButtonText: "OK",
             });
             return;
@@ -155,7 +165,7 @@ const Checkout = () => {
             if (!token) {
                 Swal.fire({
                     icon: 'warning',
-                    title: '⚠️ Bạn chưa đăng nhập.',
+                    title: t('login.error_login'),
                     confirmButtonText: 'OK',
                 }).then(() => {
                     navigate('/login');
@@ -171,18 +181,31 @@ const Checkout = () => {
                 ward: formData.ward,
                 address_detail: formData.addressDetail
             });
-
-            const response = await axios.post(
-                "https://localhost:8443/api/v1/oders/add-shipping-address", // ✅ sửa "oders" thành "orders"
-                urlParams,
-                {
+            let response;
+            if (editingAddressId) {
+                // 🛠 Gọi API chỉnh sửa
+                urlParams.append("id", editingAddressId);
+                response = await axios.post("https://localhost:8443/api/v1/orders/edit-shipping-address", urlParams, {
                     headers: {
                         "Content-Type": "application/x-www-form-urlencoded",
-                        Authorization: `Bearer ${token}`
+                        Authorization: `Bearer ${token}`,
                     },
-                    withCredentials: true
-                }
-            );
+                    withCredentials: true,
+                });
+            } else {
+
+                 response = await axios.post(
+                    "https://localhost:8443/api/v1/orders/add-shipping-address",
+                    urlParams,
+                    {
+                        headers: {
+                            "Content-Type": "application/x-www-form-urlencoded",
+                            Authorization: `Bearer ${token}`
+                        },
+                        withCredentials: true
+                    }
+                );
+            }
 
             const result = response.data;
             if (result.status === "success") {
@@ -190,13 +213,13 @@ const Checkout = () => {
                 setShowAddressForm(false);        // Ẩn form
                 Swal.fire({
                     icon: 'success',
-                    title: '✅ Đã lưu địa chỉ mặc định thành công!',
+                    title: editingAddressId ? t('checkout.success_update_address') : t('checkout.success_save_new_address'),
                     confirmButtonText: 'OK',
                 });
             } else {
                 Swal.fire({
                     icon: 'error',
-                    title: '❌ Lỗi khi thêm địa chỉ!',
+                    title: editingAddressId ? t('checkout.error_update_address') : t('checkout.error_save_new_address'),
                     text: result.message
                 });
             }
@@ -204,7 +227,7 @@ const Checkout = () => {
             console.error("Lỗi khi thêm địa chỉ:", error);
             Swal.fire({
                 icon: 'error',
-                title: '❌ Lỗi khi thêm địa chỉ!',
+                title:   t('checkout.error'),
             });
         }
     };
@@ -233,9 +256,9 @@ const Checkout = () => {
         if (!order || !order.cart_items_choose) {
             Swal.fire({
                 icon: "error",
-                title: "❌ Đặt hàng không hợp lệ",
-                text: "Vui lòng chọn sản phẩm trước khi đặt hàng.",
-                confirmButtonText: "Quay lại giỏ hàng"
+                title: t('checkout.error_order_title'),
+                text: t('checkout.error_order_text'),
+                confirmButtonText: t('checkout.btn_return_cart')
             }).then(() => {
                 navigate("/cart");
             });
@@ -245,7 +268,7 @@ const Checkout = () => {
         if (!selectedAddress) {
             Swal.fire({
                 icon: "warning",
-                title: "⚠️ Bạn chưa chọn địa chỉ giao hàng!",
+                title: t('checkout.warning_choose_address'),
                 confirmButtonText: "OK",
             });
             return;
@@ -254,7 +277,7 @@ const Checkout = () => {
         if (!paymentId) {
             Swal.fire({
                 icon: "warning",
-                title: "⚠️ Bạn chưa chọn phương thức thanh toán!",
+                title: t('checkout.warning_choose_payment'),
                 confirmButtonText: "OK",
             });
             return;
@@ -268,7 +291,7 @@ const Checkout = () => {
         if (!token) {
             Swal.fire({
                 icon: "warning",
-                title: "⚠️ Bạn chưa đăng nhập.",
+                title: t('login.error_login'),
                 confirmButtonText: "OK",
             }).then(() => {
                 navigate('/login');
@@ -278,11 +301,11 @@ const Checkout = () => {
 
         const result = await Swal.fire({
             icon: "question",
-            title: "🛒 Xác nhận đặt hàng",
-            text: "Bạn có chắc chắn muốn đặt hàng với thông tin đã chọn?",
+            title: t('checkout.question_order_title'),
+            text: t('checkout.question_order_text'),
             showCancelButton: true,
-            confirmButtonText: "Đặt hàng",
-            cancelButtonText: "Huỷ"
+            confirmButtonText:  t('checkout.btn_buy'),
+            cancelButtonText:  t('checkout.btn_cancel'),
         });
 
         if (!result.isConfirmed) return;
@@ -301,7 +324,7 @@ const Checkout = () => {
             formData.append("paymentId", paymentId);
 
             const orderResponse = await axios.post(
-                "https://localhost:8443/api/v1/oders/add-order",
+                "https://localhost:8443/api/v1/orders/add-order",
                 formData,
                 {
                     headers: {
@@ -317,7 +340,7 @@ const Checkout = () => {
             if (orderData.status !== "success") {
                 Swal.fire({
                     icon: "error",
-                    title: "❌ Đặt hàng thất bại!",
+                    title:  t('checkout.error_order'),
                     text: orderData.message,
                 });
                 return;
@@ -328,8 +351,8 @@ const Checkout = () => {
                 if (!selectedAddress || !selectedAddress.addressDetail) { // Sử dụng addressDetails nhất quán
                     Swal.fire({
                         icon: "error",
-                        title: "❌ Lỗi dữ liệu địa chỉ!",
-                        text: "Thông tin địa chỉ giao hàng không đầy đủ.",
+                        title:  t('checkout.error_data_address_title'),
+                        text:  t('checkout.error_data_address_text'),
                     });
                     setIsLoading(false);
                     return;
@@ -385,28 +408,12 @@ const Checkout = () => {
 
                     console.log("vnpayResponse:  "+vnpayResponse)
 
-                    // if (!vnpayResponse.ok) {
-                    //     const errorText = await vnpayResponse.text();
-                    //     console.error("VNPay API error:", {
-                    //         status: vnpayResponse.status,
-                    //         statusText: vnpayResponse.statusText,
-                    //         body: errorText
-                    //     });
-                    //     Swal.fire({
-                    //         icon: "error",
-                    //         title: "❌ Lỗi khi gọi API thanh toán!",
-                    //         text: `Status: ${vnpayResponse.status}, Error: ${errorText}`,
-                    //     });
-                    //     setIsLoading(false);
-                    //     return;
-                    // }
-
                     // Kiểm tra lỗi nếu có
                     if (vnpayResponse.status !== 200) {
                         console.error("VNPay API error:", vnpayResponse);
                         Swal.fire({
                             icon: "error",
-                            title: "❌ Lỗi khi gọi API thanh toán!",
+                            title:   t('checkout.error_payment'),
                             text: `Status: ${vnpayResponse.status}, Error: ${vnpayResponse.statusText}`,
                         });
                         setIsLoading(false);
@@ -415,22 +422,6 @@ const Checkout = () => {
 
 
                     const vnpayData = vnpayResponse.data;
-                    // let vnpayData;
-                    // try {
-                    //     // const vnpayData = vnpayResponse.data;
-                    //     // vnpayData = await vnpayResponse.json();
-                    //     console.log("VNPay response data:", JSON.stringify(vnpayData, null, 2));
-                    // } catch (error) {
-                    //     console.error("JSON parse error:", error);
-                    //     Swal.fire({
-                    //         icon: "error",
-                    //         title: "❌ Lỗi khi xử lý response!",
-                    //         text: "Dữ liệu trả về không đúng định dạng. Vui lòng thử lại.",
-                    //     });
-                    //     setIsLoading(false);
-                    //     return;
-                    // }
-
                     if (vnpayData.status == "00") { // Sử dụng so sánh lỏng để xử lý chuỗi/số
                         console.log("Redirecting to VNPay URL:", vnpayData.data);
                         window.location.href = vnpayData.data; // Chuyển hướng đến URL thanh toán
@@ -438,7 +429,7 @@ const Checkout = () => {
                         console.error("VNPay error response:", JSON.stringify(vnpayData, null, 2));
                         Swal.fire({
                             icon: "error",
-                            title: "❌ Lỗi khởi tạo thanh toán VNPay!",
+                            title:    t('checkout.error_payment_3'),
                             text: vnpayData.message || "Không thể khởi tạo thanh toán.",
                         });
                     }
@@ -446,18 +437,20 @@ const Checkout = () => {
                     console.error("Fetch error:", error);
                     Swal.fire({
                         icon: "error",
-                        title: "❌ Lỗi khi gọi API thanh toán!",
-                        text: "Không thể kết nối tới server. Vui lòng thử lại.",
+                        title:    t('checkout.error_payment'),
+                        text:    t('checkout.error_payment_text'),
                     });
                 }
                 setIsLoading(false);
             } else {
                 Swal.fire({
                     icon: "success",
-                    title: "✅ Đặt hàng thành công!",
-                    text: orderData.message,
+                    title:    t('checkout.success_order'),
                 }).then(() => {
-                    navigate("/shop");
+                    navigate('/order/confirmation', {
+                        state: { orderId: orderData.data.id }
+                    });
+
                     localStorage.removeItem("preparedOrder");
                 });
             }
@@ -465,14 +458,39 @@ const Checkout = () => {
             console.error("Lỗi khi xử lý đặt hàng:", error);
             Swal.fire({
                 icon: "error",
-                title: "❌ Lỗi hệ thống",
-                text: "Đặt hàng thất bại, vui lòng thử lại sau.",
+                title:    t('checkout.error_server_title'),
+                text:   t('checkout.error_server_text'),
             });
         } finally {
             setIsLoading(false);
         }
     };
 
+    const toggleAddressForm = (address = null) => {
+        if (address) {
+            setFormData({
+                receiverName: address.receiverName,
+                receiverPhone: address.receiverPhone,
+                province: address.province,
+                district: address.district,
+                ward: address.ward,
+                addressDetail: address.addressDetail,
+            });
+            setEditingAddressId(address.id);
+        } else {
+            // Reset form khi thêm mới
+            setFormData({
+                receiverName: "",
+                receiverPhone: "",
+                province: "",
+                district: "",
+                ward: "",
+                addressDetail: "",
+            });
+            setEditingAddressId(null);
+        }
+        setShowAddressForm(true);
+    };
 
     return (
         <>
@@ -481,9 +499,9 @@ const Checkout = () => {
                     <div className="row">
                         <div className="col-lg-12">
                             <div className="breadcrumb__links">
-                                <Link to="/home" style={{cursor: 'pointer'}}><i className="fa fa-home"></i>Trang
-                                    chủ</Link>
-                                <span>Thanh toán</span>
+                                <Link to="/home" style={{cursor: 'pointer'}}><i className="fa fa-home"></i>
+                                    {t('checkout.home')}</Link>
+                                <span>{t('checkout.checkout')}</span>
                             </div>
                         </div>
                     </div>
@@ -494,7 +512,7 @@ const Checkout = () => {
                     <form action="#" className="checkout__form">
                         <div className="row">
                             <div className="col-lg-6">
-                                <h5>Chi tiết thanh toán</h5>
+                                <h5>{t('checkout.detail_checkout')}</h5>
                                 <div className="row">
                                     <div>
                                         {selectedAddress ? (
@@ -516,14 +534,13 @@ const Checkout = () => {
 
                                                         <div className="name">
                                                             <p>
-                                                                <b>Tên người
-                                                                    nhận: </b> {selectedAddress.receiverName}<br/>
-                                                                <b>Số điện thoại: </b> {selectedAddress.receiverPhone}
+                                                                <b>{t('checkout_choose_address.name')}: </b> {selectedAddress.receiverName}<br/>
+                                                                <b>{t('checkout_choose_address.phone')}: </b> {selectedAddress.receiverPhone}
                                                             </p>
                                                         </div>
                                                         <div className="address">
                                                             <p>
-                                                                <b>Địa chỉ: </b><br/>
+                                                                <b>{t('checkout_choose_address.address')}: </b><br/>
                                                                 {selectedAddress.addressDetail}<br/>
                                                                 {selectedAddress.ward}, {selectedAddress.district}, {selectedAddress.province}
                                                             </p>
@@ -550,7 +567,7 @@ const Checkout = () => {
                                             >
                                                 <FontAwesomeIcon style={{color: "gray", marginRight: "8px"}}
                                                                  icon={faLocationDot}></FontAwesomeIcon>
-                                                <b>Hãy chọn thông tin giao hàng của bạn</b>
+                                                <b>{t('checkout.choose_info_address')}</b>
                                             </div>
                                         )}
 
@@ -569,7 +586,7 @@ const Checkout = () => {
                                         <>
                                             <div className="col-lg-12">
                                                 <div className="checkout__form__input">
-                                                    <p>Họ và tên <span>*</span></p>
+                                                    <p>{t('checkout.name')} <span>*</span></p>
                                                     <input
                                                         type="text"
                                                         name="receiverName"
@@ -581,7 +598,7 @@ const Checkout = () => {
                                             </div>
                                             <div className="col-lg-12">
                                                 <div className="checkout__form__input">
-                                                    <p>Số điện thoại <span>*</span></p>
+                                                    <p>{t('checkout.phone')} <span>*</span></p>
                                                     <input
                                                         type="text"
                                                         name="receiverPhone"
@@ -592,7 +609,7 @@ const Checkout = () => {
                                                 </div>
                                             </div>
                                             <div className="checkout__form__input">
-                                                <p>Tỉnh/Thành phố <span>*</span></p>
+                                                <p>{t('checkout.city')} <span>*</span></p>
                                                 <select
                                                     className={"choose_address_select"}
                                                     name="province"
@@ -600,14 +617,14 @@ const Checkout = () => {
                                                     value={formData.province} // Đảm bảo value được lấy từ state
                                                     required
                                                 >
-                                                    <option value="">Chọn tỉnh/thành phố</option>
+                                                    <option value="">{t('checkout.choose_city')}</option>
                                                     <option value="Hà Nội">Hà Nội</option>
                                                     <option value="Hồ Chí Minh">Hồ Chí Minh</option>
                                                     <option value="Đà Nẵng">Đà Nẵng</option>
                                                 </select>
                                             </div>
                                             <div className="checkout__form__input">
-                                                <p>Phường/Xã <span>*</span></p>
+                                                <p>{t('checkout.ward')} <span>*</span></p>
                                                 <select
                                                     className={"choose_address_select"}
                                                     name="district"
@@ -615,14 +632,14 @@ const Checkout = () => {
                                                     value={formData.district} // Đảm bảo value được lấy từ state
                                                     required
                                                 >
-                                                    <option value="">Chọn phường/xã</option>
+                                                    <option value="">{t('checkout.choose_ward')}</option>
                                                     <option value="Phường 12">Phường 12</option>
                                                     <option value="Phường 13">Phường 13</option>
                                                     <option value="Phường 13">Phường 13</option>
                                                 </select>
                                             </div>
                                             <div className="checkout__form__input">
-                                                <p>Quận/Huyện <span>*</span></p>
+                                                <p>{t('checkout.district')} <span>*</span></p>
                                                 <select
                                                     className={"choose_address_select"}
                                                     name="ward"
@@ -630,16 +647,16 @@ const Checkout = () => {
                                                     value={formData.ward} // Đảm bảo value được lấy từ state
                                                     required
                                                 >
-                                                    <option value="">Chọn quận/huyện</option>
+                                                    <option value="">{t('checkout.choose_district')}</option>
                                                     <option value="Quận Bình Thạnh">Quận Bình Thạnh</option>
                                                     <option value="Quận Bình Thạnh">Quận Bình Thạnh</option>
                                                 </select>
                                             </div>
                                             <div className="checkout__form__input">
-                                                <p>Địa chỉ chi tiết <span>*</span></p>
+                                                <p>{t('checkout.detail_address')}<span>*</span></p>
                                                 <input
                                                     type="text"
-                                                    placeholder="Số nhà, đường phố,..."
+                                                    placeholder={t('checkout.detail_address_placeholder')}
                                                     name="addressDetail"
                                                     onChange={handleChange}
                                                     value={formData.addressDetail} // Đảm bảo value được lấy từ state
@@ -649,10 +666,10 @@ const Checkout = () => {
 
                                             <div className={"btn_choose_address_checkout"}>
                                                 <div className={"btn_choose_address_checkout_cancel"}
-                                                     onClick={toggleAddressForm}>Hủy
+                                                     onClick={toggleAddressForm}>{t('checkout.btn_cancel')}
                                                 </div>
                                                 <div className={"btn_choose_address_checkout_ok"}
-                                                     onClick={handleAddShippingAddress}>Xác nhận
+                                                     onClick={handleAddShippingAddress}>{t('checkout.btn_confirm')}
                                                 </div>
 
                                             </div>
@@ -661,11 +678,11 @@ const Checkout = () => {
 
                                     <div className="col-lg-12">
                                         <div className="checkout__form__input">
-                                            <p>Ghi chú đơn hàng của bạn</p>
+                                            <p>{t('checkout.note_order')}</p>
                                             <textarea
                                                 value={note}
                                                 onChange={(e) => setNote(e.target.value)}
-                                                placeholder="Ghi chú cho shop những lưu ý của bạn nhé!"
+                                                placeholder={t('checkout.note_placeholder')}
                                                 style={{
                                                     fontSize: '18px',
                                                     padding: '12px 20px',
@@ -680,18 +697,16 @@ const Checkout = () => {
 
 
                                     <div className="col-lg-12 checkout_coupon_choose">
-                                        <p style={{fontSize: "15px", color: "#444444", fontWeight: "500"}}>Mã giảm
-                                            giá </p>
+                                        <p style={{fontSize: "15px", color: "#444444", fontWeight: "500"}}>{t('checkout.coupon')}</p>
                                         <div style={{display: "flex", flexDirection: "row"}}>
                                             <div className={"coupon_choose"}>
-                                                <div><FontAwesomeIcon icon={faTicket}></FontAwesomeIcon> Chọn mã giảm
-                                                    giá
+                                                <div><FontAwesomeIcon icon={faTicket}></FontAwesomeIcon> {t('checkout.choose_coupon')}
                                                 </div>
                                             </div>
                                             <div className={"coupon_is_choose"}>
                                                 <div><img
                                                     src={"https://res.cloudinary.com/dorz7ucva/image/upload/v1746166565/image_074d41706611c0774205b9c9d45a6c25779b265f.png"}/>
-                                                    Mã giảm nè
+                                                    {t('checkout.is_choose_coupon')}
                                                 </div>
                                             </div>
                                         </div>
@@ -702,12 +717,12 @@ const Checkout = () => {
                             </div>
                             <div className="col-lg-6">
                                 <div className="checkout__order">
-                                    <h5>Đơn hàng của bạn</h5>
+                                    <h5>{t('checkout.order_title')}</h5>
                                     <div className="checkout__order__product" style={{border: "none"}}>
                                         <div className={"checkout__order__product_detail"}>
                                             <div className={"checkout__order__product_detail_title"}>
-                                                <div>Sản phẩm</div>
-                                                <div>Tổng tiền</div>
+                                                <div>{t('checkout.product')}</div>
+                                                <div>{t('checkout.price')}</div>
                                             </div>
 
                                             {order?.cart_items_choose?.map((item, index) => (
@@ -721,8 +736,8 @@ const Checkout = () => {
                                                             </div>
 
                                                         </div>
-                                                        <div style={{fontWeight: "100"}}> Size: {item.size},
-                                                            Màu: {item.color}</div>
+                                                        <div style={{fontWeight: "100"}}> {t('checkout.size')}: {item.size},
+                                                            {t('checkout.color')}: {item.color}</div>
                                                     </div>
                                                     <div style={{
                                                         display: "flex",
@@ -741,9 +756,9 @@ const Checkout = () => {
                                             <div className={"checkout__order__product_detail_product_total"}>
                                                 <div className={"checkout__order__product_detail_total_price"}>
                                                     <div>
-                                                        <div>Tổng</div>
-                                                        <div>Tiền ship</div>
-                                                        <div>Tổng tiền</div>
+                                                        <div>{t('checkout.total_price')}</div>
+                                                        <div>{t('checkout.ship_price')}</div>
+                                                        <div>{t('checkout.total_final')}</div>
                                                     </div>
                                                     <div
                                                         style={{
@@ -768,8 +783,7 @@ const Checkout = () => {
                                             </div>
 
                                             <div className={"checkout__order__product_detail_choose_payment"}>
-                                                <div style={{fontWeight: "bold"}} className={"title"}>Phương thức thanh
-                                                    toán
+                                                <div style={{fontWeight: "bold"}} className={"title"}>{t('checkout.payment')}
                                                 </div>
                                                 <div className={"choose_payment"}>
                                                     <form>
@@ -777,9 +791,9 @@ const Checkout = () => {
                                                             value={paymentId}
                                                             onChange={(e) => setPaymentId(e.target.value)}
                                                         >
-                                                            <option value="1">Thanh toán khi nhận</option>
-                                                            <option value="2">Thanh toán momo</option>
-                                                            <option value="3">VnPay</option>
+                                                            <option value="1">{t('checkout.payment_1')}</option>
+                                                            <option value="2">{t('checkout.payment_2')}</option>
+                                                            <option value="3">{t('checkout.payment_3')}</option>
                                                         </select>
                                                     </form>
                                                 </div>
@@ -795,7 +809,7 @@ const Checkout = () => {
                                         onClick={handlePlaceOrder}
                                         disabled={isLoading}
                                     >
-                                        {isLoading ? "Đang xử lý..." : "Đặt hàng"}
+                                        {isLoading ? t('checkout.btn_pending') : t('checkout.btn_buy')}
                                     </button>
 
                                 </div>

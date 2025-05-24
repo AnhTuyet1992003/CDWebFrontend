@@ -16,6 +16,7 @@ const AddProduct = () => {
 
     // hiển thị thông tin sản phẩm màu sắc/kích thước
     const [productColors, setProductColors] = useState([]);
+    const [productSizeColors, setProductSizeColors] = useState([]);
     const [productName, setProductName] = useState("");
     const [productPrice, setProductPrice] = useState("");
     const [productFound, setProductFound] = useState(true); // để kiểm soát hiển thị bảng
@@ -131,7 +132,7 @@ const AddProduct = () => {
                     axios.get(`https://localhost:8443/api/v1/products/getProductSizeColor?productId=${productId}`, { withCredentials: true })
                         .then(res => {
                             const { data } = res.data;
-                            setProductColors(data);
+                            setProductSizeColors(data);
                             setProductName(res.data.nameProduct);
                             setProductPrice(res.data.price);
                             setProductFound(true);
@@ -158,7 +159,7 @@ const AddProduct = () => {
         axios.get(`https://localhost:8443/api/v1/products/getProductSizeColor?productId=${productId}`, { withCredentials: true })
             .then(res => {
                 const { data } = res.data;
-                setProductColors(data);
+                setProductSizeColors(data);
                 setProductName(res.data.nameProduct);
                 setProductPrice(res.data.price);
                 setProductFound(true);
@@ -182,6 +183,10 @@ const AddProduct = () => {
                 .catch(err => console.error("Lỗi khi lấy colorProduct:", err));
         }
     }, [productId]);
+    useEffect(() => {
+        console.log("productColors:", productColors);
+        console.log("selectedColorId:", selectedColorId);
+    }, [productColors, selectedColorId]);
 
 
     const handleAddProduct = async (e) => {
@@ -304,7 +309,7 @@ const AddProduct = () => {
             axios.get(`https://localhost:8443/api/v1/products/getProductSizeColor?productId=${productId}`, { withCredentials: true })
                 .then(res => {
                     const { data } = res.data;
-                    setProductColors(data);
+                    setProductSizeColors(data);
                     setProductName(res.data.nameProduct);
                     setProductPrice(res.data.price);
                     setProductFound(true);
@@ -376,7 +381,7 @@ const AddProduct = () => {
             axios.get(`https://localhost:8443/api/v1/products/getProductSizeColor?productId=${productId}`, { withCredentials: true })
                 .then(res => {
                     const { data } = res.data;
-                    setProductColors(data);
+                    setProductSizeColors(data);
                     setProductName(res.data.nameProduct);
                     setProductPrice(res.data.price);
                     setProductFound(true);
@@ -448,7 +453,7 @@ const AddProduct = () => {
             axios.get(`https://localhost:8443/api/v1/products/getProductSizeColor?productId=${productId}`, { withCredentials: true })
                 .then(res => {
                     const { data } = res.data;
-                    setProductColors(data);
+                    setProductSizeColors(data);
                     setProductName(res.data.nameProduct);
                     setProductPrice(res.data.price);
                     setProductFound(true);
@@ -670,7 +675,7 @@ const AddProduct = () => {
                                     </div>
                                 </form>
                                 <div className={"showProductColorSize"}>
-                                    {productFound && productColors.length > 0 && (
+                                    {productFound && productSizeColors.length > 0 && (
                                         <div className="mb-4">
                                             <table className={"add_product_table"}>
                                                 <thead>
@@ -685,7 +690,7 @@ const AddProduct = () => {
                                                 </tr>
                                                 </thead>
                                                 <tbody>
-                                                {productColors.map((item, index) => (
+                                                {productSizeColors.map((item, index) => (
                                                     <tr key={item.id}  className={"add_product_tr"}>
                                                         <td>
                                                             <img src={item.image} alt="product" width="60"/>
@@ -772,7 +777,7 @@ const AddProduct = () => {
                                     <div className="mb-4">
                                         <label className="form-label">Chọn màu sắc của sản phẩm</label>
                                         <select className="form-select" aria-label="Default select example"
-                                                value={selectedColorId}
+                                                value={selectedColorId || ""}
                                                 onChange={(e) => setSelectedColorId(e.target.value)}>>
                                             <option value="">Chọn màu sắc của sản phẩm</option>
                                             {productColors.map(pColor => (

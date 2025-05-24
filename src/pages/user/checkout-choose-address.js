@@ -5,11 +5,14 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {faCartShopping, faLocationDot, faPen, faPenToSquare, faTrash, faXmark} from '@fortawesome/free-solid-svg-icons';
 import axios from 'axios';
 import Swal from 'sweetalert2';
+import {useTranslation} from "react-i18next";
 
 const CheckoutChooseAddress = ({ onClose, onSelectAddress, toggleAddressForm }) => {
+    const { t } = useTranslation('translation');
     const [addresses, setAddresses] = useState([]);
     const [selectedIndex, setSelectedIndex] = useState(null);
     const [selectedEditAddress, setEditAddress] = useState(null);
+    const [editVisibleIndex, setEditVisibleIndex] = useState(null);
 
     useEffect(() => {
         const fetchAddresses = async () => {
@@ -19,7 +22,7 @@ const CheckoutChooseAddress = ({ onClose, onSelectAddress, toggleAddressForm }) 
                     .find(row => row.startsWith('token='))
                     ?.split('=')[1];
 
-                const response = await axios.get('https://localhost:8443/api/v1/oders/get-shipping-address', {
+                const response = await axios.get('https://localhost:8443/api/v1/orders/get-shipping-address', {
                     headers: {
                         'Authorization': `Bearer ${token}`,
                         'Content-Type': 'multipart/form-data'
@@ -64,6 +67,53 @@ const CheckoutChooseAddress = ({ onClose, onSelectAddress, toggleAddressForm }) 
         fetchAddresses();
     }, []);
 
+
+// Xóa địa chỉ
+    const handleDeleteAddress = async (id) => {
+        const result = await Swal.fire({
+            title: t('checkout_choose_address.warning_delete_address_title'),
+            text:t('checkout_choose_address.warning_delete_address_text'),
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: t('checkout_choose_address.btn_delete'),
+            cancelButtonText: t('checkout_choose_address.btn_cancel'),
+        });
+
+        if (result.isConfirmed) {
+            try {
+                const token = document.cookie
+                    .split('; ')
+                    .find(row => row.startsWith('token='))?.split('=')[1];
+
+                const response = await axios.delete(`https://localhost:8443/api/v1/orders/delete-shipping-address`, {
+                    params: { id },
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    withCredentials: true
+                });
+
+                if (response.data.status === "success") {
+                    Swal.fire(t('checkout_choose_address.success_delete_address'), '', 'success');
+                    // Cập nhật danh sách địa chỉ sau khi xóa
+                    setAddresses(prev => prev.filter(addr => addr.id !== id));
+                    setEditAddress(false)
+                } else {
+                    Swal.fire(t('checkout_choose_address.error_delete_address'), response.data.message, 'error');
+                }
+            } catch (err) {
+                console.error("Lỗi xoá địa chỉ:", err);
+                Swal.fire(t('checkout_choose_address.error'), '', 'error');
+            }
+        }
+    };
+
+
+
+
     const handleSelect = (index) => {
         setSelectedIndex(index);
     };
@@ -77,7 +127,7 @@ const CheckoutChooseAddress = ({ onClose, onSelectAddress, toggleAddressForm }) 
                     .find(row => row.startsWith('token='))
                     ?.split('=')[1];
 
-                const response = await axios.put('https://localhost:8443/api/v1/oders/choose-shipping-address', null, {
+                const response = await axios.put('https://localhost:8443/api/v1/orders/choose-shipping-address', null, {
                     headers: {
                         'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json'
@@ -115,10 +165,16 @@ const CheckoutChooseAddress = ({ onClose, onSelectAddress, toggleAddressForm }) 
         toggleAddressForm();
     };
 
+    const handleEditsAddress = (address) => {
+        onClose();
+        toggleAddressForm(address);
+    };
+
+
     return (
         <div className="ChooseAddress">
             <div className="content">
-                <div className="title">Địa chỉ của bạn</div>
+                <div className="title">{t('checkout_choose_address.title')}</div>
                 <div className="address_content">
                     {addresses.map((address, index) => (
                         <div className="contain_address" key={address.id} onClick={() => handleSelect(index)}>
@@ -137,13 +193,13 @@ const CheckoutChooseAddress = ({ onClose, onSelectAddress, toggleAddressForm }) 
                                         <div style={{paddingLeft: "10px", display: "flex", flexDirection: "column"}}>
                                             <div className="name">
                                                 <p>
-                                                    <b>Tên người nhận: </b> {address.receiverName}<br/>
-                                                    <b>Số điện thoại:</b> {address.receiverPhone}
+                                                    <b>{t('checkout_choose_address.name')}: </b> {address.receiverName}<br/>
+                                                    <b>{t('checkout_choose_address.phone')}:</b> {address.receiverPhone}
                                                 </p>
                                             </div>
                                             <div className="address">
                                                 <p>
-                                                    <b>Địa chỉ: </b><br/>
+                                                    <b>{t('checkout_choose_address.address')}: </b><br/>
                                                     {address.addressDetail}<br/>
                                                     {address.ward}, {address.district}, {address.province}
                                                 </p>
@@ -151,22 +207,39 @@ const CheckoutChooseAddress = ({ onClose, onSelectAddress, toggleAddressForm }) 
                                         </div>
                                     </div>
 
-                                    <FontAwesomeIcon style={{color: "black"}}
-                                                     className="fa-solid fa-location-dot"
-                                                     icon={faPenToSquare}></FontAwesomeIcon>
+                                    <FontAwesomeIcon
+                                        style={{ color: "black", cursor: "pointer" }}
+                                        icon={faPenToSquare}
+                                        onClick={(e) => {
+                                            e.stopPropagation(); // tránh ảnh hưởng đến việc chọn địa chỉ
+                                            setEditVisibleIndex(index === editVisibleIndex ? null : index);
+                                        }}
+                                    />
 
-                                    <div className={"edit_address_checkout"}>
-                                        <div className={"edit_address_btn"}>
-                                            <FontAwesomeIcon style={{color: "black"}}
-                                                             className="fa-solid fa-location-dot"
-                                                             icon={faPen}></FontAwesomeIcon> Chỉnh sửa
+                                    {editVisibleIndex === index && (
+                                        <div className={"edit_address_checkout"}>
+                                            <div
+                                                className={"edit_address_btn"}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleEditsAddress(address);
+                                                    console.log("Edit:", address);
+                                                }}
+                                            >
+                                                <FontAwesomeIcon style={{ color: "black" }} icon={faPen} /> {t('checkout_choose_address.edit')}
+                                            </div>
+                                            <div
+                                                className={"delete_address_btn"}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleDeleteAddress(address.id);
+                                                    console.log("Delete:", address);
+                                                }}
+                                            >
+                                                <FontAwesomeIcon style={{ color: "black" }} icon={faTrash} /> {t('checkout_choose_address.delete')}
+                                            </div>
                                         </div>
-                                        <div className={"delete_address_btn"}>
-                                            <FontAwesomeIcon style={{color: "black"}}
-                                                             className="fa-solid fa-location-dot"
-                                                             icon={faTrash}></FontAwesomeIcon> Xóa
-                                        </div>
-                                    </div>
+                                    )}
                                 </div>
                             </div>
 
@@ -174,8 +247,8 @@ const CheckoutChooseAddress = ({ onClose, onSelectAddress, toggleAddressForm }) 
                     ))}
                 </div>
                 <div className="btn_address">
-                    <div className="add_new_address" onClick={handleAddNewAddress}>Thêm địa chỉ mới</div>
-                    <div className="confirm" onClick={handleConfirm}>Xác nhận</div>
+                    <div className="add_new_address" onClick={handleAddNewAddress}>{t('checkout_choose_address.add_address')}</div>
+                    <div className="confirm" onClick={handleConfirm}>{t('checkout_choose_address.btn_confirm')}</div>
                 </div>
                 <div className="close_ChooseAddress" onClick={onClose}>
                     <FontAwesomeIcon icon={faXmark}/>
