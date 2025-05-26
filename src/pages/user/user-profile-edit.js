@@ -772,7 +772,17 @@ const UserProfileEdit = () => {
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setUser((prev) => ({ ...prev, [name]: value }));
+        //setUser((prev) => ({ ...prev, [name]: value }));
+        if (name === 'birthday' && value) {
+            const formattedDate = parseBirthdaySafely(value);
+            if (!formattedDate) {
+                setErrors((prev) => ({ ...prev, birthday: 'Ngày sinh không hợp lệ. Dùng định dạng yyyy-MM-dd.' }));
+                return;
+            }
+            setUser((prev) => ({ ...prev, [name]: formattedDate }));
+        } else {
+            setUser((prev) => ({ ...prev, [name]: value }));
+        }
         setErrors((prev) => ({ ...prev, [name]: '' }));
     };
 
@@ -892,18 +902,84 @@ const UserProfileEdit = () => {
             newErrors.address = 'Địa chỉ không được vượt quá 255 ký tự';
         }
 
-        if (user.birthday && !/^\d{4}-\d{2}-\d{2}$/.test(user.birthday)) {
-            newErrors.birthday = 'Ngày sinh phải có định dạng yyyy-MM-dd';
+        // if (user.birthday && !/^\d{4}-\d{2}-\d{2}$/.test(user.birthday)) {
+        //     newErrors.birthday = 'Ngày sinh phải có định dạng yyyy-MM-dd';
+        // }
+        console.log("birthday: "+ user.birthday)
+        if (user.birthday) {
+            const formatted = parseBirthdaySafely(user.birthday);
+            if (!formatted) {
+                newErrors.birthday = 'Ngày sinh không hợp lệ. Dùng định dạng yyyy-MM-dd.';
+            } else {
+                const dateObj = new Date(formatted);
+                if (isNaN(dateObj.getTime())) {
+                    newErrors.birthday = 'Ngày sinh không hợp lệ hoặc không tồn tại.';
+                } else {
+                    user.birthday = formatted; // Chuẩn hóa thành yyyy-MM-dd
+                }
+            }
         }
+
+        console.log("birthday: "+ user.birthday)
+
 
         return newErrors;
     };
+    const parseBirthdaySafely = (input) => {
+        if (!input) return null;
+
+        // Các định dạng ngày được hỗ trợ
+        const ddMMyyyy = /^(\d{2})\/(\d{2})\/(\d{4})$/;
+        const mmddyyyy = /^(\d{2})\/(\d{2})\/(\d{4})$/;
+        const yyyyMMdd = /^(\d{4})-(\d{2})-(\d{2})$/;
+
+        let year, month, day;
+
+        if (ddMMyyyy.test(input)) {
+            // Định dạng dd/MM/yyyy
+            [day, month, year] = input.split('/');
+        } else if (mmddyyyy.test(input)) {
+            // Định dạng MM/dd/yyyy
+            [month, day, year] = input.split('/');
+        } else if (yyyyMMdd.test(input)) {
+            // Định dạng yyyy-MM-dd
+            return input; // Đã đúng định dạng, trả về ngay
+        } else {
+            return null; // Định dạng không hợp lệ
+        }
+
+        // Chuẩn hóa thành yyyy-MM-dd
+        const formatted = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+        const dateObj = new Date(formatted);
+
+        // Kiểm tra tính hợp lệ của ngày
+        if (isNaN(dateObj.getTime()) || dateObj.getFullYear() != year || dateObj.getMonth() + 1 != month || dateObj.getDate() != day) {
+            return null;
+        }
+
+        return formatted;
+    };
+
 
 
     const handleUpdate = async (e) => {
         e.preventDefault();
-        setErrors({}); // Reset lỗi trước khi gửi yêu cầu
+        const validationErrors = validateForm();
+        setErrors(validationErrors);
+        //setErrors({}); // Reset lỗi trước khi gửi yêu cầu
 
+
+
+        if (Object.keys(validationErrors).length > 0) {
+            const errorMessages = Object.values(validationErrors).join('\n');
+            Swal.fire({
+                icon: 'error',
+                title: '❌ Dữ liệu không hợp lệ',
+                text: errorMessages || 'Vui lòng kiểm tra lại các trường thông tin.',
+                confirmButtonText: 'OK',
+            });
+            return;
+        }
         const token = localStorage.getItem('accessToken');
         try {
             const res = await axios.put(
@@ -1032,21 +1108,21 @@ const UserProfileEdit = () => {
         const newErrors = {};
         const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{7,}$/;
 
-        // if (!user2.password) {
-        //     newErrors.password = 'Vui lòng nhập mật khẩu hiện tại';
-        // }
-        //
-        // if (!user2.newPassword) {
-        //     newErrors.newPassword = 'Vui lòng nhập mật khẩu mới';
-        // } else if (!passwordRegex.test(user2.newPassword)) {
-        //     newErrors.newPassword = 'Mật khẩu mới phải ít nhất 7 ký tự, bao gồm chữ và số';
-        // }
-        //
-        // if (!user2.reNewPassword) {
-        //     newErrors.reNewPassword = 'Vui lòng nhập lại mật khẩu mới';
-        // } else if (user2.newPassword !== user2.reNewPassword) {
-        //     newErrors.reNewPassword = 'Mật khẩu không khớp';
-        // }
+        if (!user2.password) {
+            newErrors.password = 'Vui lòng nhập mật khẩu hiện tại';
+        }
+
+        if (!user2.newPassword) {
+            newErrors.newPassword = 'Vui lòng nhập mật khẩu mới';
+        } else if (!passwordRegex.test(user2.newPassword)) {
+            newErrors.newPassword = 'Mật khẩu mới phải ít nhất 7 ký tự, bao gồm chữ và số';
+        }
+
+        if (!user2.reNewPassword) {
+            newErrors.reNewPassword = 'Vui lòng nhập lại mật khẩu mới';
+        } else if (user2.newPassword !== user2.reNewPassword) {
+            newErrors.reNewPassword = 'Mật khẩu không khớp';
+        }
 
         return newErrors;
     };
@@ -1229,17 +1305,18 @@ const UserProfileEdit = () => {
                                             <input
                                                 type="date"
                                                 name="birthday"
-                                                value={user.birthday ? new Date(user.birthday).toISOString().split('T')[0] : ''}
+                                                value={user.birthday || ''}
                                                 onChange={handleChange}
                                                 className="form-control"
+                                                placeholder="yyyy-MM-dd"
                                             />
-
                                             {errors.birthday && <small className="error">{errors.birthday}</small>}
                                         </div>
                                         <div className="text-right mt-3">
                                             <button type="submit" className="btn btn-primary">
-                                            Lưu thay đổi
-                                            </button>{' '}
+                                                Lưu thay đổi
+                                            </button>
+                                            {' '}
                                             <button
                                                 type="button"
                                                 className="btn btn-default"

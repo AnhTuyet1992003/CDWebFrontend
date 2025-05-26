@@ -255,9 +255,15 @@ const Header = () => {
                         </Link>
                     </li>
                     <li className="menu-item">
+                        <Link to="/list-product-need-import" style={{cursor: 'pointer'}} className="menu-link"><i
+                            className="menu-icon tf-icons bx bx-chat"></i>
+                            <div className="text-truncate" data-i18n="Chat">Danh sách sản phẩm cần nhập</div>
+                        </Link>
+                    </li>
+                    <li className="menu-item">
                         <Link to="/import-order" style={{cursor: 'pointer'}} className="menu-link"><i
                             className="menu-icon tf-icons bx bx-chat"></i>
-                            <div className="text-truncate" data-i18n="Chat">Nhập hàng </div>
+                            <div className="text-truncate" data-i18n="Chat">Nhập hàng</div>
                         </Link>
                     </li>
                     <li className="menu-item">
