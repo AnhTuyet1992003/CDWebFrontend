@@ -696,6 +696,7 @@ import Swal from 'sweetalert2';
 import './user-profile-edit.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min';
+import Chatbox from './Chatbox';
 
 const UserProfileEdit = () => {
     const [user, setUser] = useState({
@@ -1389,6 +1390,7 @@ const UserProfileEdit = () => {
                     </div>
                 </div>
             </div>
+            <Chatbox />
         </div>
     );
 };
