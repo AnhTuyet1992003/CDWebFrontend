@@ -1,7 +1,19 @@
-import React from 'react';
 import { useNavigate,Link  } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
 const Header = () => {
     const navigate = useNavigate();
+    useEffect(() => {
+        const token = document.cookie
+            .split('; ')
+            .find(row => row.startsWith('token='))
+            ?.split('=')[1];
+        console.log("token" + token)
+        if (!token) {
+            console.log("⛔ Không có token, không gọi API user details");
+            navigate('/login');
+            return; // Không làm gì nếu chưa đăng nhập
+        }
+    }, []);
 
     return (
         <>

@@ -60,6 +60,106 @@ const OrderUser = () => {
         });
 
     };
+    const paymentOnline = async (orderId) =>{
+        const token = document.cookie
+            .split("; ")
+            .find(row => row.startsWith("token="))
+            ?.split("=")[1];
+        if (!token) return;
+
+        const orderResponse = await axios.get(`https://localhost:8443/api/v1/orders/getOrder`, {
+            params: { orderId: orderId },
+            headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json"
+            },
+            withCredentials: true
+        })
+
+        const orderData = orderResponse.data;
+        console.log("orderResponse",orderResponse.data)
+        if (orderData.status == "success") {
+            console.log("selectedAddress before VNPay check:", orderData.data.addressDetails);
+            if (!orderData.data.addressDetails) {
+                Swal.fire({
+                    icon: "error",
+                    title: t('checkout.error_data_address_title'),
+                    text: t('checkout.error_data_address_text'),
+                });
+                return;
+            }
+
+            let vnpayParams = new URLSearchParams();
+            vnpayParams.append("amount", orderData.data.totalPrice?.toString() || "0");
+            vnpayParams.append("vnp_OrderInfo", orderData.data.id?.toString() || "");
+            vnpayParams.append("ordertype", "billpayment");
+            vnpayParams.append("txt_billing_mobile", orderData.data.receiverPhone?.toString() || "");
+            vnpayParams.append("txt_billing_email", orderData.data.email || "customer@example.com");
+            vnpayParams.append("txt_billing_fullname", orderData.data.receiverName || "");
+            vnpayParams.append("txt_inv_addr1", orderData.data.addressDetails || "Unknown Address");
+            vnpayParams.append("txt_bill_city", orderData.data.province || "");
+            vnpayParams.append("txt_bill_country", "Vietnam");
+            vnpayParams.append("txt_inv_mobile", orderData.data.receiverPhone?.toString() || "");
+            vnpayParams.append("txt_inv_email", orderData.data.email || "customer@example.com");
+            vnpayParams.append("txt_inv_customer", orderData.data.receiverName || "");
+            vnpayParams.append("txt_inv_company", "N/A");
+            vnpayParams.append("txt_inv_taxcode", "N/A");
+            vnpayParams.append("cbo_inv_type", "I");
+            vnpayParams.append("language", "vn");
+
+            console.log("VNPay params:", vnpayParams.toString());
+            console.log("Token before calling /create-payment:", token);
+            try {
+                const vnpayResponse = await axios.post(
+                    "https://localhost:8443/api/v1/payments/create-payment",
+                    vnpayParams,
+                    {
+                        headers: {
+                            "Content-Type": "application/x-www-form-urlencoded",
+                            Authorization: `Bearer ${token}`,
+                            Accept: "application/json"
+                        },
+                        withCredentials: true
+                    }
+                );
+
+                console.log("vnpayResponse:  "+vnpayResponse)
+
+                // Kiểm tra lỗi nếu có
+                if (vnpayResponse.status !== 200) {
+                    console.error("VNPay API error:", vnpayResponse);
+                    Swal.fire({
+                        icon: "error",
+                        title:   t('checkout.error_payment'),
+                        text: `Status: ${vnpayResponse.status}, Error: ${vnpayResponse.statusText}`,
+                    });
+                    return;
+                }
+
+
+                const vnpayData = vnpayResponse.data;
+                if (vnpayData.status == "00") { // Sử dụng so sánh lỏng để xử lý chuỗi/số
+                    console.log("Redirecting to VNPay URL:", vnpayData.data);
+                    window.location.href = vnpayData.data; // Chuyển hướng đến URL thanh toán
+                } else {
+                    console.error("VNPay error response:", JSON.stringify(vnpayData, null, 2));
+                    Swal.fire({
+                        icon: "error",
+                        title:    t('checkout.error_payment_3'),
+                        text: vnpayData.message || "Không thể khởi tạo thanh toán.",
+                    });
+                }
+            } catch (error) {
+                console.error("Fetch error:", error);
+                Swal.fire({
+                    icon: "error",
+                    title:    t('checkout.error_payment'),
+                    text:    t('checkout.error_payment_text'),
+                });
+            }
+        }
+
+    }
 
     const fetchCountOrdersByStatus = (statusId) => {
         const token = document.cookie
@@ -257,6 +357,7 @@ const OrderUser = () => {
                                                         <div className={"btn_orderDetail"}>
                                                             {(() => {
                                                                 const id = order.statusOrderId;
+                                                                const orderId = order.id;
                                                                 const buttons = [];
 
                                                                 if ([1, 2].includes(id)) {
@@ -267,8 +368,18 @@ const OrderUser = () => {
                                                                 if (id === 7) {
                                                                     buttons.push(<div className="btn cancel-btn"
                                                                                       key="cancel">{t('order.btn_cancel')}</div>);
-                                                                    buttons.push(<div className="btn pay-btn"
-                                                                                      key="pay">{t('order.btn_buy')}</div>);
+                                                                    // buttons.push(<div className="btn pay-btn"
+                                                                    //                   key="pay">{t('order.btn_buy')}</div>);
+                                                                    buttons.push(
+                                                                        <div
+                                                                            className="btn pay-btn"
+                                                                            key="pay"
+                                                                            onClick={() => paymentOnline(orderId)}
+                                                                        >
+                                                                            {t('order.btn_buy')}
+                                                                        </div>
+                                                                    );
+
                                                                 }
 
                                                                 if (id === 4) {

@@ -91,6 +91,8 @@ const Header = () => {
                     } catch (e) {
                         console.error('Token parse error', e);
                     }
+                }else{
+                    navigate('/login');
                 }
             }
             setUsername(storedUsername || '');
@@ -164,6 +166,7 @@ const Header = () => {
         console.log("token"+ token)
         if (!token) {
             console.log("⛔ Không có token, không gọi API user details");
+            navigate('/login');
             return; // Không làm gì nếu chưa đăng nhập
         }
 
