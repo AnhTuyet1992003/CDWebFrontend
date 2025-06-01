@@ -1390,7 +1390,7 @@ const UserProfileEdit = () => {
                     </div>
                 </div>
             </div>
-            <Chatbox />
+            {/*<Chatbox />*/}
         </div>
     );
 };

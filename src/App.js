@@ -114,6 +114,7 @@ function App() {
               draggable
               theme="light"
           />
+          <Chatbox />
       </Router>
   );
 }

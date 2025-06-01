@@ -1110,26 +1110,26 @@ const ImportOrder = () => {
                         </div>
                     )}
 
-                    {/* Tên người nhập */}
                     <div className="form-group mb-3">
-                        <label className="form-label">Tên người nhập</label>
+                        {/*<label className="form-label fw-bold" >Tên người nhập: </label>*/}
                         <input
                             type="text"
                             value={username}
                             readOnly
-                            className="form-control"
+                            className="form-control bg-light text-dark"
+                            style={{cursor: "not-allowed", border: "1px solid #ced4da"}}
                         />
                     </div>
 
-                    {/* Tổng giá nhập */}
                     <div className="form-group mb-4">
-                        <label className="form-label">Tổng giá nhập</label>
+                        {/*<label className="form-label fw-bold">Tổng giá nhập</label>*/}
                         <input
                             type="number"
                             name="importPrice"
                             value={formData.importPrice}
                             readOnly
-                            className="form-control"
+                            className="form-control bg-light text-dark"
+                            style={{cursor: "not-allowed", border: "1px solid #ced4da"}}
                         />
                     </div>
 
@@ -1144,13 +1144,13 @@ const ImportOrder = () => {
                             <table className="table table-bordered table-hover">
                                 <thead className="thead-dark">
                                 <tr>
-                                    <th style={{ width: '10%' }}>ID</th>
-                                    <th style={{ width: '25%' }}>Tên sản phẩm</th>
-                                    <th style={{ width: '15%' }}>Màu sắc</th>
-                                    <th style={{ width: '15%' }}>Kích thước</th>
-                                    <th style={{ width: '10%' }}>Số lượng</th>
-                                    <th style={{ width: '15%' }}>Giá nhập</th>
-                                    <th style={{ width: '10%' }}>Hành động</th>
+                                    <th style={{width: '10%'}}>ID</th>
+                                    <th style={{width: '25%'}}>Tên sản phẩm</th>
+                                    <th style={{width: '15%'}}>Màu sắc</th>
+                                    <th style={{width: '15%'}}>Kích thước</th>
+                                    <th style={{width: '10%'}}>Số lượng</th>
+                                    <th style={{width: '15%'}}>Giá nhập</th>
+                                    <th style={{width: '10%'}}>Hành động</th>
                                 </tr>
                                 </thead>
                                 <tbody>
@@ -1166,7 +1166,8 @@ const ImportOrder = () => {
                                                 readOnly
                                             />
                                             {errors.products && errors.products[index]?.product_size_colorId && (
-                                                <small className="text-danger">{errors.products[index].product_size_colorId}</small>
+                                                <small
+                                                    className="text-danger">{errors.products[index].product_size_colorId}</small>
                                             )}
                                         </td>
                                         <td>
