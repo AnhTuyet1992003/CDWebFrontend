@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Cookies from 'js-cookie';
 import { jwtDecode } from 'jwt-decode';
+import Swal from 'sweetalert2';
 
 const OAuth2RedirectHandler = () => {
     const navigate = useNavigate();
@@ -53,7 +54,12 @@ const OAuth2RedirectHandler = () => {
                 localStorage.setItem('username', username);
                 window.dispatchEvent(new Event("storage")); // Gửi sự kiện để header cập nhật
 
-                alert("Đăng nhập Google thành công!");
+                Swal.fire({
+                    icon: 'success',
+                    title: '✅ Đăng nhập thành công!',
+                    timer: 1500,
+                    showConfirmButton: false,
+                });
                 navigate('/home');
                 return;
             }

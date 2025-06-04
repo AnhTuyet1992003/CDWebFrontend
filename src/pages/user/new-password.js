@@ -1,13 +1,12 @@
-
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import {Link, useNavigate} from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import Cookies from 'js-cookie';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './user-profile-edit.css';
-import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faEnvelope, faLock, faUser} from "@fortawesome/free-solid-svg-icons";
-import Swal from "sweetalert2";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faLock } from '@fortawesome/free-solid-svg-icons';
+import Swal from 'sweetalert2';
 
 const NewPassword = () => {
     const navigate = useNavigate();
@@ -20,16 +19,17 @@ const NewPassword = () => {
 
     const handleChange = (e) => {
         setUser({ ...user, [e.target.name]: e.target.value });
+        // Xóa lỗi của trường khi người dùng nhập lại
+        setErrors({ ...errors, [e.target.name]: '' });
     };
 
     const validateForm = () => {
         const newErrors = {};
-        const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{7,}$/;
 
         if (!user.newPassword) {
             newErrors.newPassword = 'Vui lòng nhập mật khẩu mới.';
-        } else if (!passwordRegex.test(user.newPassword)) {
-            newErrors.newPassword = 'Mật khẩu phải ít nhất 7 ký tự, bao gồm chữ và số.';
+        } else if (user.newPassword.length < 7 || user.newPassword.length > 100) {
+            newErrors.newPassword = 'Mật khẩu mới phải từ 7 ký tự, bao gồm chữ và số .';
         }
 
         if (!user.reNewPassword) {
@@ -49,7 +49,12 @@ const NewPassword = () => {
         if (Object.keys(validationErrors).length === 0) {
             const email = Cookies.get('email');
             if (!email) {
-                setMessage('Phiên xác thực đã hết hạn. Vui lòng thử lại.');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Lỗi!',
+                    text: 'Phiên xác thực đã hết hạn. Vui lòng thử lại.',
+                    confirmButtonText: 'OK',
+                });
                 navigate('/forgot-password');
                 return;
             }
@@ -64,27 +69,53 @@ const NewPassword = () => {
                     icon: 'success',
                     title: '✅ Cập nhật mật khẩu thành công!',
                     showConfirmButton: false,
-                    timer: 1500
+                    timer: 1500,
                 });
-                // Xóa cookie sau khi cập nhật thành công
                 Cookies.remove('email');
                 Cookies.remove('otp');
                 navigate('/login');
             } catch (error) {
-                console.error(error);
                 if (error.response) {
                     const { status, data } = error.response;
                     if (status === 401) {
-                        Swal.fire('Lỗi!', 'Phiên xác thực không hợp lệ. Vui lòng thử lại.', 'error');
-                        //setMessage('.');
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Lỗi!',
+                            text: 'Phiên xác thực không hợp lệ. Vui lòng thử lại.',
+                            confirmButtonText: 'OK',
+                        });
                         navigate('/forgot-password');
                     } else if (status === 400) {
-                        Swal.fire('Lỗi!', 'Dữ liệu không hợp lệ. Vui lòng thử lại.', 'error');
+                        // Xử lý lỗi validation từ BE
+                        setErrors(data); // Giả sử BE trả về { "email": "...", "newPassword": "..." }
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Lỗi!',
+                            text: 'Dữ liệu không hợp lệ. Vui lòng kiểm tra lại.',
+                            confirmButtonText: 'OK',
+                        });
+                    } else if (status === 404) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Lỗi!',
+                            text: 'Người dùng không tồn tại.',
+                            confirmButtonText: 'OK',
+                        });
                     } else {
-                        Swal.fire('Lỗi!', 'Lỗi khi cập nhật mật khẩu. Vui lòng thử lại.', 'error');
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Lỗi!',
+                            text: 'Lỗi khi cập nhật mật khẩu. Vui lòng thử lại.',
+                            confirmButtonText: 'OK',
+                        });
                     }
                 } else {
-                    Swal.fire('Lỗi!', 'Không thể kết nối đến server. Vui lòng kiểm tra lại.', 'error');
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Lỗi!',
+                        text: 'Không thể kết nối đến server. Vui lòng kiểm tra lại.',
+                        confirmButtonText: 'OK',
+                    });
                 }
             }
         }
@@ -102,12 +133,11 @@ const NewPassword = () => {
                 title: '⚠️ Vui lòng xác thực OTP trước!',
                 confirmButtonText: 'OK',
                 customClass: {
-                    popup: 'swal2-rounded'  // nếu muốn bo góc đẹp
-                }
+                    popup: 'swal2-rounded',
+                },
             });
             navigate('/forgot-password');
         }
-        console.log('email forgot pass: ' + email);
     }, [navigate]);
 
     return (
@@ -118,34 +148,37 @@ const NewPassword = () => {
                         <form className="signup-form" onSubmit={handleUpdatePassword}>
                             <h2 className="form-title">Đặt lại mật khẩu</h2>
                             <div className="form-group">
-                                <label><FontAwesomeIcon icon={faLock}/></label>
-
+                                <label>
+                                    <FontAwesomeIcon icon={faLock} />
+                                </label>
                                 <input
                                     type="password"
                                     name="newPassword"
                                     value={user.newPassword}
                                     onChange={handleChange}
-                                    required={true}
+                                    required
                                     className="form-control"
+                                    placeholder="Nhập mật khẩu mới"
                                 />
                             </div>
-
                             {errors.newPassword && (
                                 <div className="error-container">
                                     <small className="error">{errors.newPassword}</small>
                                 </div>
                             )}
 
-                            {/* Retype Password */}
                             <div className="form-group">
-                                <label><FontAwesomeIcon icon={faLock}/></label>
+                                <label>
+                                    <FontAwesomeIcon icon={faLock} />
+                                </label>
                                 <input
                                     type="password"
                                     name="reNewPassword"
                                     value={user.reNewPassword}
                                     onChange={handleChange}
-                                    required={true}
+                                    required
                                     className="form-control"
+                                    placeholder="Nhập lại mật khẩu mới"
                                 />
                             </div>
                             {errors.reNewPassword && (
@@ -154,30 +187,29 @@ const NewPassword = () => {
                                 </div>
                             )}
 
-                            {/* Submit Button */}
+                            {errors.email && (
+                                <div className="error-container">
+                                    <small className="error">{errors.email}</small>
+                                </div>
+                            )}
+
                             <div className="form-group form-button">
-                                <input type="submit" className="form-submit" value="Lưu thay đổi"/>
-                                <button
-                                    type="button"
-                                    className="btn btn-default"
-                                    onClick={handleCancel}
-                                >
+                                <input type="submit" className="form-submit" value="Lưu thay đổi" />
+                                <button type="button" className="btn btn-default" onClick={handleCancel}>
                                     Hủy
                                 </button>
                             </div>
 
-                            {/* Tổng lỗi chung (nếu có) */}
                             {message && (
-                                <p style={{color: 'red', whiteSpace: 'pre-wrap'}}>{message}</p>
+                                <p style={{ color: 'red', whiteSpace: 'pre-wrap' }}>{message}</p>
                             )}
                         </form>
 
-                        {/* Hình ảnh + link chuyển login */}
                         <div className="signup-image">
                             <figure>
-                                <img width={500} height={500} src="/img/fashion4.png" alt="sign up"/>
+                                <img width={500} height={500} src="/img/fashion4.png" alt="sign up" />
                             </figure>
-                            <Link to="/login" className="signup-image-link" style={{fontSize: '18px'}}>
+                            <Link to="/login" className="signup-image-link" style={{ fontSize: '18px' }}>
                                 Đã có tài khoản? Đăng nhập!
                             </Link>
                         </div>

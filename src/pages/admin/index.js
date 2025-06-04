@@ -1,32 +1,40 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import axios from 'axios';
 import Cookies from 'js-cookie';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
+import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
+import debounce from 'lodash/debounce';
 
-// Cấu hình API base URL và endpoint
+// API configuration
 const API_BASE_URL = 'https://localhost:8443/api/v1';
 const DAILY_REVENUE_ENDPOINT = '/orders/daily-revenue-between';
 const YEARLY_REVENUE_ENDPOINT = '/orders/list-total-revenue-by-year';
 const TOP_PRODUCTS_ENDPOINT = '/orders/top-10-best-selling-products';
+const MONTHLY_REVENUE_ENDPOINT = '/orders/list-total-revenue-by-month-in-year';
 
-// Bỏ qua kiểm tra SSL cho localhost (chỉ dùng trong phát triển)
+// Disable SSL verification for localhost (development only)
 if (process.env.NODE_ENV === 'development') {
     process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 }
 
-// Lấy JWT token từ cookie
+// Get JWT token from cookies
 const getAuthToken = () => {
-    return Cookies.get('jwtToken');
+    return document.cookie
+        .split('; ')
+        .find(row => row.startsWith('token='))
+        ?.split('=')[1];
 };
 
 const TestAdmin = () => {
+    const navigate = useNavigate();
     const [startDate, setStartDate] = useState(new Date(new Date().setDate(new Date().getDate() - 7)));
     const [endDate, setEndDate] = useState(new Date());
     const [revenueData, setRevenueData] = useState({});
     const [yearlyRevenue, setYearlyRevenue] = useState([]);
     const [year, setYear] = useState(new Date().getFullYear());
+    const [growthYear, setGrowthYear] = useState(new Date().getFullYear());
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(false);
     const [yearlyLoading, setYearlyLoading] = useState(false);
@@ -34,36 +42,39 @@ const TestAdmin = () => {
     const [topProducts, setTopProducts] = useState([]);
     const [topProductsLoading, setTopProductsLoading] = useState(false);
     const [topProductsError, setTopProductsError] = useState(null);
+    const [monthlyRevenue, setMonthlyRevenue] = useState({});
+    const [monthlyLoading, setMonthlyLoading] = useState(false);
+    const [monthlyError, setMonthlyError] = useState(null);
+
+    // Refs để lưu trữ các instance của ApexCharts
+    const dailyChartRef = useRef(null);
+    const yearlyChartRef = useRef(null);
+    const growthChartRef = useRef(null);
+
+    // Debounced year change handlers
+    const debouncedSetYear = useCallback(debounce(value => setYear(Number(value)), 300), []);
+    const debouncedSetGrowthYear = useCallback(debounce(value => setGrowthYear(Number(value)), 300), []);
 
     // Fetch daily revenue data
     const fetchRevenueData = async () => {
         setLoading(true);
         setError(null);
-        console.log('Đang gọi API với ngày:', startDate.toISOString().split('T')[0], endDate.toISOString().split('T')[0]);
         try {
-            const token = document.cookie
-                .split('; ')
-                .find(row => row.startsWith('token='))
-                ?.split('=')[1];
-            if (!token) {
-                throw new Error('Không tìm thấy token. Vui lòng đăng nhập lại.');
-            }
+            const token = getAuthToken();
+            if (!token) throw new Error('Không tìm thấy token. Vui lòng đăng nhập lại.');
             const headers = { Authorization: `Bearer ${token}` };
             const response = await axios.get(`${API_BASE_URL}${DAILY_REVENUE_ENDPOINT}`, {
                 params: {
                     'start-date': startDate.toISOString().split('T')[0],
-                    'end-date': endDate.toISOString().split('T')[0]
+                    'end-date': endDate.toISOString().split('T')[0],
                 },
-                headers
+                headers,
             });
-            console.log('Dữ liệu API (Daily):', response.data);
             setRevenueData(response.data);
         } catch (error) {
-            console.error('Lỗi khi gọi API (Daily):', error);
-            const message = error.response?.status === 401
-                ? 'Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.'
-                : error.message === 'Không tìm thấy token. Vui lòng đăng nhập lại.'
-                    ? error.message
+            const message =
+                error.response?.status === 401
+                    ? 'Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.'
                     : `Không thể tải dữ liệu doanh thu: ${error.message}`;
             setError(message);
             setRevenueData({});
@@ -77,26 +88,18 @@ const TestAdmin = () => {
         setYearlyLoading(true);
         setYearlyError(null);
         try {
-            const token = document.cookie
-                .split('; ')
-                .find(row => row.startsWith('token='))
-                ?.split('=')[1];
-            if (!token) {
-                throw new Error('Không tìm thấy token. Vui lòng đăng nhập lại.');
-            }
+            const token = getAuthToken();
+            if (!token) throw new Error('Không tìm thấy token. Vui lòng đăng nhập lại.');
             const headers = { Authorization: `Bearer ${token}` };
             const response = await axios.get(`${API_BASE_URL}${YEARLY_REVENUE_ENDPOINT}`, {
                 params: { year },
-                headers
+                headers,
             });
-            console.log('Dữ liệu API (Yearly):', response.data);
             setYearlyRevenue(response.data);
         } catch (error) {
-            console.error('Lỗi khi gọi API (Yearly):', error);
-            const message = error.response?.status === 401
-                ? 'Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.'
-                : error.message === 'Không tìm thấy token. Vui lòng đăng nhập lại.'
-                    ? error.message
+            const message =
+                error.response?.status === 401
+                    ? 'Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.'
                     : `Không thể tải dữ liệu doanh thu hàng năm: ${error.message}`;
             setYearlyError(message);
             setYearlyRevenue(Array(12).fill(0));
@@ -110,23 +113,18 @@ const TestAdmin = () => {
         setTopProductsLoading(true);
         setTopProductsError(null);
         try {
-            const token = document.cookie
-                .split('; ')
-                .find(row => row.startsWith('token='))
-                ?.split('=')[1];
+            const token = getAuthToken();
             if (!token) {
+                navigate('/home');
                 throw new Error('Không tìm thấy token. Vui lòng đăng nhập lại.');
             }
             const headers = { Authorization: `Bearer ${token}` };
             const response = await axios.get(`${API_BASE_URL}${TOP_PRODUCTS_ENDPOINT}`, { headers });
-            console.log('Dữ liệu API (Top Products):', response.data);
             setTopProducts(response.data);
         } catch (error) {
-            console.error('Lỗi khi gọi API (Top Products):', error);
-            const message = error.response?.status === 401
-                ? 'Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.'
-                : error.message === 'Không tìm thấy token. Vui lòng đăng nhập lại.'
-                    ? error.message
+            const message =
+                error.response?.status === 401
+                    ? 'Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.'
                     : `Không thể tải danh sách sản phẩm bán chạy: ${error.message}`;
             setTopProductsError(message);
             setTopProducts([]);
@@ -135,6 +133,35 @@ const TestAdmin = () => {
         }
     };
 
+    // Fetch monthly revenue data
+    const fetchMonthlyRevenue = async () => {
+        setMonthlyLoading(true);
+        setMonthlyError(null);
+        try {
+            const token = getAuthToken();
+            if (!token) {
+                navigate('/home');
+                throw new Error('Không tìm thấy token. Vui lòng đăng nhập lại.');
+            }
+            const headers = { Authorization: `Bearer ${token}` };
+            const response = await axios.get(`${API_BASE_URL}${MONTHLY_REVENUE_ENDPOINT}`, {
+                params: { year: growthYear },
+                headers,
+            });
+            setMonthlyRevenue(response.data);
+        } catch (error) {
+            const message =
+                error.response?.status === 401
+                    ? 'Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.'
+                    : `Không thể tải dữ liệu doanh thu theo tháng: ${error.message}`;
+            setMonthlyError(message);
+            setMonthlyRevenue({});
+        } finally {
+            setMonthlyLoading(false);
+        }
+    };
+
+    // Fetch data on mount or when dependencies change
     useEffect(() => {
         fetchRevenueData();
     }, [startDate, endDate]);
@@ -144,161 +171,160 @@ const TestAdmin = () => {
     }, [year]);
 
     useEffect(() => {
+        fetchMonthlyRevenue();
+    }, [growthYear]);
+
+    useEffect(() => {
         fetchTopProducts();
     }, []);
 
     // Render daily revenue chart
     useEffect(() => {
-        console.log('Dữ liệu doanh thu (Daily):', revenueData);
         if (!window.ApexCharts) {
-            console.error('ApexCharts chưa được tải');
             setError('Thư viện ApexCharts chưa được tải.');
             return;
         }
-
-        if (Object.keys(revenueData).length === 0) {
-            console.log('Không có dữ liệu để vẽ biểu đồ (Daily)');
-            return;
-        }
-
-        const options = {
-            series: [{
-                name: 'Doanh thu',
-                data: Object.values(revenueData)
-            }],
-            chart: {
-                type: 'line',
-                height: 350
-            },
-            xaxis: {
-                categories: Object.keys(revenueData).map(dateStr => {
-                    const date = new Date(dateStr);
-                    const day = String(date.getDate()).padStart(2, '0');
-                    const month = String(date.getMonth() + 1).padStart(2, '0');
-                    const year = date.getFullYear();
-                    return `${day}/${month}/${year}`;
-                })
-            },
-            yaxis: {
-                title: {
-                    text: 'Doanh thu ($)'
-                }
-            },
-            stroke: {
-                curve: 'smooth',
-                width: 3
-            },
-            colors: ['#00C851'],
-            tooltip: {
-                y: {
-                    formatter: (val) => `$${val.toFixed(2)}`
-                }
-            }
-        };
+        if (Object.keys(revenueData).length === 0) return;
 
         const chartElement = document.querySelector('#totalRevenueChart');
         if (!chartElement) {
-            console.error('Không tìm thấy phần tử #totalRevenueChart');
             setError('Không tìm thấy container biểu đồ.');
             return;
         }
 
-        const chart = new window.ApexCharts(chartElement, options);
-        chart.render();
+        // Xóa biểu đồ cũ nếu tồn tại
+        if (dailyChartRef.current) {
+            dailyChartRef.current.destroy();
+            dailyChartRef.current = null;
+        }
 
-        return () => chart.destroy();
+        const options = {
+            series: [{ name: 'Doanh thu', data: Object.values(revenueData) }],
+            chart: { type: 'line', height: 350 },
+            xaxis: {
+                categories: Object.keys(revenueData).map(dateStr => format(new Date(dateStr), 'dd/MM/yyyy')),
+            },
+            yaxis: { title: { text: 'Doanh thu ($)' } },
+            stroke: { curve: 'smooth', width: 3 },
+            colors: ['#00C851'],
+            tooltip: { y: { formatter: val => `$${val.toFixed(2)}` } },
+        };
+
+        dailyChartRef.current = new window.ApexCharts(chartElement, options);
+        dailyChartRef.current.render();
+
+        return () => {
+            if (dailyChartRef.current) {
+                dailyChartRef.current.destroy();
+                dailyChartRef.current = null;
+            }
+        };
     }, [revenueData]);
 
     // Render yearly revenue chart
     useEffect(() => {
         if (!window.ApexCharts) {
-            console.error('ApexCharts chưa được tải');
             setYearlyError('Thư viện ApexCharts chưa được tải.');
             return;
         }
-
-        if (yearlyRevenue.length !== 12) {
-            console.log('Dữ liệu doanh thu hàng năm không hợp lệ:', yearlyRevenue);
-            return;
-        }
-
-        const options = {
-            series: [{
-                name: 'Doanh thu',
-                data: yearlyRevenue
-            }],
-            chart: {
-                type: 'line',
-                height: 350,
-                zoom: { enabled: false }
-            },
-            stroke: {
-                curve: 'smooth',
-                width: 3
-            },
-            xaxis: {
-                categories: [
-                    'Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4',
-                    'Tháng 5', 'Tháng 6', 'Tháng 7', 'Tháng 8',
-                    'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12'
-                ]
-            },
-            yaxis: {
-                title: { text: 'Doanh thu ($)' }
-            },
-            grid: {
-                borderColor: '#f1f1f1'
-            },
-            colors: ['#00C851'],
-            tooltip: {
-                y: {
-                    formatter: (val) => `$${val.toFixed(2)}`
-                }
-            }
-        };
+        if (yearlyRevenue.length !== 12) return;
 
         const chartElement = document.querySelector('#incomeChart');
         if (!chartElement) {
-            console.error('Không tìm thấy phần tử #incomeChart');
             setYearlyError('Không tìm thấy container biểu đồ.');
             return;
         }
 
-        const chart = new window.ApexCharts(chartElement, options);
-        chart.render();
+        // Xóa biểu đồ cũ nếu tồn tại
+        if (yearlyChartRef.current) {
+            yearlyChartRef.current.destroy();
+            yearlyChartRef.current = null;
+        }
 
-        return () => chart.destroy();
+        const options = {
+            series: [{ name: 'Doanh thu', data: yearlyRevenue }],
+            chart: { type: 'line', height: 350, zoom: { enabled: false } },
+            stroke: { curve: 'smooth', width: 3 },
+            xaxis: {
+                categories: [
+                    'Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6',
+                    'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12',
+                ],
+            },
+            yaxis: { title: { text: 'Doanh thu ($)' } },
+            grid: { borderColor: '#f1f1f1' },
+            colors: ['#00C851'],
+            tooltip: { y: { formatter: val => `$${val.toFixed(2)}` } },
+        };
+
+        yearlyChartRef.current = new window.ApexCharts(chartElement, options);
+        yearlyChartRef.current.render();
+
+        return () => {
+            if (yearlyChartRef.current) {
+                yearlyChartRef.current.destroy();
+                yearlyChartRef.current = null;
+            }
+        };
     }, [yearlyRevenue]);
 
     // Render growth chart
     useEffect(() => {
-        if (window.ApexCharts) {
-            const options = {
-                series: [44, 55, 13, 43, 22],
-                chart: {
-                    type: 'pie',
-                    height: 350
-                },
-                labels: ['Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5'],
-                responsive: [{
+        if (!window.ApexCharts) {
+            setMonthlyError('Thư viện ApexCharts chưa được tải.');
+            return;
+        }
+        if (Object.keys(monthlyRevenue).length === 0) return;
+
+        const currentMonth = new Date().getMonth() + 1;
+        const months = [
+            'Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6',
+            'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12',
+        ].slice(0, currentMonth);
+
+        const revenueValues = Object.keys(monthlyRevenue)
+            .filter(key => parseInt(key) <= currentMonth)
+            .map(key => monthlyRevenue[key]);
+
+        const chartElement = document.querySelector('#growthChart');
+        if (!chartElement) {
+            setMonthlyError('Không tìm thấy container biểu đồ.');
+            return;
+        }
+
+        // Xóa biểu đồ cũ nếu tồn tại
+        if (growthChartRef.current) {
+            growthChartRef.current.destroy();
+            growthChartRef.current = null;
+        }
+
+        const options = {
+            series: revenueValues.length > 0 ? revenueValues : [0],
+            chart: { type: 'pie', height: 450 },
+            labels: months,
+            responsive: [
+                {
                     breakpoint: 480,
                     options: {
-                        chart: {
-                            width: 200
-                        },
-                        legend: {
-                            position: 'bottom'
-                        }
-                    }
-                }]
-            };
+                        chart: { width: 250 },
+                        legend: { position: 'bottom' },
+                    },
+                },
+            ],
+            colors: ['#2196F3', '#4CAF50', '#FF9800', '#F44336', '#9C27B0', '#673AB7'],
+            tooltip: { y: { formatter: val => `${val.toFixed(2)} VND` } },
+        };
 
-            const chart = new window.ApexCharts(document.querySelector('#growthChart'), options);
-            chart.render();
+        growthChartRef.current = new window.ApexCharts(chartElement, options);
+        growthChartRef.current.render();
 
-            return () => chart.destroy();
-        }
-    }, []);
+        return () => {
+            if (growthChartRef.current) {
+                growthChartRef.current.destroy();
+                growthChartRef.current = null;
+            }
+        };
+    }, [monthlyRevenue]);
 
     const calculateGrowth = () => {
         const values = Object.values(revenueData);
@@ -312,12 +338,13 @@ const TestAdmin = () => {
         return Object.values(revenueData).reduce((sum, val) => sum + val, 0).toFixed(2);
     };
 
-    // Generate year options (current year and past 5 years)
+    // Generate year options
     const yearOptions = Array.from({ length: 6 }, (_, i) => new Date().getFullYear() - i);
 
     return (
         <div className="container-xxl flex-grow-1 container-p-y">
             <div className="row">
+                {/* Congratulatory card */}
                 <div className="col-xxl-8 mb-6 order-0">
                     <div className="card">
                         <div className="d-flex align-items-start row">
@@ -342,6 +369,7 @@ const TestAdmin = () => {
                         </div>
                     </div>
                 </div>
+                {/* Profit and Sales cards */}
                 <div className="col-xxl-4 col-lg-12 col-md-4 order-1">
                     <div className="row">
                         <div className="col-lg-6 col-md-12 col-6 mb-6">
@@ -418,6 +446,7 @@ const TestAdmin = () => {
                         </div>
                     </div>
                 </div>
+                {/* Total Revenue and Growth Chart */}
                 <div className="col-12 col-xxl-8 order-2 order-md-3 order-xxl-2 mb-6 total-revenue">
                     <div className="card">
                         <div className="row row-bordered g-0">
@@ -426,40 +455,24 @@ const TestAdmin = () => {
                                     <div className="card-title mb-0">
                                         <h5 className="m-0 me-2">Tổng doanh thu</h5>
                                     </div>
-                                    <div className="dropdown">
-                                        <button
-                                            className="btn p-0"
-                                            type="button"
-                                            id="totalRevenue"
-                                            data-bs-toggle="dropdown"
-                                            aria-haspopup="true"
-                                            aria-expanded="false"
-                                        >
-                                            <i className="bx bx-dots-vertical-rounded icon-lg text-body-secondary"></i>
-                                        </button>
-                                        <div className="d-flex gap-2">
-                                            <div>
-                                                <label className="form-label">Ngày bắt đầu</label>
-                                                <DatePicker
-                                                    selected={startDate}
-                                                    onChange={(date) => setStartDate(date)}
-                                                    className="form-control"
-                                                    dateFormat="yyyy-MM-dd"
-                                                />
-                                            </div>
-                                            <div>
-                                                <label className="form-label">Ngày kết thúc</label>
-                                                <DatePicker
-                                                    selected={endDate}
-                                                    onChange={(date) => setEndDate(date)}
-                                                    className="form-control"
-                                                    dateFormat="yyyy-MM-dd"
-                                                />
-                                            </div>
+                                    <div className="d-flex gap-2">
+                                        <div>
+                                            <label className="form-label">Ngày bắt đầu</label>
+                                            <DatePicker
+                                                selected={startDate}
+                                                onChange={date => setStartDate(date)}
+                                                className="form-control"
+                                                dateFormat="yyyy-MM-dd"
+                                            />
                                         </div>
-                                        <div className="dropdown-menu dropdown-menu-end" aria-labelledby="totalRevenue">
-                                            <a className="dropdown-item" href="#" onClick={fetchRevenueData}>Làm mới</a>
-                                            <a className="dropdown-item" href="#">Chia sẻ</a>
+                                        <div>
+                                            <label className="form-label">Ngày kết thúc</label>
+                                            <DatePicker
+                                                selected={endDate}
+                                                onChange={date => setEndDate(date)}
+                                                className="form-control"
+                                                dateFormat="yyyy-MM-dd"
+                                            />
                                         </div>
                                     </div>
                                 </div>
@@ -473,16 +486,37 @@ const TestAdmin = () => {
                                     )}
                                     {error && <div className="alert alert-danger">{error}</div>}
                                     {!loading && Object.keys(revenueData).length === 0 && !error && (
-                                        <div className="text-center">Không có dữ liệu. Vui lòng chọn khoảng thời gian
-                                            hoặc đăng nhập.</div>
+                                        <div className="text-center">Không có dữ liệu. Vui lòng chọn khoảng thời gian hoặc đăng nhập.</div>
                                     )}
                                 </div>
                             </div>
                             <div className="col-lg-4">
                                 <div className="card-body px-xl-9 py-12 d-flex align-items-center flex-column">
                                     <div className="text-center mb-6">
+                                        <h5 className="m-0 me-2">Phân bổ doanh thu theo tháng</h5>
+                                        <select
+                                            value={growthYear}
+                                            onChange={e => debouncedSetGrowthYear(e.target.value)}
+                                            className="form-select mt-2"
+                                        >
+                                            {yearOptions.map(y => (
+                                                <option key={y} value={y}>{y}</option>
+                                            ))}
+                                        </select>
                                     </div>
-                                    <div id="growthChart"></div>
+                                    <div id="growthChart" className="w-100">
+                                        {monthlyLoading && (
+                                            <div className="text-center">
+                                                <div className="spinner-border text-primary" role="status">
+                                                    <span className="visually-hidden">Đang tải...</span>
+                                                </div>
+                                            </div>
+                                        )}
+                                        {monthlyError && <div className="alert alert-danger">{monthlyError}</div>}
+                                        {!monthlyLoading && Object.keys(monthlyRevenue).length === 0 && !monthlyError && (
+                                            <div className="text-center">Không có dữ liệu doanh thu theo tháng.</div>
+                                        )}
+                                    </div>
                                     <div className="text-center fw-medium my-6">{calculateGrowth()}% Tăng trưởng kỳ</div>
                                     <div className="d-flex gap-11 justify-content-between">
                                         <div className="d-flex">
@@ -513,6 +547,7 @@ const TestAdmin = () => {
                         </div>
                     </div>
                 </div>
+                {/* Yearly Revenue and Other Cards */}
                 <div className="col-12 col-md-8 col-lg-12 col-xxl-4 order-3 order-md-2 profile-report">
                     <div className="row">
                         <div className="col-6 mb-6 payments">
@@ -592,7 +627,7 @@ const TestAdmin = () => {
                                                 <label className="form-label me-2">Chọn năm:</label>
                                                 <select
                                                     value={year}
-                                                    onChange={(e) => setYear(Number(e.target.value))}
+                                                    onChange={e => debouncedSetYear(e.target.value)}
                                                     className="form-select"
                                                 >
                                                     {yearOptions.map(y => (
@@ -621,6 +656,7 @@ const TestAdmin = () => {
                     </div>
                 </div>
             </div>
+            {/* Top Products and Transactions */}
             <div className="row">
                 <div className="col-md-6 col-lg-4 col-xl-4 order-0 mb-6">
                     <div className="card h-100">

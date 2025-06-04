@@ -1,7 +1,19 @@
-import React from 'react';
 import { useNavigate,Link  } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
 const Header = () => {
     const navigate = useNavigate();
+    useEffect(() => {
+        const token = document.cookie
+            .split('; ')
+            .find(row => row.startsWith('token='))
+            ?.split('=')[1];
+        console.log("token" + token)
+        if (!token) {
+            console.log("⛔ Không có token, không gọi API user details");
+            navigate('/login');
+            return; // Không làm gì nếu chưa đăng nhập
+        }
+    }, []);
 
     return (
         <>
@@ -255,9 +267,15 @@ const Header = () => {
                         </Link>
                     </li>
                     <li className="menu-item">
+                        <Link to="/list-product-need-import" style={{cursor: 'pointer'}} className="menu-link"><i
+                            className="menu-icon tf-icons bx bx-chat"></i>
+                            <div className="text-truncate" data-i18n="Chat">Danh sách sản phẩm cần nhập</div>
+                        </Link>
+                    </li>
+                    <li className="menu-item">
                         <Link to="/import-order" style={{cursor: 'pointer'}} className="menu-link"><i
                             className="menu-icon tf-icons bx bx-chat"></i>
-                            <div className="text-truncate" data-i18n="Chat">Nhập hàng </div>
+                            <div className="text-truncate" data-i18n="Chat">Nhập hàng</div>
                         </Link>
                     </li>
                     <li className="menu-item">

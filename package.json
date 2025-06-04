@@ -17,6 +17,8 @@
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.2.0",
     "@testing-library/user-event": "^13.5.0",
+    "ajv": "8.17.1",
+    "ajv-keywords": "5.1.0",
     "animate.css": "^3.6.0",
     "apexcharts": "^4.5.0",
     "axios": "^1.9.0",
@@ -41,7 +43,7 @@
     "eonasdan-bootstrap-datetimepicker": "^4.17.47",
     "font-awesome": "^4.7.0",
     "fullcalendar": "^3.9.0",
-    "i18next": "^25.2.0",
+    "i18next": "^25.2.1",
     "i18next-browser-languagedetector": "^8.1.0",
     "i18next-http-backend": "^3.0.2",
     "jquery": "^3.7.1",
@@ -79,7 +81,23 @@
     "extends": [
       "react-app",
       "react-app/jest"
-    ]
+    ],
+    "env": {
+      "browser": true,
+      "es2021": true,
+      "amd": true
+    },
+    "rules": {
+      "no-unused-expressions": "error",
+      "no-undef": "error",
+      "no-restricted-globals": [
+        "error",
+        {
+          "name": "self",
+          "message": "Use window or WorkerGlobalScope instead of self"
+        }
+      ]
+    }
   },
   "browserslist": {
     "production": [
@@ -92,5 +110,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "webpack-cli": "^6.0.1"
   }
 }
