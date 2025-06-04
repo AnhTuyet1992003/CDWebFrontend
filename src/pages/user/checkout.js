@@ -317,9 +317,10 @@ const Checkout = () => {
             const formData = new URLSearchParams();
             cartItemIds.forEach(id => formData.append("cartItemIds", id));
             formData.append("shippingAddressId", selectedAddress.id);
-            formData.append("shippingFee", 0);
-            formData.append("finalPrice", order.total_price);
+            formData.append("shippingFee", order.shipping_fee);
+            formData.append("finalPrice", order.final_price);
             formData.append("totalPrice", order.total_price);
+            formData.append("discountValue", order.discount_value);
             formData.append("note", note || "");
             formData.append("paymentId", paymentId);
 
@@ -359,7 +360,7 @@ const Checkout = () => {
                 }
 
                 let vnpayParams = new URLSearchParams();
-                vnpayParams.append("amount", order.total_price.toString());
+                vnpayParams.append("amount", order.final_price.toString());
                 vnpayParams.append("vnp_OrderInfo", `${orderData.data.id}`)
                 console.log("order_id la: ------------------"+ orderData.data.id)
                 vnpayParams.append("ordertype", "billpayment");
@@ -758,6 +759,7 @@ const Checkout = () => {
                                                     <div>
                                                         <div>{t('checkout.total_price')}</div>
                                                         <div>{t('checkout.ship_price')}</div>
+                                                        <div>{t('checkout.discount_value')}</div>
                                                         <div>{t('checkout.total_final')}</div>
                                                     </div>
                                                     <div
@@ -773,9 +775,10 @@ const Checkout = () => {
                                                             {formatVND(order?.total_price || 0)}
 
                                                         </div>
-                                                        <div>{formatVND(0)}</div>
+                                                        <div>{formatVND(order?.shipping_fee || 0)}</div>
+                                                        <div>{formatVND(order?.discount_value || 0)}</div>
                                                         <div>
-                                                            {formatVND(order?.total_price || 0)}
+                                                            {formatVND(order?.final_price || 0)}
 
                                                         </div>
                                                     </div>

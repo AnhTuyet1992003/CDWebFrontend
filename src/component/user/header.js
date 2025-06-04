@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import Cookies from 'js-cookie';
 import {jwtDecode} from "jwt-decode";
 import axios from "axios";
@@ -7,7 +7,8 @@ import '../../pages/user/AddToCart.css'
 import { useTranslation } from 'react-i18next';
 import Swal from 'sweetalert2';
 const Header = () => {
-
+    const location = useLocation();
+    const isActive = (path) => location.pathname === path;
 
     // đa ngôn ngữ
     const { t, i18n } = useTranslation();
@@ -209,8 +210,12 @@ const Header = () => {
                         <div className="col-xl-6 col-lg-7">
                             <nav className="header__menu">
                                 <ul>
-                                    <li className="active"><Link to="/home">{t('header.home')}</Link></li>
-                                    <li><Link to="/shop">{t('header.products')}</Link></li>
+                                    <li className={isActive('/home') ? 'active' : ''}>
+                                        <Link to="/home">{t('header.home')}</Link>
+                                    </li>
+                                    <li className={isActive('/shop') ? 'active' : ''}>
+                                        <Link to="/shop">{t('header.products')}</Link>
+                                    </li>
                                     <li>
                                         <a href="#">Pages</a>
                                         <ul className="dropdown">
@@ -222,16 +227,24 @@ const Header = () => {
                                             <li><Link to="/blog-detail">Blog Detail</Link></li>
                                         </ul>
                                     </li>
-                                    <li><Link to="/blog">{t('header.about')}</Link></li>
-                                    <li><Link to="/contact">{t('header.contact')}</Link></li>
-                                    <li><Link to="/admin-index">Admin</Link></li>
+                                    <li className={isActive('/blog') ? 'active' : ''}>
+                                        <Link to="/blog">{t('header.about')}</Link>
+                                    </li>
+                                    <li className={isActive('/contact') ? 'active' : ''}>
+                                        <Link to="/contact">{t('header.contact')}</Link>
+                                    </li>
+                                    <li className={isActive('/admin-index') ? 'active' : ''}>
+                                        <Link to="/admin-index">Admin</Link>
+                                    </li>
                                 </ul>
                             </nav>
                         </div>
                         <div className="col-lg-3">
                             <div className="header__right">
                                 <div className="header__right__auth">
-                                    <div  style={{display: "flex", flexDirection: "row", justifyItems: "center", alignItems: "center"}}>
+                                    <div style={{
+                                        display: "flex",
+                                        flexDirection: "row", justifyItems: "center", alignItems: "center"}}>
                                     <a
                                         className="nav-link dropdown-toggle hide-arrow"
                                         href="#"

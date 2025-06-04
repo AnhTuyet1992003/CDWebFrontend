@@ -1769,19 +1769,35 @@ ol {
 	padding: 0 20px;
 	overflow: hidden;
 	display: inline-block;
+	background: #FFFFFF;
 }
 
 .pro-qty .qtybtn {
-	font-size: 14px;
+	font-size: 20px;
 	color: #666666;
 	cursor: pointer;
 	float: left;
 	width: 12px;
 	line-height: 46px;
+	text-align: center;
+	user-select: none;
+	transition: all 0.2s ease;
 }
 
+/* Hover: làm chữ to ra nhẹ */
+.pro-qty .qtybtn:hover {
+	font-size: 24px;
+	transform: scale(1.3);
+}
+
+/* Active: thu nhỏ lại như đang nhấn */
+.pro-qty .qtybtn:active {
+	transform: scale(0.95);
+}
+
+
 .pro-qty input {
-	font-size: 14px;
+	font-size: 20px;
 	color: #666666;
 	font-weight: 500;
 	border: none;
@@ -1797,17 +1813,44 @@ ol {
 }
 
 .product__details__button .cart-btn {
-	display: inline-block;
-	font-size: 14px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	margin-left: 25px;
+	/*margin-top: 20px;*/
+	background: rgba(238, 77, 45, 0.18);
+	border: 2px solid #ee4d2d;
+	border-radius: 10px;
+	width: 200px;
+	height: 50px;
+	color: #c30000;
+	/*font-size: 20px;*/
+	font-weight: bold;
+	transition: all 0.3s ease;
+}
+
+.product__details__button .cart-btn:hover{
+	background: rgba(238, 77, 45, 0.48);
+	border: 2px solid #ee4d2d;
+}
+
+.product__details__button .buy-btn:hover{
+	background: rgb(255, 131, 108);
+}
+.product__details__button .buy-btn {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	margin-left: 35px;
+	/*margin-top: 20px;*/
+	background: rgb(238, 77, 45);
+	border-radius: 10px;
+	width: 100px;
+	height: 50px;
 	color: #ffffff;
-	background: #ca1515;
-	font-weight: 600;
-	text-transform: uppercase;
-	padding: 14px 30px 15px;
-	border-radius: 50px;
-	float: left;
-	margin-right: 10px;
-	margin-bottom: 10px;
+	/*font-size: 20px;*/
+	font-weight: bold;
+	transition: all 0.3s ease;
 }
 
 .product__details__button ul {
@@ -1842,7 +1885,6 @@ ol {
 
 .product__details__widget {
 	border-top: 1px solid #ebebeb;
-	padding-top: 55px;
 }
 
 .product__details__widget ul li {
@@ -3771,6 +3813,8 @@ ol {
 
 
 	/*test*/
-
+.product__item__text .name_product #nameProduct:hover{
+	font-size: 30px;
+}
 	
 }

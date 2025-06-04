@@ -58,7 +58,6 @@ const OrderUser = () => {
         navigate('/order/confirmation', {
             state: { orderId: id }
         });
-
     };
     const paymentOnline = async (orderId) =>{
         const token = document.cookie
