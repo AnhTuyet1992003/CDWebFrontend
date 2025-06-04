@@ -123,6 +123,7 @@
     "color": "Màu",
     "total_price": "Tổng",
     "ship_price": "Tiền ship",
+    "discount_value": "Giảm",
     "total_final": "Tổng thanh toán",
     "payment": "Phương thức thanh toán",
     "payment_1": "Thanh toán khi nhận",

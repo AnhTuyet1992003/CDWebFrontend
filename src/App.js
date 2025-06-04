@@ -69,7 +69,7 @@ function App() {
 
             <Route path="/order/confirmation" element={<LayoutUser><OrderDetail /></LayoutUser>} />
             <Route path="/order" element={<LayoutUser><OrderUser /></LayoutUser>} />
-
+            <Route path="/product/product-detail" element={<LayoutUser><ProductDetail /></LayoutUser>} />
 
             <Route path="/chatbox" element={<Chatbox />} />
 
