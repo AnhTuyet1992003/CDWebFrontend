@@ -216,6 +216,12 @@ const Header = () => {
                                     <li className={isActive('/shop') ? 'active' : ''}>
                                         <Link to="/shop">{t('header.products')}</Link>
                                     </li>
+                                    <li className={isActive('/coupon') ? 'active' : ''}>
+                                        <Link to="/coupon">Mã giảm giá</Link>
+                                    </li>
+                                    <li className={isActive('/choose-coupon') ? 'active' : ''}>
+                                        <Link to="/choose-coupon">chọn giảm giá</Link>
+                                    </li>
                                     <li>
                                         <a href="#">Pages</a>
                                         <ul className="dropdown">
@@ -241,7 +247,7 @@ const Header = () => {
                         </div>
                         <div className="col-lg-3">
                             <div className="header__right">
-                                <div className="header__right__auth">
+                            <div className="header__right__auth">
                                     <div style={{
                                         display: "flex",
                                         flexDirection: "row", justifyItems: "center", alignItems: "center"}}>

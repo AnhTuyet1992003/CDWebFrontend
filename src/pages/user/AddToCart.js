@@ -34,7 +34,7 @@ const AddToCart = ({ productId, onClose }) => {
     const token = localStorage.getItem('accessToken');
     useEffect(() => {
         if (productId) {
-            axios.get(`https://localhost:8443/api/v1/products/getProduct/${productId}`, { withCredentials: true })
+            axios.get(`https://localhost:8443/api/v1/products/getProduct/${productId}?isActive=true`, { withCredentials: true })
                 .then(response => {
                     setProduct(response.data);
                     setSelectedImage(response.data.image);

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './ProductReviews.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faStar, faThumbsUp, faReply, faImage, faEdit, faTrash } from '@fortawesome/free-solid-svg-icons';
+import { faStar, faThumbsUp, faReply, faEdit, faTrash, faImage } from '@fortawesome/free-solid-svg-icons';
 import axios from 'axios';
 import Swal from 'sweetalert2';
 import { useNavigate } from 'react-router-dom';
@@ -31,26 +31,21 @@ const StarRating = ({ productId }) => {
     const [pageSize] = useState(3);
     const [totalPages, setTotalPages] = useState(0);
     const [totalItems, setTotalItems] = useState(0);
+    // Thêm state để lưu averageRating và totalReviews từ API
+    const [averageRating, setAverageRating] = useState(0);
+    const [totalReviews, setTotalReviews] = useState(0);
 
-    const totalReviews = ratings.reduce((sum, rating) => sum + rating.count, 0);
-    const averageRating = totalReviews > 0 ? ratings.reduce((sum, rating) => sum + (rating.stars * rating.count), 0) / totalReviews : 0;
-    const roundedAverage = Math.floor(averageRating) + (averageRating >= Math.floor(averageRating) + 0.5 ? 1 : 0);
-
-    const handleAuthError = () => {
-        Swal.fire({
-            icon: 'warning',
-            title: 'Phiên đăng nhập hết hạn! Vui lòng đăng nhập lại.',
-            confirmButtonText: 'OK',
-        }).then(() => {
-            localStorage.removeItem('username');
-            document.cookie = 'token=; expires=Thu, 01 Jan 1970 00:00:00 GMT';
-            navigate('/login');
-        });
-    };
-
+    // Lấy danh sách đánh giá và thống kê từ API, cập nhật state comments, ratings, averageRating, totalReviews
+    // Cách chạy: Gửi GET request tới API với productId, page, size và token trong header
+    // Kết quả: Cập nhật comments (bình luận cha), ratings (thống kê sao), averageRating, totalReviews, totalPages, totalItems
+    // Đảm bảo: Xử lý lỗi 401, ratings luôn có 5 mức sao, lấy averageRating và totalReviews từ API
     const fetchReviews = async () => {
         if (!token) {
-            handleAuthError();
+            Swal.fire({
+                icon: 'warning',
+                title: 'Vui lòng đăng nhập để xem đánh giá!',
+                confirmButtonText: 'OK',
+            }).then(() => navigate('/login'));
             return;
         }
 
@@ -58,18 +53,14 @@ const StarRating = ({ productId }) => {
             const response = await axios.get(`https://localhost:8443/api/v1/reviews/product/${productId}/with-likes`, {
                 headers: { Authorization: `Bearer ${token}` },
                 params: { page: currentPage, size: pageSize },
+                withCredentials: true,
             });
 
-            const data = response.data;
+            const { reviews, stats, averageRating, totalReviews, totalPages, totalItems, currentPage: responsePage } = response.data;
 
-            const replyIds = new Set();
-            data.reviews.forEach(review => {
-                review.replies.forEach(reply => {
-                    replyIds.add(reply.id);
-                });
-            });
-
-            const fetchedComments = data.reviews
+            // Lọc bình luận cha (không phải reply) bằng cách loại bỏ các review có id nằm trong danh sách reply
+            const replyIds = new Set(reviews.flatMap(review => review.replies.map(reply => reply.id)));
+            const fetchedComments = reviews
                 .filter(review => !replyIds.has(review.id))
                 .map(review => ({
                     id: review.id,
@@ -94,9 +85,8 @@ const StarRating = ({ productId }) => {
                     createdDate: review.createdDate,
                 }));
 
+            // Cập nhật state với dữ liệu từ API
             setComments(fetchedComments);
-            console.log('Fetched Comments:', fetchedComments);
-
             const updatedRatings = [
                 { stars: 5, count: 0 },
                 { stars: 4, count: 0 },
@@ -104,62 +94,367 @@ const StarRating = ({ productId }) => {
                 { stars: 2, count: 0 },
                 { stars: 1, count: 0 },
             ];
-            data.stats.forEach(stat => {
+            stats.forEach(stat => {
                 const index = updatedRatings.findIndex(r => r.stars === stat.stars);
-                if (index !== -1) {
-                    updatedRatings[index].count = stat.total || 0;
-                }
+                if (index !== -1) updatedRatings[index].count = stat.total || 0;
             });
             setRatings(updatedRatings);
-
-            setTotalPages(data.totalPages);
-            setTotalItems(data.totalItems);
-            setCurrentPage(data.currentPage);
+            setAverageRating(averageRating || 0);
+            setTotalReviews(totalReviews || 0);
+            setTotalPages(totalPages);
+            setTotalItems(totalItems);
+            setCurrentPage(responsePage);
         } catch (error) {
             if (error.response?.status === 401) {
-                handleAuthError();
-            } else {
-                console.error('Lỗi khi lấy danh sách đánh giá:', error);
                 Swal.fire({
-                    icon: 'error',
-                    title: 'Lỗi khi lấy dữ liệu đánh giá!',
+                    icon: 'warning',
+                    title: 'Phiên đăng nhập hết hạn! Vui lòng đăng nhập lại.',
                     confirmButtonText: 'OK',
-                });
+                }).then(() => navigate('/login'));
+            } else {
+                Swal.fire({ icon: 'error', title: 'Lỗi khi lấy dữ liệu đánh giá!', confirmButtonText: 'OK' });
             }
         }
     };
 
+    // Tự động gọi fetchReviews khi productId, token hoặc currentPage thay đổi
+    // Cách chạy: useEffect theo dõi các dependency, gọi fetchReviews để cập nhật dữ liệu
+    // Đảm bảo: Luôn gọi lại khi cần để cập nhật averageRating và totalReviews từ API
     useEffect(() => {
         fetchReviews();
-    }, [productId, token, navigate, currentPage, pageSize]);
+    }, [productId, token, currentPage]);
 
+    // Chuyển đổi trang phân trang
+    // Cách chạy: Nhận số trang mới, kiểm tra tính hợp lệ (0 <= page < totalPages), cập nhật currentPage
     const handlePageChange = (page) => {
-        if (page >= 0 && page < totalPages) {
-            setCurrentPage(page);
+        if (page >= 0 && page < totalPages) setCurrentPage(page);
+    };
+
+    // Gửi bình luận mới kèm rating và ảnh (nếu có)
+    // Cách chạy: Kiểm tra nội dung, số sao và token, tạo FormData, gửi POST request tới API
+    // Kết quả: Làm mới danh sách đánh giá, reset form nhập liệu
+    const handleSubmitComment = async () => {
+        if (!token) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Vui lòng đăng nhập để gửi bình luận!',
+                confirmButtonText: 'OK',
+            }).then(() => navigate('/login'));
+            return;
+        }
+        if (!comment.trim()) return Swal.fire({ icon: 'warning', title: 'Vui lòng nhập nội dung bình luận!', confirmButtonText: 'OK' });
+        if (!selectedRating) return Swal.fire({ icon: 'warning', title: 'Vui lòng chọn số sao đánh giá!', confirmButtonText: 'OK' });
+
+        try {
+            const formData = new FormData();
+            formData.append('comment', comment);
+            formData.append('stars', selectedRating);
+            formData.append('productId', productId);
+            if (selectedImage) formData.append('image', selectedImage);
+
+            await axios.post('https://localhost:8443/api/v1/reviews', formData, {
+                headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'multipart/form-data' },
+                withCredentials: true,
+            });
+
+            Swal.fire({ icon: 'success', title: 'Gửi bình luận thành công!', confirmButtonText: 'OK' });
+            fetchReviews();
+            setComment('');
+            setSelectedRating(0);
+            setSelectedImage(null);
+        } catch (error) {
+            if (error.response?.status === 401) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Phiên đăng nhập hết hạn! Vui lòng đăng nhập lại.',
+                    confirmButtonText: 'OK',
+                }).then(() => navigate('/login'));
+            } else {
+                Swal.fire({ icon: 'error', title: 'Lỗi khi gửi bình luận!', confirmButtonText: 'OK' });
+            }
         }
     };
 
+    // Sửa bình luận hoặc trả lời
+    // Cách chạy: Kiểm tra nội dung, số sao (nếu không phải reply) và token, gửi PUT request tới API
+    const handleSubmitEditComment = async (commentId, isReply) => {
+        if (!token) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Vui lòng đăng nhập để sửa bình luận!',
+                confirmButtonText: 'OK',
+            }).then(() => navigate('/login'));
+            return;
+        }
+        if (!editContent.trim()) return Swal.fire({ icon: 'warning', title: 'Vui lòng nhập nội dung!', confirmButtonText: 'OK' });
+        if (!isReply && !editRating) return Swal.fire({ icon: 'warning', title: 'Vui lòng chọn số sao!', confirmButtonText: 'OK' });
+
+        try {
+            await axios.put(`https://localhost:8443/api/v1/reviews/${commentId}`, null, {
+                headers: { Authorization: `Bearer ${token}` },
+                params: { comment: editContent, ...(!isReply && { stars: editRating }) },
+                withCredentials: true,
+            });
+
+            Swal.fire({ icon: 'success', title: 'Cập nhật thành công!', confirmButtonText: 'OK' });
+            fetchReviews();
+            setEditingComment(null);
+            setEditContent('');
+            setEditRating(0);
+        } catch (error) {
+            if (error.response?.status === 401) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Phiên đăng nhập hết hạn! Vui lòng đăng nhập lại.',
+                    confirmButtonText: 'OK',
+                }).then(() => navigate('/login'));
+            } else {
+                Swal.fire({ icon: 'error', title: 'Lỗi khi sửa bình luận!', confirmButtonText: 'OK' });
+            }
+        }
+    };
+
+    // Xóa bình luận hoặc trả lời
+    // Cách chạy: Kiểm tra token, hiển thị xác nhận xóa, gửi DELETE request tới API nếu đồng ý
+    const handleDeleteComment = async (commentId) => {
+        if (!token) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Vui lòng đăng nhập để xóa bình luận!',
+                confirmButtonText: 'OK',
+            }).then(() => navigate('/login'));
+            return;
+        }
+
+        Swal.fire({
+            icon: 'warning',
+            title: 'Bạn có chắc chắn muốn xóa?',
+            showCancelButton: true,
+            confirmButtonText: 'Xóa',
+            cancelButtonText: 'Hủy',
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                try {
+                    await axios.delete(`https://localhost:8443/api/v1/reviews/${commentId}`, {
+                        headers: { Authorization: `Bearer ${token}` },
+                        withCredentials: true,
+                    });
+
+                    Swal.fire({ icon: 'success', title: 'Xóa thành công!', confirmButtonText: 'OK' });
+                    fetchReviews();
+                } catch (error) {
+                    if (error.response?.status === 401) {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Phiên đăng nhập hết hạn! Vui lòng đăng nhập lại.',
+                            confirmButtonText: 'OK',
+                        }).then(() => navigate('/login'));
+                    } else {
+                        Swal.fire({ icon: 'error', title: 'Lỗi khi xóa bình luận!', confirmButtonText: 'OK' });
+                    }
+                }
+            }
+        });
+    };
+
+    // Thích hoặc bỏ thích bình luận/trả lời
+    // Cách chạy: Kiểm tra token, gửi POST request tới API để toggle like, cập nhật state comments
+    const handleLike = async (id, isReply = false, parentId = null) => {
+        if (!token) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Vui lòng đăng nhập để thích bình luận!',
+                confirmButtonText: 'OK',
+            }).then(() => navigate('/login'));
+            return;
+        }
+
+        try {
+            const response = await axios.post(`https://localhost:8443/api/v1/reviews/${id}/like`, {}, {
+                headers: { Authorization: `Bearer ${token}` },
+                withCredentials: true,
+            });
+
+            const { review, liked } = response.data;
+            setComments(comments.map(c => {
+                if (isReply && c.id === parentId) {
+                    return {
+                        ...c,
+                        replies: c.replies.map(r => r.id === id ? { ...r, likes: review.likes, liked } : r),
+                    };
+                }
+                return c.id === id ? { ...c, likes: review.likes, liked } : c;
+            }));
+        } catch (error) {
+            if (error.response?.status === 401) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Phiên đăng nhập hết hạn! Vui lòng đăng nhập lại.',
+                    confirmButtonText: 'OK',
+                }).then(() => navigate('/login'));
+            } else {
+                Swal.fire({ icon: 'error', title: 'Lỗi khi thực hiện hành động!', confirmButtonText: 'OK' });
+            }
+        }
+    };
+
+    // Gửi trả lời cho bình luận
+    // Cách chạy: Kiểm tra nội dung trả lời và token, gửi POST request tới API với parentReviewId
+    const handleSubmitReply = async (commentId) => {
+        if (!token) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Vui lòng đăng nhập để gửi trả lời!',
+                confirmButtonText: 'OK',
+            }).then(() => navigate('/login'));
+            return;
+        }
+        if (!replyContent.trim()) return Swal.fire({ icon: 'warning', title: 'Vui lòng nhập nội dung trả lời!', confirmButtonText: 'OK' });
+
+        try {
+            await axios.post('https://localhost:8443/api/v1/reviews/reply', null, {
+                headers: { Authorization: `Bearer ${token}` },
+                params: { parentReviewId: commentId, comment: replyContent },
+                withCredentials: true,
+            });
+
+            Swal.fire({ icon: 'success', title: 'Gửi trả lời thành công!', confirmButtonText: 'OK' });
+            fetchReviews();
+            setReplyContent('');
+            setReplyingTo(null);
+        } catch (error) {
+            if (error.response?.status === 401) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Phiên đăng nhập hết hạn! Vui lòng đăng nhập lại.',
+                    confirmButtonText: 'OK',
+                }).then(() => navigate('/login'));
+            } else {
+                Swal.fire({ icon: 'error', title: 'Lỗi khi gửi trả lời!', confirmButtonText: 'OK' });
+            }
+        }
+    };
+
+    // Định dạng ngày giờ theo chuẩn Việt Nam
+    // Cách chạy: Chuyển timestamp thành chuỗi định dạng dd/mm/yyyy hh:mm:ss
+    const formatDateTime = (timestamp) => {
+        if (!timestamp) return '';
+        return new Date(timestamp).toLocaleString('vi-VN', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+        });
+    };
+
+    // Lấy chữ cái đầu của tên để hiển thị trong avatar
+    // Cách chạy: Tách tên thành các từ, lấy chữ cái đầu, ghép lại và lấy 2 ký tự đầu tiên
+    const getAvatarInitials = (name) => {
+        if (!name) return '';
+        return name.split(' ').map(word => word[0]).join('').toUpperCase().substring(0, 2);
+    };
+
+    // Xử lý chọn sao đánh giá
+    // Cách chạy: Cập nhật state selectedRating hoặc editRating khi người dùng click vào sao
+    const handleStarClick = (stars) => setSelectedRating(stars);
+    const handleEditStarClick = (stars) => setEditRating(stars);
+
+    // Xử lý upload ảnh
+    // Cách chạy: Lấy file ảnh từ input, cập nhật state selectedImage
+    const handleImageChange = (e) => {
+        const file = e.target.files[0];
+        if (file) setSelectedImage(file);
+    };
+
+    // Bắt đầu chỉnh sửa bình luận hoặc trả lời
+    // Cách chạy: Cập nhật state editingComment, editContent và editRating dựa trên bình luận/reply
+    const handleEditComment = (comment, isReply = false) => {
+        setEditingComment({ id: comment.id, isReply });
+        setEditContent(comment.content);
+        setEditRating(isReply ? 0 : comment.rating || 0);
+    };
+
+    // Render sao trung bình của sản phẩm
+    // Cách chạy: Tạo mảng 5 sao, hiển thị sao đầy hoặc mờ dựa trên averageRating từ API
+    // Đảm bảo: Luôn hiển thị 5 sao, kể cả khi averageRating = 0
+    const renderStars = () => {
+        const fullStars = Math.round(averageRating);
+        return Array(5).fill().map((_, i) => (
+            <FontAwesomeIcon key={i} icon={faStar} className={`star ${i < fullStars ? 'full-star' : 'faded-star'}`} />
+        ));
+    };
+
+    // Render sao để người dùng chọn khi viết bình luận
+    // Cách chạy: Tạo mảng 5 sao, hiển thị sao được chọn dựa trên selectedRating
+    // Đảm bảo: Luôn hiển thị 5 sao để người dùng chọn
+    const renderSelectionStars = () => (
+        Array(5).fill().map((_, i) => (
+            <FontAwesomeIcon
+                key={i + 1}
+                icon={faStar}
+                className={`star ${selectedRating >= i + 1 ? 'selected' : ''}`}
+                onClick={() => handleStarClick(i + 1)}
+            />
+        ))
+    );
+
+    // Render sao để người dùng chọn khi chỉnh sửa bình luận
+    // Cách chạy: Tương tự renderSelectionStars, nhưng dùng editRating
+    // Đảm bảo: Luôn hiển thị 5 sao trong form chỉnh sửa
+    const renderEditSelectionStars = () => (
+        Array(5).fill().map((_, i) => (
+            <FontAwesomeIcon
+                key={i + 1}
+                icon={faStar}
+                className={`star ${editRating >= i + 1 ? 'selected' : ''}`}
+                onClick={() => handleEditStarClick(i + 1)}
+            />
+        ))
+    );
+
+    // Render sao cho bình luận
+    // Cách chạy: Tạo mảng 5 sao, hiển thị sao đầy hoặc mờ dựa trên rating của bình luận
+    // Đảm bảo: Mỗi bình luận luôn hiển thị 5 sao (đầy hoặc mờ)
+    const renderCommentStars = (rating) => (
+        Array(5).fill().map((_, i) => (
+            <FontAwesomeIcon
+                key={i + 1}
+                icon={faStar}
+                className={`star ${rating >= i + 1 ? 'full-star' : 'faded-star'}`}
+            />
+        ))
+    );
+
+    // Render sao cho thống kê đánh giá
+    // Cách chạy: Tạo mảng sao đầy dựa trên số sao (stars) của từng rating
+    // Đảm bảo: Hiển thị đúng số sao đầy cho mỗi mức đánh giá trong thống kê
+    const renderRatingStars = (stars) => (
+        Array(stars).fill().map((_, i) => (
+            <FontAwesomeIcon key={i + 1} icon={faStar} className="star full-star" />
+        ))
+    );
+
+    // Render phân trang
+    // Cách chạy: Tạo các nút phân trang (tối đa 5), hiển thị nút Previous/Next và thông tin trang
     const renderPagination = () => {
-        const pages = [];
         const maxPagesToShow = 5;
         let startPage = Math.max(0, currentPage - Math.floor(maxPagesToShow / 2));
         let endPage = Math.min(totalPages - 1, startPage + maxPagesToShow - 1);
-
         if (endPage - startPage + 1 < maxPagesToShow) {
             startPage = Math.max(0, endPage - maxPagesToShow + 1);
         }
 
-        for (let i = startPage; i <= endPage; i++) {
-            pages.push(
-                <button
-                    key={i}
-                    onClick={() => handlePageChange(i)}
-                    className={`pagination-button ${i === currentPage ? 'active' : ''}`}
-                >
-                    {i + 1}
-                </button>
-            );
-        }
+        const pages = Array(endPage - startPage + 1).fill().map((_, i) => (
+            <button
+                key={startPage + i}
+                onClick={() => handlePageChange(startPage + i)}
+                className={`pagination-button ${startPage + i === currentPage ? 'active' : ''}`}
+            >
+                {startPage + i + 1}
+            </button>
+        ));
 
         return (
             <div className="pagination">
@@ -183,366 +478,6 @@ const StarRating = ({ productId }) => {
                 </span>
             </div>
         );
-    };
-
-    const renderStars = () => {
-        const fullStars = roundedAverage;
-        const stars = [];
-        for (let i = 0; i < fullStars; i++) {
-            stars.push(<FontAwesomeIcon key={i} icon={faStar} className="star full-star" />);
-        }
-        while (stars.length < 5) {
-            stars.push(<FontAwesomeIcon key={stars.length} icon={faStar} className="star faded-star" />);
-        }
-        return stars;
-    };
-
-    const handleStarClick = (stars) => {
-        setSelectedRating(stars);
-    };
-
-    const handleEditStarClick = (stars) => {
-        setEditRating(stars);
-    };
-
-    const renderSelectionStars = () => {
-        const stars = [];
-        for (let i = 1; i <= 5; i++) {
-            stars.push(
-                <FontAwesomeIcon
-                    key={i}
-                    icon={faStar}
-                    className={`star ${selectedRating >= i ? 'selected' : ''}`}
-                    onClick={() => handleStarClick(i)}
-                />
-            );
-        }
-        return stars;
-    };
-
-    const renderEditSelectionStars = () => {
-        const stars = [];
-        for (let i = 1; i <= 5; i++) {
-            stars.push(
-                <FontAwesomeIcon
-                    key={i}
-                    icon={faStar}
-                    className={`star ${editRating >= i ? 'selected' : ''}`}
-                    onClick={() => handleEditStarClick(i)}
-                />
-            );
-        }
-        return stars;
-    };
-
-    const renderCommentStars = (rating) => {
-        const stars = [];
-        for (let i = 1; i <= 5; i++) {
-            stars.push(
-                <FontAwesomeIcon
-                    key={i}
-                    icon={faStar}
-                    className={`star ${rating >= i ? 'full-star' : 'faded-star'}`}
-                />
-            );
-        }
-        return stars;
-    };
-
-    const renderRatingStars = (stars) => {
-        const starIcons = [];
-        for (let i = 1; i <= stars; i++) {
-            starIcons.push(<FontAwesomeIcon key={i} icon={faStar} className="star full-star" />);
-        }
-        return starIcons;
-    };
-
-    const handleImageChange = (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            setSelectedImage(file);
-        }
-    };
-
-    const handleSubmitComment = async () => {
-        if (!token) {
-            handleAuthError();
-            return;
-        }
-
-        if (!comment.trim()) {
-            Swal.fire({
-                icon: 'warning',
-                title: 'Vui lòng nhập nội dung bình luận!',
-                confirmButtonText: 'OK',
-            });
-            return;
-        }
-
-        if (selectedRating === 0) {
-            Swal.fire({
-                icon: 'warning',
-                title: 'Vui lòng chọn số sao đánh giá!',
-                confirmButtonText: 'OK',
-            });
-            return;
-        }
-
-        try {
-            const formData = new FormData();
-            formData.append('comment', comment);
-            formData.append('stars', selectedRating);
-            formData.append('productId', productId);
-            if (selectedImage) {
-                formData.append('image', selectedImage);
-            }
-
-            await axios.post('https://localhost:8443/api/v1/reviews', formData, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                    'Content-Type': 'multipart/form-data',
-                },
-            });
-
-            Swal.fire({
-                icon: 'success',
-                title: 'Gửi bình luận thành công!',
-                confirmButtonText: 'OK',
-            });
-
-            fetchReviews();
-            setComment('');
-            setSelectedRating(0);
-            setSelectedImage(null);
-        } catch (error) {
-            if (error.response?.status === 401) {
-                handleAuthError();
-            } else {
-                console.error('Lỗi khi gửi bình luận:', error);
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Lỗi khi gửi bình luận!',
-                    text: error.response?.data || 'Có lỗi xảy ra, vui lòng thử lại!',
-                    confirmButtonText: 'OK',
-                });
-            }
-        }
-    };
-
-    const handleEditComment = (comment, isReply = false) => {
-        setEditingComment({ id: comment.id, isReply });
-        setEditContent(comment.content);
-        setEditRating(isReply ? 0 : comment.rating || 0);
-    };
-
-    const handleSubmitEditComment = async (commentId, isReply) => {
-        if (!editContent.trim()) {
-            Swal.fire({
-                icon: 'warning',
-                title: 'Vui lòng nhập nội dung bình luận!',
-                confirmButtonText: 'OK',
-            });
-            return;
-        }
-
-        if (!isReply && editRating === 0) {
-            Swal.fire({
-                icon: 'warning',
-                title: 'Vui lòng chọn số sao đánh giá!',
-                confirmButtonText: 'OK',
-            });
-            return;
-        }
-
-        try {
-            const params = {
-                comment: editContent,
-                ...(isReply ? {} : { stars: editRating }),
-            };
-
-            await axios.put(
-                `https://localhost:8443/api/v1/reviews/${commentId}`,
-                null,
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                    params: params,
-                }
-            );
-
-            Swal.fire({
-                icon: 'success',
-                title: 'Cập nhật bình luận thành công!',
-                confirmButtonText: 'OK',
-            });
-
-            fetchReviews();
-            setEditingComment(null);
-            setEditContent('');
-            setEditRating(0);
-        } catch (error) {
-            if (error.response?.status === 401) {
-                handleAuthError();
-            } else {
-                console.error('Lỗi khi sửa bình luận:', error.response?.data || error.message);
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Lỗi khi sửa bình luận!',
-                    text: error.response?.data?.error || 'Có lỗi xảy ra, vui lòng thử lại!',
-                    confirmButtonText: 'OK',
-                });
-            }
-        }
-    };
-
-    const handleDeleteComment = async (commentId) => {
-        Swal.fire({
-            icon: 'warning',
-            title: 'Bạn có chắc chắn muốn xóa bình luận này?',
-            showCancelButton: true,
-            confirmButtonText: 'Xóa',
-            cancelButtonText: 'Hủy',
-        }).then(async (result) => {
-            if (result.isConfirmed) {
-                try {
-                    await axios.delete(`https://localhost:8443/api/v1/reviews/${commentId}`, {
-                        headers: {
-                            Authorization: `Bearer ${token}`,
-                        },
-                    });
-
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Xóa bình luận thành công!',
-                        confirmButtonText: 'OK',
-                    });
-
-                    fetchReviews();
-                } catch (error) {
-                    if (error.response?.status === 401) {
-                        handleAuthError();
-                    } else {
-                        console.error('Lỗi khi xóa bình luận:', error.response?.data || error.message);
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Lỗi khi xóa bình luận!',
-                            text: error.response?.data?.error || 'Có lỗi xảy ra, vui lòng thử lại!',
-                            confirmButtonText: 'OK',
-                        });
-                    }
-                }
-            }
-        });
-    };
-
-    const handleLike = async (id, isReply = false, parentId = null) => {
-        if (!token) {
-            handleAuthError();
-            return;
-        }
-
-        try {
-            const response = await axios.post(`https://localhost:8443/api/v1/reviews/${id}/like`, {}, {
-                headers: { Authorization: `Bearer ${token}` },
-            });
-
-            const { review, liked } = response.data;
-
-            if (isReply) {
-                setComments(comments.map(c => {
-                    if (c.id === parentId) {
-                        return {
-                            ...c,
-                            replies: c.replies.map(r =>
-                                r.id === id ? { ...r, likes: review.likes, liked } : r
-                            ),
-                        };
-                    }
-                    return c;
-                }));
-            } else {
-                setComments(comments.map(c =>
-                    c.id === id ? { ...c, likes: review.likes, liked } : c
-                ));
-            }
-        } catch (error) {
-            if (error.response?.status === 401) {
-                handleAuthError();
-            } else {
-                console.error('Lỗi khi toggle like/unlike:', error.response?.data || error.message);
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Lỗi khi thực hiện hành động!',
-                    text: error.response?.data?.error || 'Có lỗi xảy ra, vui lòng thử lại!',
-                    confirmButtonText: 'OK',
-                });
-            }
-        }
-    };
-
-    const handleSubmitReply = async (commentId) => {
-        if (!token) {
-            handleAuthError();
-            return;
-        }
-
-        if (!replyContent.trim()) {
-            Swal.fire({
-                icon: 'warning',
-                title: 'Vui lòng nhập nội dung trả lời!',
-                confirmButtonText: 'OK',
-            });
-            return;
-        }
-
-        try {
-            await axios.post('https://localhost:8443/api/v1/reviews/reply', null, {
-                headers: { Authorization: `Bearer ${token}` },
-                params: { parentReviewId: commentId, comment: replyContent },
-            });
-
-            Swal.fire({
-                icon: 'success',
-                title: 'Gửi trả lời thành công!',
-                confirmButtonText: 'OK',
-            });
-
-            fetchReviews();
-            setReplyContent('');
-            setReplyingTo(null);
-        } catch (error) {
-            if (error.response?.status === 401) {
-                handleAuthError();
-            } else {
-                console.error('Lỗi khi gửi trả lời:', error.response?.data || error.message);
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Lỗi khi gửi trả lời!',
-                    text: error.response?.data?.error || 'Có lỗi xảy ra, vui lòng thử lại!',
-                    confirmButtonText: 'OK',
-                });
-            }
-        }
-    };
-
-    const formatDateTime = (timestamp) => {
-        if (!timestamp) return '';
-        const date = new Date(timestamp);
-        return date.toLocaleString('vi-VN', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit',
-        });
-    };
-
-    const getAvatarInitials = (name) => {
-        if (!name) return '';
-        const initials = name.split(' ').map(word => word[0]).join('').toUpperCase();
-        return initials.substring(0, 2);
     };
 
     return (
