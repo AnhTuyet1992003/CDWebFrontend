@@ -45,7 +45,8 @@ import ImportOrder from "./pages/admin/import-order";
 import ListImportOrder from "./pages/admin/list-import-order";
 import EditImportOrder from "./pages/admin/edit-import-order";
 import ListProductNeedImport from "./pages/admin/list-product-need-import";
-
+import Coupon from './pages/user/coupon'
+import ChooseCoupon from './pages/user/choose-coupon'
 function App() {
   return (
       <Router>
@@ -70,6 +71,10 @@ function App() {
 
             <Route path="/order/confirmation" element={<LayoutUser><OrderDetail /></LayoutUser>} />
             <Route path="/order" element={<LayoutUser><OrderUser /></LayoutUser>} />
+
+            <Route path="/coupon" element={<LayoutUser><Coupon /></LayoutUser>} />
+            <Route path="/choose-coupon" element={<LayoutUser><ChooseCoupon /></LayoutUser>} />
+
             <Route path="/product/product-detail" element={<LayoutUser><ProductDetail /></LayoutUser>} />
 
             <Route path="/chatbox" element={<Chatbox />} />

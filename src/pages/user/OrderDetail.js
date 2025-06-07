@@ -171,8 +171,8 @@ const OrderDetail = () => {
                                         <td className="text-end">{formatVND(order.shippingFee)}</td>
                                     </tr>
                                     <tr>
-                                        <td colSpan={2}>{t('order_detail.price_coupon')} (Code: NEWYEAR)</td>
-                                        <td className="text-danger text-end">{formatVND(0)}</td>
+                                        <td colSpan={2}>{t('order_detail.price_coupon')} (Code: {order.codeCoupon})</td>
+                                        <td className="text-danger text-end">-{formatVND(order.discountValue)}</td>
                                     </tr>
                                     <tr className="fw-bold">
                                         <td colSpan={2}>{t('order_detail.price_final')}</td>
