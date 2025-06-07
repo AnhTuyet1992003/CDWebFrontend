@@ -21,7 +21,7 @@ const Home = () => {
 
     const fetchProducts = async (page, size) => {
         try {
-            const res = await axios.get(`https://localhost:8443/api/v1/products/list_page?page=${page}&size=${size}`);
+            const res = await axios.get(`https://localhost:8443/api/v1/products/list_page?page=${page}&size=${size}&isActive=true`);
             setProducts(res.data.products);
             setCurrentPage(res.data.currentPage);
             setPageSize(res.data.pageSize)

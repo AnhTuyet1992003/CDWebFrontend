@@ -128,7 +128,7 @@ const Cart = () => {
                 })
                 setSelectedCoupon(null);
             }
-            if (selectedCoupon.minProductQuantity>1){
+            if (selectedItems.length<selectedCoupon.minProductQuantity){
                 Swal.fire({
                     icon: 'warning',
                     title: "Không thõa mãn điều kiện của mã giảm",

@@ -273,7 +273,7 @@ const Checkout = () => {
         return new Intl.NumberFormat('vi-VN').format(money) + ' ₫';
     };
 
-    const calculateDiscount = (coupon, totalPrice, freeShip) => {
+    const calculateDiscount = (coupon, totalPrice, freeShip, order) => {
         if (!coupon) return 0;
         let discount = 0;
         if (coupon.maxUsesPerUser - coupon.usageCount <= 0)
@@ -295,15 +295,17 @@ const Checkout = () => {
             })
             return 0;
         }
-        if (coupon.minProductQuantity>1){
+        const productCount = order?.cart_items_choose?.length || 0;
+        if (productCount < coupon.minProductQuantity) {
             Swal.fire({
                 icon: 'warning',
-                title: "Không thõa mãn điều kiện của mã giảm",
-                text: "Không đủ số lượng sản phẩm tối thiểu",
+                title: "Không thỏa mãn điều kiện của mã giảm",
+                text: `Cần tối thiểu ${coupon.minProductQuantity} sản phẩm để áp dụng mã giảm.`,
                 confirmButtonText: 'OK',
-            })
+            });
             return 0;
         }
+
         if (coupon.couponType === 'Giảm theo tiền') {
             discount = Math.min(coupon.discountValue, totalPrice);
         } else if (coupon.couponType === 'Giảm theo phần trăm') {
@@ -754,7 +756,7 @@ const Checkout = () => {
                                                 coupons={coupons} // Truyền coupons vào ChooseCoupon
                                                 selectedCouponCode={order?.coupon_code}
                                                 onCouponSelect={(coupon) => {
-                                                    const discount = coupon ? calculateDiscount(coupon, order.total_price, order.shipping_fee) : 0;
+                                                    const discount = coupon ? calculateDiscount(coupon, order.total_price, order.shipping_fee, order) : 0;
 
                                                     if (discount === 0 && coupon) {
                                                         // Không thỏa mãn điều kiện -> Không cập nhật coupon
@@ -763,9 +765,9 @@ const Checkout = () => {
                                                     setOrder((prevOrder) => ({
                                                         ...prevOrder,
                                                         coupon_code: coupon?.code || '',
-                                                        discount_value: coupon ? calculateDiscount(coupon, prevOrder.total_price, prevOrder.shipping_fee) : 0,
+                                                        discount_value: coupon ? calculateDiscount(coupon, prevOrder.total_price, prevOrder.shipping_fee, order) : 0,
                                                         final_price: coupon
-                                                            ? prevOrder.total_price - calculateDiscount(coupon, prevOrder.total_price, prevOrder.shipping_fee) + (prevOrder.shipping_fee || 0)
+                                                            ? prevOrder.total_price - calculateDiscount(coupon, prevOrder.total_price, prevOrder.shipping_fee, order) + (prevOrder.shipping_fee || 0)
                                                             : prevOrder.total_price + (prevOrder.shipping_fee || 0),
 
                                                     }));
