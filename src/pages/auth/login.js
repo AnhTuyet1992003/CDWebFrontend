@@ -1,21 +1,20 @@
-import React, {useState} from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faFacebookF, faTwitter, faGoogle } from '@fortawesome/free-brands-svg-icons';
 import { faUser, faLock } from '@fortawesome/free-solid-svg-icons';
 import { useNavigate } from 'react-router-dom';
-
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'font-awesome/css/font-awesome.min.css';
 import './styleAuth.css';
 import axios from 'axios';
 import Cookies from 'js-cookie';
 import { jwtDecode } from 'jwt-decode';
-
-import { useEffect } from 'react';
-
+import { useTranslation } from 'react-i18next';
 
 const Login = () => {
+    const { t, i18n } = useTranslation();
+    const navigate = useNavigate();
 
     useEffect(() => {
         if (window.location.hash === '#_=_') {
@@ -23,7 +22,6 @@ const Login = () => {
         }
     }, []);
 
-    const navigate = useNavigate();
     useEffect(() => {
         const token = Cookies.get('token');
         console.log('Token:', token);
@@ -48,11 +46,11 @@ const Login = () => {
             const response = await axios.post('https://localhost:8443/api/v1/users/login', {
                 username,
                 password
-            },{ withCredentials: true }).catch(error => {
+            }, { withCredentials: true }).catch(error => {
                 console.error("Login failed: ", error); // In toàn bộ lỗi
-            });;
+            });
 
-            const accessToken= response.data.accessToken;
+            const accessToken = response.data.accessToken;
             console.log("Access token nhận được:", accessToken);
 
             // Lưu token vào cookie
@@ -61,26 +59,24 @@ const Login = () => {
                 secure: true,
                 sameSite: 'None',
             });
-            // expires là số ngày, bạn có thể điều chỉnh
 
             localStorage.setItem('accessToken', accessToken);
-            // Cookies.set('testToken', accessToken, { secure: false });
-            // console.log(Cookies.get('testToken'));
             // Decode token để lấy thông tin người dùng
             const decoded = jwtDecode(accessToken);
             console.log("usename nhận được:", decoded.sub);
             localStorage.setItem('username', decoded.sub);
 
             window.dispatchEvent(new Event("storage"));
-            alert('Đăng nhập thành công!');
+            alert(t('login.success_alert'));
             console.log('Login success, token:', Cookies.get('token'));
             // Chuyển hướng đến trang chủ
             navigate('/home');
         } catch (error) {
             console.error('Login failed:', error);
-            alert('Sai username hoặc password!');
+            alert(t('login.error_alert'));
         }
-    }
+    };
+
     const handleSocialLogin = async (provider) => {
         try {
             const baseUrl = 'https://localhost:8443/oauth2/authorization';
@@ -90,19 +86,10 @@ const Login = () => {
             const redirectUrl = `${baseUrl}/${provider}`;
             console.log("Đang đăng nhập bằng:", provider);
 
-            //alert('Đăng nhập thành công!');
-            // Chuyển hướng đến trang chủ
-            //navigate('/home');
-
-            //navigate('/home');
-            // Tùy backend, nếu HEAD bị CORS chặn, có thể bỏ đoạn kiểm tra này
             window.location.href = redirectUrl;
-            // Cập nhật URL đăng nhập với Facebook
-            //window.location.href = "https://localhost:8443/oauth2/authorization/facebook";
-
         } catch (error) {
             console.error('Lỗi:', error.message);
-            alert(`Không thể kết nối đến dịch vụ ${provider}.`);
+            alert(t('login.social_error', { provider }));
         }
     };
 
@@ -113,18 +100,18 @@ const Login = () => {
                     <div className="signin-content">
                         <div className="signin-image">
                             <figure>
-                                <img src="/img/fashion11.png" alt="sign up" width={400} height={500} />
+                                <img src="/img/fashion11.png" alt={t('login.image_alt')} width={400} height={500} />
                             </figure>
                             <Link to="/register" className="signup-image-link">
-                                <FontAwesomeIcon style={{ fontSize: '22px' }} icon={faUser} /> Tạo tài khoản
+                                <FontAwesomeIcon style={{ fontSize: '22px' }} icon={faUser} /> {t('login.register_link')}
                             </Link>
                             <Link to="/forgot-password" className="signup-image-link">
-                                <FontAwesomeIcon style={{ fontSize: '22px' }} icon={faUser} /> Quên mật khẩu
+                                <FontAwesomeIcon style={{ fontSize: '22px' }} icon={faUser} /> {t('login.forgot_link')}
                             </Link>
                         </div>
 
                         <div className="signin-form">
-                            <h2 className="form-title" style={{ fontSize: '40px' }}>Đăng nhập</h2>
+                            <h2 className="form-title" style={{ fontSize: '40px' }}>{t('login.title')}</h2>
 
                             <form className="register-form" id="login-form" onSubmit={handleLoginSubmit}>
                                 <div className="form-group">
@@ -135,7 +122,7 @@ const Login = () => {
                                         type="text"
                                         name="your_username"
                                         id="your_username"
-                                        placeholder="Username của bạn"
+                                        placeholder={t('login.username_placeholder')}
                                         value={username}
                                         onChange={(e) => setUsername(e.target.value)}
                                         style={{ fontFamily: 'Courier New' }}
@@ -149,7 +136,7 @@ const Login = () => {
                                         type="password"
                                         name="your_pass"
                                         id="your_pass"
-                                        placeholder="Mật khẩu"
+                                        placeholder={t('login.password_placeholder')}
                                         value={password}
                                         onChange={(e) => setPassword(e.target.value)}
                                         style={{ fontFamily: 'Courier New' }}
@@ -158,11 +145,11 @@ const Login = () => {
                                 <div className="form-group">
                                     <input type="checkbox" name="remember-me" id="remember-me" className="agree-term visually-hidden" />
                                     <label htmlFor="remember-me" className="label-agree-term">
-                                        <span><span></span></span>Ghi nhớ tài khoản
+                                        <span><span></span></span>{t('login.remember_me')}
                                     </label>
                                 </div>
                                 <div className="form-group form-button">
-                                    <input type="submit" name="signin" id="signin" className="form-submit" value="Đăng nhập" />
+                                    <input type="submit" name="signin" id="signin" className="form-submit" value={t('login.login_button')} />
                                 </div>
 
                                 {/* Social Login Buttons */}
@@ -173,7 +160,7 @@ const Login = () => {
                                             alt="Google"
                                             style={{ width: '20px', marginRight: '8px' }}
                                         />
-                                        Đăng nhập với Google
+                                        {t('login.google_login')}
                                     </button>
 
                                     <button type="button" className="social-button facebook" onClick={() => handleSocialLogin('facebook')}>
@@ -182,13 +169,13 @@ const Login = () => {
                                             alt="Facebook"
                                             style={{ width: '20px', marginRight: '8px' }}
                                         />
-                                        Đăng nhập với Facebook
+                                        {t('login.facebook_login')}
                                     </button>
                                 </div>
 
                                 {/* Icon-based Social Login */}
                                 <div className="social-login" style={{ marginTop: '30px' }}>
-                                    <span className="social-label" style={{ fontSize: '15px' }}>Đăng nhập với</span>
+                                    <span className="social-label" style={{ fontSize: '15px' }}>{t('login.social_label')}</span>
                                     <ul className="socials">
                                         <li>
                                             <button type="button" className="social-icon" onClick={() => handleSocialLogin('facebook')}>
@@ -196,7 +183,7 @@ const Login = () => {
                                             </button>
                                         </li>
                                         <li>
-                                            <button type="button" className="social-icon" onClick={() => alert('Twitter chưa hỗ trợ')}>
+                                            <button type="button" className="social-icon" onClick={() => alert(t('login.twitter_not_supported'))}>
                                                 <FontAwesomeIcon icon={faTwitter} style={{ fontSize: '18px' }} />
                                             </button>
                                         </li>
@@ -207,7 +194,6 @@ const Login = () => {
                                         </li>
                                     </ul>
                                 </div>
-
                             </form>
                         </div>
                     </div>
