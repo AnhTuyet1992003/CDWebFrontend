@@ -1,702 +1,11 @@
-// import React, { useEffect, useState } from 'react';
-// import axios, {post} from 'axios';
-// import { jwtDecode } from 'jwt-decode';
-// import Chatbox from './Chatbox';
-//
-// import Cookies from 'js-cookie';
-// import Swal from 'sweetalert2';
-//
-// import './user-profile-edit.css'
-// // Bootstrap CSS
-// import 'bootstrap/dist/css/bootstrap.min.css';
-//
-// // jQuery (nếu cần dùng)
-// import $ from 'jquery';
-//
-// // Bootstrap JS (bundle includes popper.js)
-// import 'bootstrap/dist/js/bootstrap.bundle.min';
-//
-//
-// const UserProfileEdit = () => {
-//     const [user, setUser] = useState({
-//         fullname: '',
-//         //username: '',
-//         phone: '',
-//         address: '',
-//         birthday: '',
-//         avatar: ''
-//     });
-//     const [user2, setUser2] = useState({
-//         password: '',
-//         newPassword: '',
-//         reNewPassword: ''
-//     });
-//
-//     const [avatarFile, setAvatarFile] = useState(null);
-//     const [avatarPreview, setAvatarPreview] = useState(null);
-//     // Khi chọn file ảnh
-//     const handleAvatarChange = (e) => {
-//         const files = e.target.files;
-//         if (!files || files.length === 0) {
-//             console.log("No file selected"); // 👉 sẽ không log dòng này nếu chọn đúng
-//             setMessage("Vui lòng chọn một ảnh hợp lệ.");
-//
-//             // Hiển thị Swal yêu cầu chọn ảnh hợp lệ
-//             Swal.fire({
-//                 icon: 'warning',
-//                 title: '⚠️ Vui lòng chọn một ảnh hợp lệ.',
-//                 confirmButtonText: 'OK',
-//             });
-//             return;
-//         }
-//
-//         const file = files[0];
-//         console.log("File selected:", file); // ✅ kiểm tra đúng file chưa
-//
-//         // Kiểm tra định dạng file (ảnh)
-//         const validImageTypes = ['image/jpeg', 'image/png', 'image/jpg'];
-//         if (!validImageTypes.includes(file.type)) {
-//             Swal.fire({
-//                 icon: 'error',
-//                 title: '❌ Chỉ hỗ trợ ảnh JPEG, PNG hoặc JPG!',
-//                 confirmButtonText: 'OK',
-//             });
-//             setMessage("Chỉ hỗ trợ ảnh JPEG, PNG hoặc JPG.");
-//             return;
-//         }
-//
-//         // Nếu chọn đúng ảnh, lưu file
-//         setAvatarFile(file);
-//         setMessage(""); // Xóa thông báo lỗi nếu chọn ảnh hợp lệ
-//
-//         // Tạo đường dẫn ảnh để hiển thị ngay
-//         const previewUrl = URL.createObjectURL(file);
-//         setAvatarPreview(previewUrl);
-//
-//         // Hiển thị thông báo chọn ảnh thành công
-//         Swal.fire({
-//             icon: 'success',
-//             title: '✅ Ảnh đã được chọn thành công!',
-//             timer: 1500,
-//             showConfirmButton: false,
-//         });
-//     };
-//
-//
-//     //gửi file lên api
-//     const handleUploadAvatar = async () => {
-//         if (!avatarFile){
-//             Swal.fire({
-//                 icon: 'warning',
-//                 title: '⚠️ Vui lòng chọn một ảnh để tải lên.',
-//                 confirmButtonText: 'OK',
-//             });
-//             return;
-//         }
-//
-//         // Xác nhận người dùng có muốn tải ảnh không
-//         const confirmUpload = await Swal.fire({
-//             icon: 'question',
-//             title: 'Bạn có chắc chắn muốn cập nhật ảnh đại diện?',
-//             showCancelButton: true,
-//             confirmButtonText: 'Tải lên',
-//             cancelButtonText: 'Hủy',
-//         });
-//
-//         // Nếu người dùng xác nhận thì thực hiện tải ảnh
-//         if (confirmUpload.isConfirmed) {
-//             const token = document.cookie
-//                 .split('; ')
-//                 .find(row => row.startsWith('token='))?.split('=')[1];
-//
-//             const formData = new FormData();
-//             formData.append('file', avatarFile);
-//             console.log("Token từ cookie login google_avatar:", token);
-//
-//             try {
-//                 const response = await axios.post('https://localhost:8443/api/v1/users/upload-avatar', formData, {
-//                     headers: {
-//                         Authorization: `Bearer ${token}`,
-//                     },
-//                 });
-//
-//                 // Hiển thị thông báo thành công
-//                 Swal.fire({
-//                     icon: 'success',
-//                     title: '✅ Tải ảnh lên thành công!',
-//                     text: 'Ảnh đại diện đã được cập nhật.',
-//                     timer: 2000,
-//                     showConfirmButton: false,
-//                 });
-//
-//                 console.log('Avatar Url:', response.data.data.url);
-//             } catch (error) {
-//                 console.error(error);
-//                 Swal.fire({
-//                     icon: 'error',
-//                     title: '❌ Lỗi khi tải ảnh',
-//                     text: 'Có lỗi xảy ra trong quá trình tải ảnh. Vui lòng thử lại.',
-//                 });
-//             }
-//         } else {
-//             // Nếu người dùng hủy bỏ, hiển thị thông báo
-//             Swal.fire({
-//                 icon: 'info',
-//                 title: 'Hủy tải ảnh',
-//                 text: 'Bạn đã hủy việc tải ảnh lên.',
-//             });
-//         }
-//     };
-//
-//
-//     const [userId, setUserId] = useState(null);
-//     const [message, setMessage] = useState('');
-//
-//     // Load user info from token
-//     useEffect(() => {
-//         // const token = document.cookie
-//         //     .split('; ')
-//         //     .find(row => row.startsWith('token='))
-//         //     ?.split('=')[1];
-//         const token = localStorage.getItem('accessToken');
-//             // Cookies.get('token');
-//
-//         console.log("token profile: "+token)
-//
-//
-//         if (!token) {
-//             setMessage('Bạn chưa đăng nhập');
-//             return;
-//         }
-//
-//         const decoded = jwtDecode(token);
-//         const username = decoded.sub;
-//
-//         axios.post(`https://localhost:8443/api/v1/users/details`, {}, {
-//             headers: {
-//                 Authorization: `Bearer ${token}`,
-//             },
-//             withCredentials: true,
-//         })
-//             .then(res => {
-//                 const userData = res.data;
-//                 const formattedBirthday = userData.birthday; // ghép thêm giờ phút giây
-//                 setUser({
-//                     fullname: userData.fullname || '',
-//                     //username: userData.username || '',
-//                     phone: userData.phone || '',
-//                     address: userData.address || '',
-//                     birthday: formattedBirthday || '',
-//                     avatar: userData.avatar || 'https://res.cloudinary.com/dorz7ucva/image/upload/v1745202292/image_2820bc603a47efcf17a0806b81ca92bff7ea2905.png'
-//                 });
-//                 setUserId(userData.id);
-//                 console.log(userData.avatar); // Đúng
-//             })
-//             .catch(err => {
-//                 console.error(err);
-//                 setMessage('Lỗi khi tải thông tin người dùng');
-//             });
-//
-//         //chat tu dong
-//         console.log('✅ Chatbox script loaded');
-//         const script = document.createElement('script');
-//          script.src = 'https://app.tudongchat.com/js/chatbox.js';
-//         //script.src = 'C:\\Users\\ADMIN\\eclipse-workspace\\CDWebFrontend\\src\\assets\\user\\js\\chatbox.js'
-//         script.async = true;
-//
-//         script.onload = () => {
-//             console.log('✅ Chatbox script loaded');
-//             if (window.TuDongChat) {
-//                 const tudong_chatbox = new window.TuDongChat('GEKBdJuf_t2KzMXWnR9hH');
-//                 tudong_chatbox.initial();
-//                 console.log('✅ Chatbox initialized');
-//             } else {
-//                 console.error('❌ TuDongChat not available');
-//             }
-//         };
-//
-//         script.onerror = () => {
-//             console.error('❌ Failed to load chatbox.js');
-//         };
-//
-//         document.body.appendChild(script);
-//
-//         return () => {
-//             document.body.removeChild(script);
-//         };
-//     }, []);
-//
-//     const handleChange = (e) => {
-//         const { name, value } = e.target;
-//         setUser(prev => ({ ...prev, [name]: value }));
-//     };
-//
-//
-//
-//     const handleUpdate = async (e) => {
-//         e.preventDefault();
-//
-//         // const token = document.cookie
-//         //     .split('; ')
-//         //     .find(row => row.startsWith('token='))
-//         //     ?.split('=')[1];
-//         const token = localStorage.getItem('accessToken');
-//
-//
-//         try {
-//             const res = await axios.put(
-//                 `https://localhost:8443/api/v1/users/details/${userId}`,
-//                 user,
-//                 {
-//                     headers: {
-//                         Authorization: `Bearer ${token}`,
-//                     },
-//                     withCredentials: true,
-//                 }
-//             );
-//             setMessage('Cập nhật thông tin thành công!');
-//         } catch (error) {
-//             console.error(error);
-//
-//             // Kiểm tra lỗi từ response
-//             if (error.response && error.response.data) {
-//                 // Nếu có lỗi từ backend, lấy thông điệp từ response và hiển thị
-//                 setMessage(error.response.data);  // Hiển thị thông điệp lỗi từ backend
-//             } else {
-//                 // Nếu không có lỗi response, hiển thị thông báo chung
-//                 setMessage('Lỗi khi cập nhật thông tin');
-//             }
-//         }
-//     };
-//     const [errors, setErrors] = useState({});
-//
-//     const validateForm = () => {
-//         const newErrors = {};
-//         const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{7,}$/;
-//
-//         if (!user2.password) {
-//             newErrors.password = 'Vui lòng nhập mật khẩu.';
-//         } else if (!passwordRegex.test(user2.password)) {
-//             newErrors.password = 'Mật khẩu ít nhất 7 ký tự, bao gồm chữ và số.';
-//         }
-//
-//         if (!user2.newPassword) {
-//             newErrors.newPassword = 'Vui lòng nhập mật khẩu.';
-//         } else if (!passwordRegex.test(user2.passnewPasswordword)) {
-//             newErrors.newPassword = 'Mật khẩu ít nhất 7 ký tự, bao gồm chữ và số.';
-//         }
-//
-//         if (!user2.reNewPassword) {
-//             newErrors.retypePassword = 'Vui lòng nhập lại mật khẩu.';
-//         } else if (user2.newPassword !== user2.reNewPassword) {
-//             newErrors.retypePassword = 'Mật khẩu không khớp.';
-//         }
-//         return newErrors;
-//     };
-//     const handleUpdatePassword = async (e) => {
-//         e.preventDefault();
-//         const validationErrors = validateForm();
-//         setErrors(validationErrors);
-//
-//         // const token = document.cookie
-//         //     .split('; ')
-//         //     .find(row => row.startsWith('token='))
-//         //     ?.split('=')[1];
-//         const token = localStorage.getItem('accessToken');
-//
-//
-//         try {
-//             const res = await axios.put(
-//                 `https://localhost:8443/api/v1/users/changePassword/${userId}`,
-//                 user2,
-//                 {
-//                     headers: {
-//                         Authorization: `Bearer ${token}`,
-//                     },
-//                     withCredentials: true,
-//                 }
-//             );
-//             setMessage('Cập nhật thông tin thành công!');
-//         } catch (error) {
-//             console.error(error);
-//
-//             // Kiểm tra lỗi từ response
-//             if (error.response && error.response.data) {
-//                 // Nếu có lỗi từ backend, lấy thông điệp từ response và hiển thị
-//                 setMessage(error.response.data);  // Hiển thị thông điệp lỗi từ backend
-//             } else {
-//                 // Nếu không có lỗi response, hiển thị thông báo chung
-//                 setMessage('Lỗi khi cập nhật thông tin');
-//             }
-//         }
-//     };
-//
-//     return (
-//         <>
-//             <div className="information">
-//                 <div className="max-w-xl mx-auto mt-10 bg-white shadow-md p-6 rounded-xl">
-//                     <h2 className="text-xl font-bold mb-4">Cập nhật thông tin người dùng</h2>
-//                     {message && <div className="mb-4 text-red-500">{message}</div>}
-//                     <form onSubmit={handleUpdate} className="space-y-4">
-//                         <input type="text" name="fullname" value={user.fullname} onChange={handleChange}
-//                                placeholder="Họ tên"
-//                                className="w-full p-2 border rounded"/>
-//                         {/*<input type="text" name="username" value={user.username} onChange={handleChange}*/}
-//                         {/*       placeholder="Tên đăng nhập" className="w-full p-2 border rounded"/>*/}
-//                         <input type="text" name="phone" value={user.phone} onChange={handleChange}
-//                                placeholder="Số điện thoại"
-//                                className="w-full p-2 border rounded"/>
-//                         <input type="text" name="address" value={user.address} onChange={handleChange}
-//                                placeholder="Địa chỉ"
-//                                className="w-full p-2 border rounded"/>
-//                         <input type="date" name="birthday" value={user.birthday} onChange={handleChange}
-//                                className="w-full p-2 border rounded"/>
-//                         <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Lưu
-//                             thay
-//                             đổi
-//                         </button>
-//                     </form>
-//                 </div>
-//             </div>
-//
-//
-//             <div className="containerEdit light-style flex-grow-1 container-p-y">
-//
-//                 <h4 className="font-weight-bold py-3 mb-4">
-//                     Chỉnh sửa thông tin cá nhân
-//                 </h4>
-//
-//                 <div className="card overflow-hidden">
-//                     <div className="row no-gutters row-bordered row-border-light">
-//                         <div className="col-md-3 pt-0">
-//                             <div className="list-group list-group-flush account2-settings-links">
-//                                 <a className="list-group-item list-group-item-action active" data-toggle="list"
-//                                    href="#account2-general">Thông tin cá nhân</a>
-//                                 <a className="list-group-item list-group-item-action" data-toggle="list"
-//                                    href="#account2-change-password">Đổi mật khẩu</a>
-//                                 <a className="list-group-item list-group-item-action" data-toggle="list"
-//                                    href="#account2-info">Thông tin chung</a>
-//                                 <a className="list-group-item list-group-item-action" data-toggle="list"
-//                                    href="#account2-social-links">Social links</a>
-//                                 <a className="list-group-item list-group-item-action" data-toggle="list"
-//                                    href="#account2-connections">Connections</a>
-//                                 <a className="list-group-item list-group-item-action" data-toggle="list"
-//                                    href="#account2-notifications">Notifications</a>
-//                             </div>
-//                         </div>
-//                         <div className="col-md-9">
-//                             <div className="tab-content">
-//                                 <div className="tab-pane fade active show" id="account2-general">
-//
-//                                     <div className="card2-body media align-items-center">
-//                                         <img
-//                                             src={avatarPreview || user.avatar} // Nếu có ảnh preview thì hiển thị, không thì hiển thị ảnh mặc định
-//                                             alt="Avatar"
-//                                             className="d-block ui-w-80"
-//                                         />
-//                                         <div className="media-body ml-4">
-//                                             <label className="btn btn-outline-primary upload-photo-label">
-//                                                 Tải hình mới lên
-//                                                 <input
-//                                                     type="file"
-//                                                     accept="image/*"
-//                                                     className="account2-settings-fileinput"
-//                                                     onChange={handleAvatarChange}
-//                                                     // style={{display: "none"}}
-//                                                 />
-//                                             </label> &nbsp;
-//                                             <button type="button"
-//                                                     className="btn btn-default md-btn-flat"
-//                                                     onClick={handleUploadAvatar}>Tải ảnh
-//                                             </button>
-//
-//                                             <div className="text-light small mt-1">Cho phép JPG, GIF hoặc PNG. Kích
-//                                                 thước tối đa là
-//                                                 800K
-//                                             </div>
-//                                         </div>
-//                                     </div>
-//                                     <br></br>
-//                                     <hr className="border-light m-0"/>
-//
-//                                     <div className="card-body">
-//                                     <div className="form-group">
-//                                             <label className="form-label">Username</label>
-//                                             <input type="text" className="form-control mb-1"/>
-//                                         </div>
-//                                         <div className="form-group">
-//                                             <label className="form-label">Tên</label>
-//                                             <input type="text" className="form-control" value="Nelle Maxwell"/>
-//                                         </div>
-//                                         <div className="form-group">
-//                                             <label className="form-label">Email</label>
-//                                             <input type="text" className="form-control mb-1" value="nmaxwell@mail.com"/>
-//                                             <div className="alert alert-warning mt-3">
-//                                                 Your email is not confirmed. Please check your inbox.<br/>
-//                                                 <a href="javascript:void(0)">Resend confirmation</a>
-//                                             </div>
-//                                         </div>
-//                                         <div className="form-group">
-//                                             <label className="form-label">Số điện thoại</label>
-//                                             <input type="tel" className="form-control" pattern="[0-9]+"/>
-//                                         </div>
-//                                     </div>
-//
-//                                 </div>
-//                                 <div className="tab-pane fade" id="account2-change-password">
-//                                     <form onSubmit={handleUpdatePassword} className="space-y-4">
-//                                         <div className="card2-body pb-2">
-//
-//                                             {errors.password && (
-//                                                 <div className="error-container">
-//                                                     <small className="error">{errors.password}</small>
-//                                                 </div>
-//                                             )}
-//                                             <div className="form-group">
-//                                                 <label className="form-label">Current password</label>
-//                                                 <input type="password" name="password" value={user2.password}
-//                                                        onChange={handleChange}
-//                                                        required={true} className="form-control"/>
-//                                             </div>
-//                                             {errors.newPassword && (
-//                                                 <div className="error-container">
-//                                                     <small className="error">{errors.newPassword}</small>
-//                                                 </div>
-//                                             )}
-//
-//                                             <div className="form-group">
-//                                                 <label className="form-label">New password</label>
-//                                                 <input type="password" name="newPassword" value={user2.newPassword}
-//                                                        onChange={handleChange}
-//                                                        required={true} className="form-control"/>
-//                                             </div>
-//                                             {errors.reNewPassword && (
-//                                                 <div className="error-container">
-//                                                     <small className="error">{errors.reNewPassword}</small>
-//                                                 </div>
-//                                             )}
-//
-//                                             <div className="form-group">
-//                                                 <label className="form-label">Repeat new password</label>
-//                                                 <input type="password" name="reNewPassword" value={user2.reNewPassword}
-//                                                        onChange={handleChange} required={true}
-//                                                        className="form-control"/>
-//                                             </div>
-//                                             {errors.password && (
-//                                                 <div className="error-container">
-//                                                     <small className="error">{errors.password}</small>
-//                                                 </div>
-//                                             )}
-//
-//                                             <div className="text-right mt-3">
-//                                                 <button type="submit" className="btn btn-primary">Save changes</button>
-//                                                 &nbsp;
-//                                                 <button type="button" className="btn btn-default">Cancel</button>
-//                                             </div>
-//
-//                                         </div>
-//                                     </form>
-//                                 </div>
-//                                 <div className="tab-pane fade" id="account2-info">
-//                                     <div className="card2-body pb-2">
-//
-//                                         <div className="form-group">
-//                                             <label className="form-label">Bio</label>
-//                                             <textarea className="form-control" rows="5">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris nunc arcu, dignissim sit amet sollicitudin iaculis, vehicula id urna. Sed luctus urna nunc. Donec fermentum, magna sit amet rutrum pretium, turpis dolor molestie diam, ut lacinia diam risus eleifend sapien. Curabitur ac nibh nulla. Maecenas nec augue placerat, viverra tellus non, pulvinar risus.</textarea>
-//                                         </div>
-//                                         <div className="form-group">
-//                                             <label className="form-label">Birthday</label>
-//                                             <input type="text" className="form-control" value="May 3, 1995"/>
-//                                         </div>
-//                                         <div className="form-group">
-//                                             <label className="form-label">Country</label>
-//                                             <select className="custom-select">
-//                                                 <option>USA</option>
-//                                                 <option selected="">Canada</option>
-//                                                 <option>UK</option>
-//                                                 <option>Germany</option>
-//                                                 <option>France</option>
-//                                             </select>
-//                                         </div>
-//
-//
-//                                     </div>
-//                                     <hr className="border-light m-0"/>
-//                                     <div className="card2-body pb-2">
-//
-//                                         <h6 className="mb-4">Contacts</h6>
-//                                         <div className="form-group">
-//                                             <label className="form-label">Phone</label>
-//                                             <input type="text" className="form-control" value="+0 (123) 456 7891"/>
-//                                         </div>
-//                                         <div className="form-group">
-//                                             <label className="form-label">Website</label>
-//                                             <input type="text" className="form-control" value=""/>
-//                                         </div>
-//
-//                                     </div>
-//
-//                                 </div>
-//                                 <div className="tab-pane fade" id="account2-social-links">
-//                                     <div className="card2-body pb-2">
-//
-//                                         <div className="form-group">
-//                                             <label className="form-label">Twitter</label>
-//                                             <input type="text" className="form-control"
-//                                                    value="https://twitter.com/user"/>
-//                                         </div>
-//                                         <div className="form-group">
-//                                             <label className="form-label">Facebook</label>
-//                                             <input type="text" className="form-control"
-//                                                    value="https://www.facebook.com/user"/>
-//                                         </div>
-//                                         <div className="form-group">
-//                                             <label className="form-label">Google+</label>
-//                                             <input type="text" className="form-control" value=""/>
-//                                         </div>
-//                                         <div className="form-group">
-//                                             <label className="form-label">LinkedIn</label>
-//                                             <input type="text" className="form-control" value=""/>
-//                                         </div>
-//                                         <div className="form-group">
-//                                             <label className="form-label">Instagram</label>
-//                                             <input type="text" className="form-control"
-//                                                    value="https://www.instagram.com/user"/>
-//                                         </div>
-//
-//                                     </div>
-//                                 </div>
-//                                 <div className="tab-pane fade" id="account2-connections">
-//                                     <div className="card2-body">
-//                                         <button type="button" className="btn btn-twitter">Connect
-//                                             to <strong>Twitter</strong></button>
-//                                     </div>
-//                                     <hr className="border-light m-0"/>
-//                                     <div className="card2-body">
-//                                         <h5 className="mb-2">
-//                                             <a href="javascript:void(0)" className="float-right text-muted text-tiny"><i
-//                                                 className="ion ion-md-close"></i> Remove</a>
-//                                             <i className="ion ion-logo-google text-google"></i>
-//                                             You are connected to Google:
-//                                         </h5>
-//                                         <a href="/cdn-cgi/l/email-protection" className="__cf_email__"
-//                                            data-cfemail="6c02010d141b0900002c010d0500420f0301">[email&#160;protected]</a>
-//                                     </div>
-//                                     <hr className="border-light m-0"/>
-//                                     <div className="card2-body">
-//                                         <button type="button" className="btn btn-facebook">Connect
-//                                             to <strong>Facebook</strong></button>
-//                                     </div>
-//                                     <hr className="border-light m-0"/>
-//                                     <div className="card2-body">
-//                                         <button type="button" className="btn btn-instagram">Connect
-//                                             to <strong>Instagram</strong></button>
-//                                     </div>
-//                                 </div>
-//                                 <div className="tab-pane fade" id="account2-notifications">
-//                                     <div className="card2-body pb-2">
-//
-//                                         <h6 className="mb-4">Activity</h6>
-//
-//                                         <div className="form-group">
-//                                             <label className="switcher">
-//                                                 <input type="checkbox" className="switcher-input" checked=""/>
-//                                                 <span className="switcher-indicator">
-//                       <span className="switcher-yes"></span>
-//                       <span className="switcher-no"></span>
-//                     </span>
-//                                                 <span className="switcher-label">Email me when someone comments on my article</span>
-//                                             </label>
-//                                         </div>
-//                                         <div className="form-group">
-//                                             <label className="switcher">
-//                                                 <input type="checkbox" className="switcher-input" checked=""/>
-//                                                 <span className="switcher-indicator">
-//                       <span className="switcher-yes"></span>
-//                       <span className="switcher-no"></span>
-//                     </span>
-//                                                 <span className="switcher-label">Email me when someone answers on my forum thread</span>
-//                                             </label>
-//                                         </div>
-//                                         <div className="form-group">
-//                                             <label className="switcher">
-//                                                 <input type="checkbox" className="switcher-input"/>
-//                                                 <span className="switcher-indicator">
-//                       <span className="switcher-yes"></span>
-//                       <span className="switcher-no"></span>
-//                     </span>
-//                                                 <span className="switcher-label">Email me when someone follows me</span>
-//                                             </label>
-//                                         </div>
-//                                     </div>
-//                                     <hr className="border-light m-0"/>
-//                                     <div className="card2-body pb-2">
-//
-//                                         <h6 className="mb-4">Application</h6>
-//
-//                                         <div className="form-group">
-//                                             <label className="switcher">
-//                                                 <input type="checkbox" className="switcher-input" checked=""/>
-//                                                 <span className="switcher-indicator">
-//                       <span className="switcher-yes"></span>
-//                       <span className="switcher-no"></span>
-//                     </span>
-//                                                 <span className="switcher-label">News and announcements</span>
-//                                             </label>
-//                                         </div>
-//                                         <div className="form-group">
-//                                             <label className="switcher">
-//                                                 <input type="checkbox" className="switcher-input"/>
-//                                                 <span className="switcher-indicator">
-//                       <span className="switcher-yes"></span>
-//                       <span className="switcher-no"></span>
-//                     </span>
-//                                                 <span className="switcher-label">Weekly product updates</span>
-//                                             </label>
-//                                         </div>
-//                                         <div className="form-group">
-//                                             <label className="switcher">
-//                                                 <input type="checkbox" className="switcher-input" checked=""/>
-//                                                 <span className="switcher-indicator">
-//                       <span className="switcher-yes"></span>
-//                       <span className="switcher-no"></span>
-//                     </span>
-//                                                 <span className="switcher-label">Weekly blog digest</span>
-//                                             </label>
-//                                         </div>
-//
-//                                     </div>
-//                                 </div>
-//                             </div>
-//                         </div>
-//                     </div>
-//                 </div>
-//
-//                 <div className="text-right mt-3">
-//                     <button type="button" className="btn btn-primary">Save changes</button>
-//                     &nbsp;
-//                     <button type="button" className="btn btn-default">Cancel</button>
-//                 </div>
-//
-//             </div>
-//
-//
-//             {/*<div><Chatbox/></div>*/}
-//
-//         </>
-//     );
-// };
-//
-// export default UserProfileEdit;
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { jwtDecode } from 'jwt-decode';
-import Cookies from 'js-cookie';
 import Swal from 'sweetalert2';
+import i18next from 'i18next';
 import './user-profile-edit.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min';
-import Chatbox from './Chatbox';
 
 const UserProfileEdit = () => {
     const [user, setUser] = useState({
@@ -723,11 +32,11 @@ const UserProfileEdit = () => {
     useEffect(() => {
         const token = localStorage.getItem('accessToken');
         if (!token) {
-            setMessage('Bạn chưa đăng nhập');
+            setMessage(i18next.t('profile.error_not_logged_in'));
             Swal.fire({
                 icon: 'error',
-                title: 'Lỗi!',
-                text: 'Bạn chưa đăng nhập. Vui lòng đăng nhập lại.',
+                title: i18next.t('profile.error_not_logged_in'),
+                text: i18next.t('profile.error_not_logged_in'),
                 confirmButtonText: 'OK',
             });
             return;
@@ -735,14 +44,10 @@ const UserProfileEdit = () => {
 
         const decoded = jwtDecode(token);
         axios
-            .post(
-                'https://localhost:8443/api/v1/users/details',
-                {},
-                {
-                    headers: { Authorization: `Bearer ${token}` },
-                    withCredentials: true,
-                }
-            )
+            .post('https://localhost:8443/api/v1/users/details', {}, {
+                headers: { Authorization: `Bearer ${token}` },
+                withCredentials: true,
+            })
             .then((res) => {
                 const userData = res.data;
                 const formattedBirthday = userData.birthday ? userData.birthday.split('T')[0] : '';
@@ -761,11 +66,11 @@ const UserProfileEdit = () => {
             })
             .catch((err) => {
                 console.error(err);
-                setMessage('Lỗi khi tải thông tin người dùng');
+                setMessage(i18next.t('profile.error_load_user'));
                 Swal.fire({
                     icon: 'error',
-                    title: 'Lỗi!',
-                    text: 'Không thể tải thông tin người dùng. Vui lòng thử lại.',
+                    title: i18next.t('profile.error_load_user'),
+                    text: i18next.t('profile.error_load_user'),
                     confirmButtonText: 'OK',
                 });
             });
@@ -773,17 +78,7 @@ const UserProfileEdit = () => {
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-        //setUser((prev) => ({ ...prev, [name]: value }));
-        if (name === 'birthday' && value) {
-            const formattedDate = parseBirthdaySafely(value);
-            if (!formattedDate) {
-                setErrors((prev) => ({ ...prev, birthday: 'Ngày sinh không hợp lệ. Dùng định dạng yyyy-MM-dd.' }));
-                return;
-            }
-            setUser((prev) => ({ ...prev, [name]: formattedDate }));
-        } else {
-            setUser((prev) => ({ ...prev, [name]: value }));
-        }
+        setUser((prev) => ({ ...prev, [name]: value }));
         setErrors((prev) => ({ ...prev, [name]: '' }));
     };
 
@@ -798,7 +93,7 @@ const UserProfileEdit = () => {
         if (!files || files.length === 0) {
             Swal.fire({
                 icon: 'warning',
-                title: '⚠️ Vui lòng chọn một ảnh hợp lệ.',
+                title: i18next.t('profile.error_choose_avatar'),
                 confirmButtonText: 'OK',
             });
             return;
@@ -809,7 +104,7 @@ const UserProfileEdit = () => {
         if (!validImageTypes.includes(file.type)) {
             Swal.fire({
                 icon: 'error',
-                title: '❌ Chỉ hỗ trợ ảnh JPEG, PNG hoặc JPG!',
+                title: i18next.t('profile.error_choose_avatar'),
                 confirmButtonText: 'OK',
             });
             return;
@@ -819,7 +114,7 @@ const UserProfileEdit = () => {
         setAvatarPreview(URL.createObjectURL(file));
         Swal.fire({
             icon: 'success',
-            title: '✅ Ảnh đã được chọn thành công!',
+            title: i18next.t('profile.message_choose_avatar_valid'),
             timer: 1500,
             showConfirmButton: false,
         });
@@ -829,7 +124,7 @@ const UserProfileEdit = () => {
         if (!avatarFile) {
             Swal.fire({
                 icon: 'warning',
-                title: '⚠️ Vui lòng chọn một ảnh để tải lên.',
+                title: i18next.t('profile.error_choose_avatar'),
                 confirmButtonText: 'OK',
             });
             return;
@@ -837,10 +132,10 @@ const UserProfileEdit = () => {
 
         const confirmUpload = await Swal.fire({
             icon: 'question',
-            title: 'Bạn có chắc chắn muốn cập nhật ảnh đại diện?',
+            title: i18next.t('profile.confirm_upload_avatar'),
             showCancelButton: true,
-            confirmButtonText: 'Tải lên',
-            cancelButtonText: 'Hủy',
+            confirmButtonText: i18next.t('profile.upload'),
+            cancelButtonText: i18next.t('profile.cancel'),
         });
 
         if (confirmUpload.isConfirmed) {
@@ -850,15 +145,13 @@ const UserProfileEdit = () => {
 
             try {
                 const response = await axios.post('https://localhost:8443/api/v1/users/upload-avatar', formData, {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
+                    headers: { Authorization: `Bearer ${token}` },
                 });
                 setUser((prev) => ({ ...prev, avatar: response.data.data.url }));
                 Swal.fire({
                     icon: 'success',
-                    title: '✅ Tải ảnh lên thành công!',
-                    text: 'Ảnh đại diện đã được cập nhật.',
+                    title: i18next.t('profile.success_upload_avatar'),
+                    text: i18next.t('profile.avatar_updated'),
                     timer: 2000,
                     showConfirmButton: false,
                 });
@@ -866,8 +159,8 @@ const UserProfileEdit = () => {
                 console.error(error);
                 Swal.fire({
                     icon: 'error',
-                    title: '❌ Lỗi khi tải ảnh',
-                    text: 'Có lỗi xảy ra trong quá trình tải ảnh. Vui lòng thử lại.',
+                    title: i18next.t('profile.error_upload_avatar'),
+                    text: i18next.t('profile.error_upload_avatar_text'),
                     confirmButtonText: 'OK',
                 });
             }
@@ -877,348 +170,255 @@ const UserProfileEdit = () => {
     const validateForm = () => {
         const newErrors = {};
 
-        if (!user.fullname) {
-            newErrors.fullname = 'Họ và tên không được để trống';
-        } else if (user.fullname.length < 2 || user.fullname.length > 100) {
-            newErrors.fullname = 'Họ và tên phải từ 2 đến 100 ký tự';
+        if (!user.username) {
+            newErrors.username = 'validation.username_notBlank';
+        } else if (user.username.length < 3 || user.username.length > 50) {
+            newErrors.username = 'validation.username_size';
         }
 
-        if (!user.username) {
-            newErrors.username = 'Tên đăng nhập không được để trống';
-        } else if (user.username.length < 3 || user.username.length > 50) {
-            newErrors.username = 'Tên đăng nhập phải từ 3 đến 50 ký tự';
+        if (!user.fullname) {
+            newErrors.fullname = 'validation.fullname_notBlank';
+        } else if (user.fullname.length < 2 || user.fullname.length > 100) {
+            newErrors.fullname = 'validation.fullname_size';
         }
 
         if (!user.email) {
-            newErrors.email = 'Email không được để trống';
+            newErrors.email = 'validation.email_notBlank';
         } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(user.email)) {
-            newErrors.email = 'Email không hợp lệ';
+            newErrors.email = 'validation.email_invalid';
+        } else if (user.email.length > 100) {
+            newErrors.email = 'validation.email_size';
         }
 
         if (user.phone && user.phone.length > 10) {
-            newErrors.phone = 'Số điện thoại không được vượt quá 10 ký tự';
+            newErrors.phone = 'validation.phone_size';
         }
 
         if (user.address && user.address.length > 255) {
-            newErrors.address = 'Địa chỉ không được vượt quá 255 ký tự';
+            newErrors.address = 'validation.address_size';
         }
 
-        // if (user.birthday && !/^\d{4}-\d{2}-\d{2}$/.test(user.birthday)) {
-        //     newErrors.birthday = 'Ngày sinh phải có định dạng yyyy-MM-dd';
-        // }
-        console.log("birthday: "+ user.birthday)
         if (user.birthday) {
-            const formatted = parseBirthdaySafely(user.birthday);
-            if (!formatted) {
-                newErrors.birthday = 'Ngày sinh không hợp lệ. Dùng định dạng yyyy-MM-dd.';
-            } else {
-                const dateObj = new Date(formatted);
-                if (isNaN(dateObj.getTime())) {
-                    newErrors.birthday = 'Ngày sinh không hợp lệ hoặc không tồn tại.';
-                } else {
-                    user.birthday = formatted; // Chuẩn hóa thành yyyy-MM-dd
-                }
+            const date = new Date(user.birthday);
+            if (isNaN(date.getTime())) {
+                newErrors.birthday = 'validation.birthday_invalid';
             }
         }
-
-        console.log("birthday: "+ user.birthday)
-
 
         return newErrors;
     };
-    const parseBirthdaySafely = (input) => {
-        if (!input) return null;
-
-        // Các định dạng ngày được hỗ trợ
-        const ddMMyyyy = /^(\d{2})\/(\d{2})\/(\d{4})$/;
-        const mmddyyyy = /^(\d{2})\/(\d{2})\/(\d{4})$/;
-        const yyyyMMdd = /^(\d{4})-(\d{2})-(\d{2})$/;
-
-        let year, month, day;
-
-        if (ddMMyyyy.test(input)) {
-            // Định dạng dd/MM/yyyy
-            [day, month, year] = input.split('/');
-        } else if (mmddyyyy.test(input)) {
-            // Định dạng MM/dd/yyyy
-            [month, day, year] = input.split('/');
-        } else if (yyyyMMdd.test(input)) {
-            // Định dạng yyyy-MM-dd
-            return input; // Đã đúng định dạng, trả về ngay
-        } else {
-            return null; // Định dạng không hợp lệ
-        }
-
-        // Chuẩn hóa thành yyyy-MM-dd
-        const formatted = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
-        const dateObj = new Date(formatted);
-
-        // Kiểm tra tính hợp lệ của ngày
-        if (isNaN(dateObj.getTime()) || dateObj.getFullYear() != year || dateObj.getMonth() + 1 != month || dateObj.getDate() != day) {
-            return null;
-        }
-
-        return formatted;
-    };
-
-
-
-    const handleUpdate = async (e) => {
-        e.preventDefault();
-        const validationErrors = validateForm();
-        setErrors(validationErrors);
-        //setErrors({}); // Reset lỗi trước khi gửi yêu cầu
-
-
-
-        if (Object.keys(validationErrors).length > 0) {
-            const errorMessages = Object.values(validationErrors).join('\n');
-            Swal.fire({
-                icon: 'error',
-                title: '❌ Dữ liệu không hợp lệ',
-                text: errorMessages || 'Vui lòng kiểm tra lại các trường thông tin.',
-                confirmButtonText: 'OK',
-            });
-            return;
-        }
-        const token = localStorage.getItem('accessToken');
-        try {
-            const res = await axios.put(
-                `https://localhost:8443/api/v1/users/details/${userId}`,
-                user,
-                {
-                    headers: { Authorization: `Bearer ${token}` },
-                    withCredentials: true,
-                }
-            );
-            Swal.fire({
-                icon: 'success',
-                title: '✅ Cập nhật thông tin thành công!',
-                timer: 1500,
-                showConfirmButton: false,
-            });
-            setMessage('');
-        } catch (error) {
-            console.log('Full error object:', error);
-            console.log('Error response data:', error.response ? error.response.data : 'No response data');
-            if (error.response && error.response.data) {
-                if (error.response.status === 400) {
-                    if (typeof error.response.data === 'object' && !error.response.data.status) {
-                        // Lỗi validation chi tiết từ BE (dạng { "fieldname": "message" })
-                        setErrors(error.response.data);
-                        const errorMessages = Object.values(error.response.data).join('\n');
-                        Swal.fire({
-                            icon: 'error',
-                            title: '❌ Dữ liệu không hợp lệ',
-                            text: errorMessages || 'Vui lòng kiểm tra lại các trường thông tin.',
-                            confirmButtonText: 'OK',
-                        });
-                    } else {
-                        // Lỗi tổng quát từ BE (dạng string hoặc object với status)
-                        let errorMessage;
-                        if (typeof error.response.data === 'string') {
-                            errorMessage = error.response.data;
-                        } else if (error.response.data.message) {
-                            errorMessage = error.response.data.message;
-                        } else if (error.response.data.error) {
-                            errorMessage = error.response.data.error + ' tại ' + error.response.data.path;
-                        } else {
-                            errorMessage = 'Dữ liệu không hợp lệ. Vui lòng kiểm tra lại thông tin.';
-                        }
-                        setMessage(errorMessage);
-                        Swal.fire({
-                            icon: 'error',
-                            title: '❌ Lỗi khi cập nhật thông tin',
-                            text: errorMessage,
-                            confirmButtonText: 'OK',
-                        });
-                    }
-                } else if (error.response.status === 403) {
-                    Swal.fire({
-                        icon: 'error',
-                        title: '❌ Lỗi quyền truy cập',
-                        text: 'Bạn không có quyền cập nhật thông tin này.',
-                        confirmButtonText: 'OK',
-                    });
-                } else {
-                    Swal.fire({
-                        icon: 'error',
-                        title: '❌ Lỗi khi cập nhật thông tin',
-                        text: error.response.data.message || 'Có lỗi xảy ra. Vui lòng thử lại.',
-                        confirmButtonText: 'OK',
-                    });
-                }
-            } else {
-                Swal.fire({
-                    icon: 'error',
-                    title: '❌ Lỗi kết nối',
-                    text: 'Không thể kết nối đến server. Vui lòng kiểm tra lại.',
-                    confirmButtonText: 'OK',
-                });
-            }
-        }
-    };
-
-    // const handleUpdatePassword = async (e) => {
-    //     e.preventDefault();
-    //     const validationErrors = validatePasswordForm();
-    //     setErrors(validationErrors);
-    //
-    //     if (Object.keys(validationErrors).length === 0) {
-    //         const token = localStorage.getItem('accessToken');
-    //         try {
-    //             const res = await axios.put(
-    //                 `https://localhost:8443/api/v1/users/changePassword/${userId}`,
-    //                 user2,
-    //                 {
-    //                     headers: { Authorization: `Bearer ${token}` },
-    //                     withCredentials: true,
-    //                 }
-    //             );
-    //             Swal.fire({
-    //                 icon: 'success',
-    //                 title: '✅ Đổi mật khẩu thành công!',
-    //                 timer: 1500,
-    //                 showConfirmButton: false,
-    //             });
-    //             setMessage('');
-    //             setUser2({ password: '', newPassword: '', reNewPassword: '' });
-    //         } catch (error) {
-    //             console.error(error);
-    //             if (error.response && error.response.data) {
-    //                 setErrors(error.response.data);
-    //                 Swal.fire({
-    //                     icon: 'error',
-    //                     title: '❌ Lỗi khi đổi mật khẩu',
-    //                     text: 'Dữ liệu không hợp lệ hoặc mật khẩu hiện tại không đúng.',
-    //                     confirmButtonText: 'OK',
-    //                 });
-    //             } else {
-    //                 Swal.fire({
-    //                     icon: 'error',
-    //                     title: '❌ Lỗi khi đổi mật khẩu',
-    //                     text: 'Có lỗi xảy ra. Vui lòng thử lại.',
-    //                     confirmButtonText: 'OK',
-    //                 });
-    //             }
-    //         }
-    //     }
-    // };
 
     const validatePasswordForm = () => {
         const newErrors = {};
         const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{7,}$/;
 
         if (!user2.password) {
-            newErrors.password = 'Vui lòng nhập mật khẩu hiện tại';
+            newErrors.password = 'validation.password_notBlank';
         }
 
         if (!user2.newPassword) {
-            newErrors.newPassword = 'Vui lòng nhập mật khẩu mới';
+            newErrors.newPassword = 'validation.newPassword_notBlank';
         } else if (!passwordRegex.test(user2.newPassword)) {
-            newErrors.newPassword = 'Mật khẩu mới phải ít nhất 7 ký tự, bao gồm chữ và số';
+            newErrors.newPassword = 'validation.newPassword_invalid';
         }
 
         if (!user2.reNewPassword) {
-            newErrors.reNewPassword = 'Vui lòng nhập lại mật khẩu mới';
+            newErrors.reNewPassword = 'validation.reNewPassword_notBlank';
         } else if (user2.newPassword !== user2.reNewPassword) {
-            newErrors.reNewPassword = 'Mật khẩu không khớp';
+            newErrors.reNewPassword = 'validation.reNewPassword_mismatch';
         }
 
         return newErrors;
     };
+
+    const handleUpdate = async (e) => {
+        e.preventDefault();
+        const validationErrors = validateForm();
+        setErrors(validationErrors);
+
+        if (Object.keys(validationErrors).length > 0) {
+            const errorMessages = Object.values(validationErrors)
+                .map((key) => i18next.t(key))
+                .join('\n');
+            Swal.fire({
+                icon: 'error',
+                title: i18next.t('profile.error_invalid_data'),
+                text: errorMessages,
+                confirmButtonText: 'OK',
+            });
+            return;
+        }
+
+        const token = localStorage.getItem('accessToken');
+        try {
+            const res = await axios.put(`https://localhost:8443/api/v1/users/details/${userId}`, user, {
+                headers: { Authorization: `Bearer ${token}` },
+                withCredentials: true,
+            });
+            Swal.fire({
+                icon: 'success',
+                title: i18next.t('profile.success_update'),
+                timer: 1500,
+                showConfirmButton: false,
+            });
+            setMessage('');
+        } catch (error) {
+            console.error(error);
+            if (error.response && error.response.data) {
+                if (error.response.status === 400) {
+                    const errorData = error.response.data;
+                    if (typeof errorData === 'object') {
+                        const translatedErrors = {};
+                        Object.keys(errorData).forEach((field) => {
+                            translatedErrors[field] = i18next.t(errorData[field]);
+                        });
+                        setErrors(translatedErrors);
+                        const errorMessages = Object.values(translatedErrors).join('\n');
+                        Swal.fire({
+                            icon: 'error',
+                            title: i18next.t('profile.error_invalid_data'),
+                            text: errorMessages,
+                            confirmButtonText: 'OK',
+                        });
+                    } else {
+                        setMessage(i18next.t(errorData));
+                        Swal.fire({
+                            icon: 'error',
+                            title: i18next.t('profile.error_update'),
+                            text: i18next.t(errorData),
+                            confirmButtonText: 'OK',
+                        });
+                    }
+                } else if (error.response.status === 403) {
+                    setMessage(i18next.t('user.error_forbidden_update'));
+                    Swal.fire({
+                        icon: 'error',
+                        title: i18next.t('profile.error_forbidden'),
+                        text: i18next.t('user.error_forbidden_update'),
+                        confirmButtonText: 'OK',
+                    });
+                } else {
+                    setMessage(i18next.t('system.error_internal'));
+                    Swal.fire({
+                        icon: 'error',
+                        title: i18next.t('profile.error_update'),
+                        text: i18next.t('system.error_internal'),
+                        confirmButtonText: 'OK',
+                    });
+                }
+            } else {
+                setMessage(i18next.t('profile.error_server'));
+                Swal.fire({
+                    icon: 'error',
+                    title: i18next.t('profile.error_update'),
+                    text: i18next.t('profile.error_server'),
+                    confirmButtonText: 'OK',
+                });
+            }
+        }
+    };
+
     const handleUpdatePassword = async (e) => {
         e.preventDefault();
         const validationErrors = validatePasswordForm();
         setErrors(validationErrors);
 
-        if (Object.keys(validationErrors).length === 0) {
-            const token = localStorage.getItem('accessToken');
-            try {
-                const res = await axios.put(
-                    `https://localhost:8443/api/v1/users/changePassword/${userId}`,
-                    {
-                        password: user2.password,
-                        newPassword: user2.newPassword,
-                        retypePassword: user2.reNewPassword,
-                    },
-                    {
-                        headers: { Authorization: `Bearer ${token}` },
-                        withCredentials: true,
-                    }
-                );
-                Swal.fire({
-                    icon: 'success',
-                    title: '✅ Đổi mật khẩu thành công!',
-                    timer: 1500,
-                    showConfirmButton: false,
-                });
-                setMessage('');
-                setUser2({ password: '', newPassword: '', reNewPassword: '' });
-            } catch (error) {
-                console.log('Full error object:', error);
-                console.log('Error response data:', error.response ? error.response.data : 'No response data');
-                if (error.response) {
-                    const errorData = error.response.data || {};
-                    if (error.response.status === 400) {
-                        setErrors(errorData);
-                        const errorMessages = Object.values(errorData).join('\n');
-                        Swal.fire({
-                            icon: 'error',
-                            title: '⚠️ Lỗi khi đổi mật khẩu',
-                            text: errorMessages || 'Dữ liệu không hợp lệ. Vui lòng thử lại.',
-                            confirmButtonText: 'OK',
+        if (Object.keys(validationErrors).length > 0) {
+            const errorMessages = Object.values(validationErrors)
+                .map((key) => i18next.t(key))
+                .join('\n');
+            Swal.fire({
+                icon: 'error',
+                title: i18next.t('profile.error_invalid_data'),
+                text: errorMessages,
+                confirmButtonText: 'OK',
+            });
+            return;
+        }
+
+        const token = localStorage.getItem('accessToken');
+        try {
+            const res = await axios.put(`https://localhost:8443/api/v1/users/changePassword/${userId}`, user2, {
+                headers: { Authorization: `Bearer ${token}` },
+                withCredentials: true,
+            });
+            Swal.fire({
+                icon: 'success',
+                title: i18next.t('profile.success_password_update'),
+                timer: 1500,
+                showConfirmButton: false,
+            });
+            setMessage('');
+            setUser2({ password: '', newPassword: '', reNewPassword: '' });
+        } catch (error) {
+            console.error(error);
+            if (error.response && error.response.data) {
+                if (error.response.status === 400) {
+                    const errorData = error.response.data;
+                    if (typeof errorData === 'object') {
+                        const translatedErrors = {};
+                        Object.keys(errorData).forEach((field) => {
+                            translatedErrors[field] = i18next.t(errorData[field]);
                         });
-                    } else if (error.response.status === 403) {
-                        const errorMessage = errorData || 'Bạn không có quyền cập nhật mật khẩu.';
+                        setErrors(translatedErrors);
+                        const errorMessages = Object.values(translatedErrors).join('\n');
                         Swal.fire({
                             icon: 'error',
-                            title: '❌ Lỗi quyền truy cập',
-                            text: errorMessage,
-                            confirmButtonText: 'OK',
-                        });
-                    } else if (error.response.status === 401) {
-                        const errorMessage = errorData || 'Yêu cầu không được xác thực. Vui lòng đăng nhập lại.';
-                        Swal.fire({
-                            icon: 'error',
-                            title: '❌ Lỗi xác thực',
-                            text: errorMessage,
+                            title: i18next.t('profile.error_password_update'),
+                            text: errorMessages,
                             confirmButtonText: 'OK',
                         });
                     } else {
-                        const errorMessage = errorData || 'Có lỗi xảy ra. Vui lòng thử lại.';
+                        setMessage(i18next.t(errorData));
                         Swal.fire({
                             icon: 'error',
-                            title: '❌ Lỗi khi đổi mật khẩu',
-                            text: errorMessage,
+                            title: i18next.t('profile.error_password_update'),
+                            text: i18next.t(errorData),
                             confirmButtonText: 'OK',
                         });
                     }
-                } else {
+                } else if (error.response.status === 403) {
+                    setMessage(i18next.t('user.error_forbidden_update'));
                     Swal.fire({
                         icon: 'error',
-                        title: '❌ Lỗi kết nối',
-                        text: 'Không thể kết nối đến server. Vui lòng kiểm tra lại kết nối.',
+                        title: i18next.t('profile.error_forbidden'),
+                        text: i18next.t('user.error_forbidden_update'),
+                        confirmButtonText: 'OK',
+                    });
+                } else {
+                    setMessage(i18next.t('system.error_internal'));
+                    Swal.fire({
+                        icon: 'error',
+                        title: i18next.t('profile.error_password_update'),
+                        text: i18next.t('system.error_internal'),
                         confirmButtonText: 'OK',
                     });
                 }
+            } else {
+                setMessage(i18next.t('profile.error_server'));
+                Swal.fire({
+                    icon: 'error',
+                    title: i18next.t('profile.error_password_update'),
+                    text: i18next.t('profile.error_server'),
+                    confirmButtonText: 'OK',
+                });
             }
         }
     };
 
     return (
         <div className="containerEdit light-style flex-grow-1 container-p-y">
-            <h4 className="font-weight-bold py-3 mb-4">Chỉnh sửa thông tin cá nhân</h4>
-            {message && <div className="mb-4 text-red-500">{message}</div>}
+            <h4 className="font-weight-bold py-3 mb-4">{i18next.t('profile.edit_profile')}</h4>
+            {message && <div className="mb-4 text-red-500">{i18next.t(message)}</div>}
             <div className="card overflow-hidden">
                 <div className="row no-gutters row-bordered row-border-light">
                     <div className="col-md-3 pt-0">
                         <div className="list-group list-group-flush account2-settings-links">
                             <a className="list-group-item list-group-item-action active" data-toggle="list" href="#account2-general">
-                                Thông tin cá nhân
+                                {i18next.t('profile.personal_info')}
                             </a>
                             <a className="list-group-item list-group-item-action" data-toggle="list" href="#account2-change-password">
-                                Đổi mật khẩu
+                                {i18next.t('profile.change_password')}
                             </a>
                         </div>
                     </div>
@@ -1229,95 +429,92 @@ const UserProfileEdit = () => {
                                     <img src={avatarPreview || user.avatar} alt="Avatar" className="d-block ui-w-80" />
                                     <div className="media-body ml-4">
                                         <label className="btn btn-outline-primary upload-photo-label">
-                                            Tải hình mới lên
+                                            {i18next.t('profile.upload_new_photo')}
                                             <input type="file" accept="image/*" className="account2-settings-fileinput" onChange={handleAvatarChange} />
                                         </label>{' '}
                                         <button type="button" className="btn btn-default md-btn-flat" onClick={handleUploadAvatar}>
-                                            Tải ảnh
+                                            {i18next.t('profile.upload')}
                                         </button>
-                                        <div className="text-light small mt-1">Cho phép JPG, GIF hoặc PNG. Kích thước tối đa là 800K</div>
+                                        <div className="text-light small mt-1">{i18next.t('profile.avatar_requirements')}</div>
                                     </div>
                                 </div>
                                 <hr className="border-light m-0" />
                                 <div className="card-body">
                                     <form onSubmit={handleUpdate} className="space-y-4">
                                         <div className="form-group">
-                                            <label className="form-label">Tên đăng nhập</label>
+                                            <label className="form-label">{i18next.t('profile.username')}</label>
                                             <input
                                                 type="text"
                                                 name="username"
                                                 value={user.username}
                                                 onChange={handleChange}
                                                 className="form-control"
-                                                placeholder="Nhập tên đăng nhập"
+                                                placeholder={i18next.t('profile.enter_username')}
                                             />
-                                            {errors.username && <small className="error">{errors.username}</small>}
+                                            {errors.username && <small className="error">{i18next.t(errors.username)}</small>}
                                         </div>
                                         <div className="form-group">
-                                            <label className="form-label">Họ và tên</label>
+                                            <label className="form-label">{i18next.t('profile.fullname')}</label>
                                             <input
                                                 type="text"
                                                 name="fullname"
                                                 value={user.fullname}
                                                 onChange={handleChange}
                                                 className="form-control"
-                                                placeholder="Nhập họ và tên"
+                                                placeholder={i18next.t('profile.enter_fullname')}
                                             />
-                                            {errors.fullname && <small className="error">{errors.fullname}</small>}
+                                            {errors.fullname && <small className="error">{i18next.t(errors.fullname)}</small>}
                                         </div>
                                         <div className="form-group">
-                                            <label className="form-label">Email</label>
+                                            <label className="form-label">{i18next.t('profile.email')}</label>
                                             <input
                                                 type="email"
                                                 name="email"
                                                 value={user.email}
                                                 onChange={handleChange}
                                                 className="form-control"
-                                                placeholder="Nhập email"
+                                                placeholder={i18next.t('profile.enter_email')}
                                             />
-                                            {errors.email && <small className="error">{errors.email}</small>}
+                                            {errors.email && <small className="error">{i18next.t(errors.email)}</small>}
                                         </div>
                                         <div className="form-group">
-                                            <label className="form-label">Số điện thoại</label>
+                                            <label className="form-label">{i18next.t('profile.phone')}</label>
                                             <input
                                                 type="tel"
                                                 name="phone"
                                                 value={user.phone}
                                                 onChange={handleChange}
                                                 className="form-control"
-                                                placeholder="Nhập số điện thoại"
+                                                placeholder={i18next.t('profile.enter_phone')}
                                             />
-                                            {errors.phone && <small className="error">{errors.phone}</small>}
+                                            {errors.phone && <small className="error">{i18next.t(errors.phone)}</small>}
                                         </div>
                                         <div className="form-group">
-                                            <label className="form-label">Địa chỉ</label>
+                                            <label className="form-label">{i18next.t('profile.address')}</label>
                                             <input
                                                 type="text"
                                                 name="address"
                                                 value={user.address}
                                                 onChange={handleChange}
                                                 className="form-control"
-                                                placeholder="Nhập địa chỉ"
+                                                placeholder={i18next.t('profile.enter_address')}
                                             />
-                                            {errors.address && <small className="error">{errors.address}</small>}
+                                            {errors.address && <small className="error">{i18next.t(errors.address)}</small>}
                                         </div>
                                         <div className="form-group">
-                                            <label className="form-label">Ngày sinh (yyyy-MM-dd)</label>
+                                            <label className="form-label">{i18next.t('profile.birthday')}</label>
                                             <input
                                                 type="date"
                                                 name="birthday"
-                                                value={user.birthday || ''}
+                                                value={user.birthday}
                                                 onChange={handleChange}
                                                 className="form-control"
                                                 placeholder="yyyy-MM-dd"
                                             />
-                                            {errors.birthday && <small className="error">{errors.birthday}</small>}
+                                            {errors.birthday && <small className="error">{i18next.t(errors.birthday)}</small>}
                                         </div>
                                         <div className="text-right mt-3">
-                                            <button type="submit" className="btn btn-primary">
-                                                Lưu thay đổi
-                                            </button>
-                                            {' '}
+                                            <button type="submit" className="btn btn-primary">{i18next.t('profile.save_changes')}</button>{' '}
                                             <button
                                                 type="button"
                                                 className="btn btn-default"
@@ -1326,7 +523,7 @@ const UserProfileEdit = () => {
                                                     setErrors({});
                                                 }}
                                             >
-                                                Hủy
+                                                {i18next.t('profile.cancel')}
                                             </button>
                                         </div>
                                     </form>
@@ -1336,51 +533,49 @@ const UserProfileEdit = () => {
                                 <form onSubmit={handleUpdatePassword} className="space-y-4">
                                     <div className="card2-body pb-2">
                                         <div className="form-group">
-                                            <label className="form-label">Mật khẩu hiện tại</label>
+                                            <label className="form-label">{i18next.t('profile.current_password')}</label>
                                             <input
                                                 type="password"
                                                 name="password"
                                                 value={user2.password}
                                                 onChange={handlePasswordChange}
                                                 className="form-control"
-                                                placeholder="Nhập mật khẩu hiện tại"
+                                                placeholder={i18next.t('profile.enter_current_password')}
                                             />
-                                            {errors.password && <small className="error">{errors.password}</small>}
+                                            {errors.password && <small className="error">{i18next.t(errors.password)}</small>}
                                         </div>
                                         <div className="form-group">
-                                            <label className="form-label">Mật khẩu mới</label>
+                                            <label className="form-label">{i18next.t('profile.new_password')}</label>
                                             <input
                                                 type="password"
                                                 name="newPassword"
                                                 value={user2.newPassword}
                                                 onChange={handlePasswordChange}
                                                 className="form-control"
-                                                placeholder="Nhập mật khẩu mới"
+                                                placeholder={i18next.t('profile.enter_new_password')}
                                             />
-                                            {errors.newPassword && <small className="error">{errors.newPassword}</small>}
+                                            {errors.newPassword && <small className="error">{i18next.t(errors.newPassword)}</small>}
                                         </div>
                                         <div className="form-group">
-                                            <label className="form-label">Nhập lại mật khẩu mới</label>
+                                            <label className="form-label">{i18next.t('profile.repeat_new_password')}</label>
                                             <input
                                                 type="password"
                                                 name="reNewPassword"
                                                 value={user2.reNewPassword}
                                                 onChange={handlePasswordChange}
                                                 className="form-control"
-                                                placeholder="Nhập lại mật khẩu mới"
+                                                placeholder={i18next.t('profile.repeat_new_password')}
                                             />
-                                            {errors.reNewPassword && <small className="error">{errors.reNewPassword}</small>}
+                                            {errors.reNewPassword && <small className="error">{i18next.t(errors.reNewPassword)}</small>}
                                         </div>
                                         <div className="text-right mt-3">
-                                            <button type="submit" className="btn btn-primary">
-                                                Lưu thay đổi
-                                            </button>{' '}
+                                            <button type="submit" className="btn btn-primary">{i18next.t('profile.save_changes')}</button>{' '}
                                             <button
                                                 type="button"
                                                 className="btn btn-default"
                                                 onClick={() => setUser2({ password: '', newPassword: '', reNewPassword: '' })}
                                             >
-                                                Hủy
+                                                {i18next.t('profile.cancel')}
                                             </button>
                                         </div>
                                     </div>
@@ -1390,7 +585,6 @@ const UserProfileEdit = () => {
                     </div>
                 </div>
             </div>
-            {/*<Chatbox />*/}
         </div>
     );
 };

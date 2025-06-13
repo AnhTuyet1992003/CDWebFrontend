@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -8,9 +7,10 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import 'font-awesome/css/font-awesome.min.css';
 import axios from 'axios';
 import Cookies from 'js-cookie';
-import {colors} from "@mui/material";
+import { useTranslation } from 'react-i18next';
 
 const ForgotPassword = () => {
+    const { t, i18n } = useTranslation();
     const navigate = useNavigate();
     const [email, setEmail] = useState('');
     const [error, setError] = useState('');
@@ -37,12 +37,12 @@ const ForgotPassword = () => {
 
         // Kiểm tra định dạng email
         if (!email) {
-            setError('Vui lòng nhập email.');
+            setError(t('validation.email_notBlank'));
             setIsLoading(false);
             return;
         }
         if (!validateEmail(email)) {
-            setError('Email không hợp lệ.');
+            setError(t('validation.email_invalid'));
             setIsLoading(false);
             return;
         }
@@ -56,19 +56,17 @@ const ForgotPassword = () => {
 
             console.log('Phản hồi từ server:', response.data);
 
-            // Kiểm tra cookie email từ server
-            //const emailCookie = Cookies.get('email');
             const emailCookie = document.cookie
                 .split('; ')
-                .find(row => row.startsWith('email='))
-               console.log("email"+ email)
+                .find(row => row.startsWith('email='));
+            console.log("email" + email);
             if (!emailCookie) {
-                setError('Không tìm thấy cookie email. Vui lòng thử lại.');
+                setError(t('forgotPassword.no_email_cookie'));
                 setIsLoading(false);
                 return;
             }
 
-            setSuccess('OTP đã được gửi đến email của bạn!');
+            setSuccess(t('forgotPassword.otp_sent'));
             setTimeout(() => {
                 console.log('Chuyển hướng đến /validate-otp');
                 navigate('/validate-otp');
@@ -79,25 +77,23 @@ const ForgotPassword = () => {
             if (error.response) {
                 const { status, data } = error.response;
                 if (status === 401) {
-                    setError('Email chưa được đăng ký.');
+                    setError(t('forgotPassword.unregistered_email'));
                 } else if (status === 400) {
-                    setError(data || 'Dữ liệu không hợp lệ.');
+                    setError(data || t('forgotPassword.invalid_data'));
                 } else {
-                    setError('Lỗi khi gửi OTP. Vui lòng thử lại.');
+                    setError(t('forgotPassword.otp_error'));
                 }
             } else {
-                setError('Không thể kết nối đến server. Vui lòng kiểm tra lại.');
+                setError(t('forgotPassword.server_error'));
             }
         }
     };
 
     return (
-        // <div className="container-fluid" >
         <div
             className="container-fluid d-flex justify-content-center align-items-center"
             style={{
                 height: '110vh',
-
                 backgroundColor: '#81b8ee' // xanh dương nhạt
             }}
         >
@@ -107,17 +103,17 @@ const ForgotPassword = () => {
                         <div className="reset-form d-block" style={{
                             width: '70vh',
                             padding: '10px',
-                            backgroundColor: '#ffffff', // xanh dương nhạt
-                            border: '2px solid #000000', // viền đen
-                            borderRadius: '8px' // (tuỳ chọn) bo góc nhẹ cho đẹp
+                            backgroundColor: '#ffffff',
+                            border: '2px solid #000000',
+                            borderRadius: '8px'
                         }}>
                             <form className="reset-password-form" onSubmit={handleForgotPassSubmit} method="post">
-                                <h4 className="mb-3">Cấp lại mật khẩu</h4>
-                                <p>Thực hiện việc thay đổi mật khẩu theo 3 bước sau để bảo mật an toàn:</p>
+                                <h4 className="mb-3">{t('forgotPassword.title')}</h4>
+                                <p>{t('forgotPassword.instructions')}</p>
                                 <ol className="list-unstyled">
-                                    <li><span>1. </span>Nhập địa chỉ email của bạn</li>
-                                    <li><span>2. </span>Hệ thống sẽ gửi mã OTP tới email của bạn</li>
-                                    <li><span>3. </span>Nhập mã OTP bạn nhận được</li>
+                                    <li><span>1. </span>{t('forgotPassword.step1')}</li>
+                                    <li><span>2. </span>{t('forgotPassword.step2')}</li>
+                                    <li><span>3. </span>{t('forgotPassword.step3')}</li>
                                 </ol>
                                 {success && (
                                     <div className="alert alert-success" role="alert">
@@ -135,19 +131,19 @@ const ForgotPassword = () => {
                                         type="email"
                                         name="email"
                                         id="email"
-                                        placeholder="Email của bạn"
+                                        placeholder={t('forgotPassword.email_placeholder')}
                                         value={email}
                                         onChange={(e) => setEmail(e.target.value)}
-                                        style={{fontFamily: 'Courier New'}}
+                                        style={{ fontFamily: 'Courier New' }}
                                         disabled={isLoading}
                                     />
                                 </div>
                                 <div className="mb-6">
                                     <button type="submit" className="btn" disabled={isLoading}>
-                                        {isLoading ? 'Đang gửi...' : 'Gửi mã OTP'}
+                                        {isLoading ? t('forgotPassword.sending') : t('forgotPassword.send_otp')}
                                     </button>
                                     <Link to="/login" className="signup-image-link">
-                                        <FontAwesomeIcon style={{fontSize: '22px'}} icon={faUser}/> Quay lại
+                                        <FontAwesomeIcon style={{ fontSize: '22px' }} icon={faUser} /> {t('forgotPassword.back')}
                                     </Link>
                                 </div>
                             </form>

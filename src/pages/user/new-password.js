@@ -7,8 +7,10 @@ import './user-profile-edit.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faLock } from '@fortawesome/free-solid-svg-icons';
 import Swal from 'sweetalert2';
+import { useTranslation } from 'react-i18next';
 
 const NewPassword = () => {
+    const { t, i18n } = useTranslation();
     const navigate = useNavigate();
     const [user, setUser] = useState({
         newPassword: '',
@@ -27,15 +29,15 @@ const NewPassword = () => {
         const newErrors = {};
 
         if (!user.newPassword) {
-            newErrors.newPassword = 'Vui lòng nhập mật khẩu mới.';
+            newErrors.newPassword = t('validation.newPassword_notBlank');
         } else if (user.newPassword.length < 7 || user.newPassword.length > 100) {
-            newErrors.newPassword = 'Mật khẩu mới phải từ 7 ký tự, bao gồm chữ và số .';
+            newErrors.newPassword = t('validation.newPassword_size');
         }
 
         if (!user.reNewPassword) {
-            newErrors.reNewPassword = 'Vui lòng nhập lại mật khẩu.';
+            newErrors.reNewPassword = t('validation.retypePassword_notBlank');
         } else if (user.newPassword !== user.reNewPassword) {
-            newErrors.reNewPassword = 'Mật khẩu không khớp.';
+            newErrors.reNewPassword = t('validation.reNewPassword_mismatch');
         }
 
         return newErrors;
@@ -51,9 +53,9 @@ const NewPassword = () => {
             if (!email) {
                 Swal.fire({
                     icon: 'error',
-                    title: 'Lỗi!',
-                    text: 'Phiên xác thực đã hết hạn. Vui lòng thử lại.',
-                    confirmButtonText: 'OK',
+                    title: t('newPassword.error'),
+                    text: t('newPassword.session_expired'),
+                    confirmButtonText: t('newPassword.ok'),
                 });
                 navigate('/forgot-password');
                 return;
@@ -67,7 +69,7 @@ const NewPassword = () => {
                 );
                 Swal.fire({
                     icon: 'success',
-                    title: '✅ Cập nhật mật khẩu thành công!',
+                    title: t('newPassword.success'),
                     showConfirmButton: false,
                     timer: 1500,
                 });
@@ -80,41 +82,40 @@ const NewPassword = () => {
                     if (status === 401) {
                         Swal.fire({
                             icon: 'error',
-                            title: 'Lỗi!',
-                            text: 'Phiên xác thực không hợp lệ. Vui lòng thử lại.',
-                            confirmButtonText: 'OK',
+                            title: t('newPassword.error'),
+                            text: t('newPassword.invalid_session'),
+                            confirmButtonText: t('newPassword.ok'),
                         });
                         navigate('/forgot-password');
                     } else if (status === 400) {
-                        // Xử lý lỗi validation từ BE
-                        setErrors(data); // Giả sử BE trả về { "email": "...", "newPassword": "..." }
+                        setErrors(data);
                         Swal.fire({
                             icon: 'error',
-                            title: 'Lỗi!',
-                            text: 'Dữ liệu không hợp lệ. Vui lòng kiểm tra lại.',
-                            confirmButtonText: 'OK',
+                            title: t('newPassword.error'),
+                            text: t('newPassword.invalid_data'),
+                            confirmButtonText: t('newPassword.ok'),
                         });
                     } else if (status === 404) {
                         Swal.fire({
                             icon: 'error',
-                            title: 'Lỗi!',
-                            text: 'Người dùng không tồn tại.',
-                            confirmButtonText: 'OK',
+                            title: t('newPassword.error'),
+                            text: t('newPassword.user_not_found'),
+                            confirmButtonText: t('newPassword.ok'),
                         });
                     } else {
                         Swal.fire({
                             icon: 'error',
-                            title: 'Lỗi!',
-                            text: 'Lỗi khi cập nhật mật khẩu. Vui lòng thử lại.',
-                            confirmButtonText: 'OK',
+                            title: t('newPassword.error'),
+                            text: t('newPassword.update_error'),
+                            confirmButtonText: t('newPassword.ok'),
                         });
                     }
                 } else {
                     Swal.fire({
                         icon: 'error',
-                        title: 'Lỗi!',
-                        text: 'Không thể kết nối đến server. Vui lòng kiểm tra lại.',
-                        confirmButtonText: 'OK',
+                        title: t('newPassword.error'),
+                        text: t('newPassword.server_error'),
+                        confirmButtonText: t('newPassword.ok'),
                     });
                 }
             }
@@ -130,8 +131,9 @@ const NewPassword = () => {
         if (!email) {
             Swal.fire({
                 icon: 'warning',
-                title: '⚠️ Vui lòng xác thực OTP trước!',
-                confirmButtonText: 'OK',
+                title: t('newPassword.warning'),
+                text: t('newPassword.verify_otp'),
+                confirmButtonText: t('newPassword.ok'),
                 customClass: {
                     popup: 'swal2-rounded',
                 },
@@ -146,7 +148,7 @@ const NewPassword = () => {
                 <div className="container-auth">
                     <div className="signup-content">
                         <form className="signup-form" onSubmit={handleUpdatePassword}>
-                            <h2 className="form-title">Đặt lại mật khẩu</h2>
+                            <h2 className="form-title">{t('newPassword.title')}</h2>
                             <div className="form-group">
                                 <label>
                                     <FontAwesomeIcon icon={faLock} />
@@ -158,7 +160,7 @@ const NewPassword = () => {
                                     onChange={handleChange}
                                     required
                                     className="form-control"
-                                    placeholder="Nhập mật khẩu mới"
+                                    placeholder={t('newPassword.new_password_placeholder')}
                                 />
                             </div>
                             {errors.newPassword && (
@@ -178,7 +180,7 @@ const NewPassword = () => {
                                     onChange={handleChange}
                                     required
                                     className="form-control"
-                                    placeholder="Nhập lại mật khẩu mới"
+                                    placeholder={t('newPassword.retype_password_placeholder')}
                                 />
                             </div>
                             {errors.reNewPassword && (
@@ -194,9 +196,9 @@ const NewPassword = () => {
                             )}
 
                             <div className="form-group form-button">
-                                <input type="submit" className="form-submit" value="Lưu thay đổi" />
+                                <input type="submit" className="form-submit" value={t('newPassword.save')} />
                                 <button type="button" className="btn btn-default" onClick={handleCancel}>
-                                    Hủy
+                                    {t('newPassword.cancel')}
                                 </button>
                             </div>
 
@@ -207,10 +209,10 @@ const NewPassword = () => {
 
                         <div className="signup-image">
                             <figure>
-                                <img width={500} height={500} src="/img/fashion4.png" alt="sign up" />
+                                <img width={500} height={500} src="/img/fashion4.png" alt={t('newPassword.image_alt')} />
                             </figure>
                             <Link to="/login" className="signup-image-link" style={{ fontSize: '18px' }}>
-                                Đã có tài khoản? Đăng nhập!
+                                {t('newPassword.login_link')}
                             </Link>
                         </div>
                     </div>
