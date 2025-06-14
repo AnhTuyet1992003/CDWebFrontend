@@ -1,12 +1,13 @@
-
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'font-awesome/css/font-awesome.min.css';
 import axios from 'axios';
 import Cookies from 'js-cookie';
+import { useTranslation } from 'react-i18next';
 
 const ValidateOtp = () => {
+    const { t, i18n } = useTranslation();
     const navigate = useNavigate();
     const [otp, setOtp] = useState('');
     const [error, setError] = useState('');
@@ -20,7 +21,7 @@ const ValidateOtp = () => {
         setIsLoading(true);
 
         if (!otp) {
-            setError('Vui lòng nhập mã OTP.');
+            setError(t('validateOtp.no_otp'));
             setIsLoading(false);
             return;
         }
@@ -28,7 +29,7 @@ const ValidateOtp = () => {
         try {
             const email = Cookies.get('email'); // Lấy email từ cookie
             if (!email) {
-                setError('Phiên xác thực không hợp lệ. Vui lòng thử lại từ đầu.');
+                setError(t('validateOtp.invalid_session'));
                 setIsLoading(false);
                 navigate('/forgot-password');
                 return;
@@ -40,7 +41,7 @@ const ValidateOtp = () => {
                 { withCredentials: true }
             );
 
-            setSuccess('OTP hợp lệ!');
+            setSuccess(t('validateOtp.valid_otp'));
             setIsLoading(false);
             setTimeout(() => {
                 navigate('/new-password');
@@ -50,17 +51,16 @@ const ValidateOtp = () => {
             setIsLoading(false);
             if (error.response) {
                 const { status, data } = error.response;
-                // Xử lý response lỗi là object
-                const errorMessage = typeof data === 'string' ? data : data.error || 'OTP hoặc email không hợp lệ.';
+                const errorMessage = typeof data === 'string' ? data : data.error || t('validateOtp.invalid_otp_email');
                 if (status === 401) {
                     setError(errorMessage);
                 } else if (status === 400) {
                     setError(errorMessage);
                 } else {
-                    setError('Lỗi khi xác thực OTP. Vui lòng thử lại.');
+                    setError(t('validateOtp.otp_error'));
                 }
             } else {
-                setError('Không thể kết nối đến server. Vui lòng kiểm tra lại.');
+                setError(t('validateOtp.server_error'));
             }
         }
     };
@@ -68,7 +68,6 @@ const ValidateOtp = () => {
     return (
         <div className="container-fluid d-flex justify-content-center align-items-center" style={{
             height: '110vh',
-
             backgroundColor: '#81b8ee' // xanh dương nhạt
         }}>
             <div className="row">
@@ -77,13 +76,13 @@ const ValidateOtp = () => {
                         <div className="reset-form d-block" style={{
                             width: '70vh',
                             padding: '10px',
-                            backgroundColor: '#ffffff', // xanh dương nhạt
-                            border: '2px solid #000000', // viền đen
-                            borderRadius: '8px' //
+                            backgroundColor: '#ffffff',
+                            border: '2px solid #000000',
+                            borderRadius: '8px'
                         }}>
                             <form className="reset-password-form" onSubmit={handleInputOtpSubmit} method="post">
-                                <h4 className="mb-3">Xác thực OTP</h4>
-                                <p>Nhập mã OTP đã được gửi đến email của bạn.</p>
+                                <h4 className="mb-3">{t('validateOtp.title')}</h4>
+                                <p>{t('validateOtp.instructions')}</p>
                                 {success && (
                                     <div className="alert alert-success" role="alert">
                                         {success}
@@ -100,7 +99,7 @@ const ValidateOtp = () => {
                                         type="text"
                                         name="otp"
                                         id="otp"
-                                        placeholder="Mã OTP"
+                                        placeholder={t('validateOtp.otp_placeholder')}
                                         value={otp}
                                         onChange={(e) => setOtp(e.target.value)}
                                         style={{ fontFamily: 'Courier New' }}
@@ -109,10 +108,10 @@ const ValidateOtp = () => {
                                 </div>
                                 <div className="mb-6">
                                     <button type="submit" className="btn" disabled={isLoading}>
-                                        {isLoading ? 'Đang xác thực...' : 'Xác thực OTP'}
+                                        {isLoading ? t('validateOtp.verifying') : t('validateOtp.verify')}
                                     </button>
                                     <Link to="/forgot-password" className="signup-image-link">
-                                        <i className="fa fa-arrow-left"></i> Quay lại
+                                        <i className="fa fa-arrow-left"></i> {t('validateOtp.back')}
                                     </Link>
                                 </div>
                             </form>
