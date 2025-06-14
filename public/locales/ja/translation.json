@@ -218,7 +218,26 @@
     "btn_buy": "チェックアウト",
     "btn_cancel_ask": "キャンセル申請",
     "btn_return": "返品申請",
-    "btn_reBuy": "再購入"
+    "btn_reBuy": "再購入",
+    "reason": "理由",
+    "error_title": "システムエラー",
+    "error_reason_load": "理由リストを読み込めません",
+    "warning_select_reason": "理由を選択してください",
+    "cancel_success": "注文が正常にキャンセルされました",
+    "request_cancel_success": "キャンセルリクエストを正常に送信しました",
+    "request_return_success": "返品リクエストを正常に送信しました",
+    "success_title": "操作成功",
+    "error_update_status": "操作に失敗しました",
+    "error_save_reason": "ステータスの保存エラー",
+    "confirm_action_title": "本当に実行しますか？",
+    "confirm_action_text": "リクエストはキャンセルされ、注文は元の状態に戻ります！",
+    "confirm": "確認",
+    "error_delete_reason": "理由の削除エラー",
+    "select_reason": "理由を選択",
+    "select_return_reason": "確認",
+    "select_cancel_reason": "この操作の理由を選択してください！",
+    "cancel_request_canceled": "キャンセルリクエストが成功しました"
+  }
   },
   "profile": {
     "warning_choose_avatar": "⚠️ 有効な画像を選択してください。",
