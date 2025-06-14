@@ -45,7 +45,10 @@ import ImportOrder from "./pages/admin/import-order";
 import ListImportOrder from "./pages/admin/list-import-order";
 import EditImportOrder from "./pages/admin/edit-import-order";
 import ListProductNeedImport from "./pages/admin/list-product-need-import";
-
+import Coupon from './pages/user/coupon'
+import ChooseCoupon from './pages/user/choose-coupon'
+import ListOrder from './pages/admin/list-order'
+import OrderDetailAdmin from './pages/admin/order-detail'
 function App() {
   return (
       <Router>
@@ -71,6 +74,10 @@ function App() {
             <Route path="/order/confirmation" element={<LayoutUser><OrderDetail /></LayoutUser>} />
             <Route path="/order" element={<LayoutUser><OrderUser /></LayoutUser>} />
 
+            <Route path="/coupon" element={<LayoutUser><Coupon /></LayoutUser>} />
+            <Route path="/choose-coupon" element={<LayoutUser><ChooseCoupon /></LayoutUser>} />
+
+            <Route path="/product/product-detail" element={<LayoutUser><ProductDetail /></LayoutUser>} />
 
             <Route path="/chatbox" element={<Chatbox />} />
 
@@ -97,7 +104,8 @@ function App() {
             <Route path="/list-import-order" element={<LayoutAdmin><ListImportOrder /></LayoutAdmin>} />
             <Route path="/edit-import-order/:id" element={<LayoutAdmin><EditImportOrder /></LayoutAdmin>} />
             <Route path="/list-product-need-import" element={<LayoutAdmin><ListProductNeedImport /></LayoutAdmin>} />
-
+            <Route path="/admin-list-order" element={<LayoutAdmin><ListOrder /></LayoutAdmin>} />
+            <Route path="/admin-order-detail" element={<LayoutAdmin><OrderDetailAdmin /></LayoutAdmin>} />
             {/*<Route path="/admin-list-user" element={<AdminListUser/>} />*/}
           {/*/!* Admin Routes *!/*/}
           {/*<Route path="/admin" element={<AdminHome />} />*/}

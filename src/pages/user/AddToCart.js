@@ -34,7 +34,7 @@ const AddToCart = ({ productId, onClose }) => {
     const token = localStorage.getItem('accessToken');
     useEffect(() => {
         if (productId) {
-            axios.get(`https://localhost:8443/api/v1/products/getProduct/${productId}`, { withCredentials: true })
+            axios.get(`https://localhost:8443/api/v1/products/getProduct/${productId}?isActive=true`, { withCredentials: true })
                 .then(response => {
                     setProduct(response.data);
                     setSelectedImage(response.data.image);
@@ -201,23 +201,6 @@ const AddToCart = ({ productId, onClose }) => {
                         <div className="img_product">
                             <img src={selectedImage || product.image} alt={product.nameProduct}/>
                         </div>
-
-                        {/* Danh sách ảnh nhỏ dưới ảnh chính */}
-                        {/*<div className="image_thumbnails">*/}
-                        {/*    {imageList.map((image, index) => (*/}
-                        {/*        <img*/}
-                        {/*            key={index}*/}
-                        {/*            src={image}*/}
-                        {/*            alt={`Variant ${index}`}*/}
-                        {/*            onClick={() => {*/}
-                        {/*                setSelectedImage(image); // Cập nhật ảnh khi người dùng click vào ảnh nhỏ*/}
-                        {/*                setSelectedImageIndex(index); // Cập nhật chỉ số ảnh đã chọn*/}
-                        {/*            }}*/}
-                        {/*            className={selectedImageIndex === index ? 'selected' : ''}*/}
-                        {/*            style={{width: 50, height: 50, cursor: 'pointer', margin: '5px', position: "relative", zIndex: "100000"}}*/}
-                        {/*        />*/}
-                        {/*    ))}*/}
-                        {/*</div>*/}
                         <div style={{position: 'relative', width: 'max-content'}}>
                             {/* Nút điều hướng trái */}
                             <button className={"btn_left_img"}

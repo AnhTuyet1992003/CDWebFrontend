@@ -1,5 +1,9 @@
 import React, { useEffect, useState } from "react";
+<<<<<<< HEAD
 import { Link } from "react-router-dom";
+=======
+import {Link, useNavigate} from "react-router-dom";
+>>>>>>> main
 import Chatbox from './Chatbox';
 import axios from "axios";  // đúng đường dẫn file Chatbox bạn tạo
 import AddToCart from "./AddToCart";
@@ -11,7 +15,7 @@ const Home = () => {
     const [products, setProducts] = useState([]);
     const [showAddToCart, setShowAddToCart] = useState(false);
     const [selectedProductId, setSelectedProductId] = useState(null);
-
+    const navigate = useNavigate();
     const [currentPage, setCurrentPage] = useState(0);
     const [totalPages, setTotalPages] = useState(1);
     const [pageSize, setPageSize] = useState(9);
@@ -24,7 +28,7 @@ const Home = () => {
 
     const fetchProducts = async (page, size) => {
         try {
-            const res = await axios.get(`https://localhost:8443/api/v1/products/list_page?page=${page}&size=${size}`);
+            const res = await axios.get(`https://localhost:8443/api/v1/products/list_page?page=${page}&size=${size}&isActive=true`);
             setProducts(res.data.products);
             setCurrentPage(res.data.currentPage);
             setPageSize(res.data.pageSize);
@@ -52,6 +56,7 @@ const Home = () => {
         setShowAddToCart(false);
     };
 
+<<<<<<< HEAD
     const handleSortChange = (e) => {
         const value = e.target.value;
         if (value) {
@@ -87,6 +92,14 @@ const Home = () => {
 
     // Danh sách sản phẩm đã được sắp xếp
     const sortedProducts = sortProducts(products, sortBy, sortOrder);
+=======
+    const handleProductDetail = (id) => {
+        navigate('/product/product-detail', {
+            state: { productId: id }
+        });
+    };
+
+>>>>>>> main
 
     return (
         <>
@@ -477,10 +490,11 @@ const Home = () => {
                                     <div className="col-lg-4 col-md-6" key={product.id}>
                                         <div className="product__item">
                                             <div className="product__item__pic set-bg"
-                                                 style={{backgroundImage: `url('${product.image}')`}}>
+                                                 style={{backgroundImage: `url('${product.image}')`}} >
                                                 <ul className="product__hover">
-                                                    <li><a href={product.image} className="image-popup"><span
-                                                        className="arrow_expand"></span></a></li>
+                                                    <li onClick={() => handleProductDetail(product.id)}><a>
+                                                        <i className="fa fa-info-circle"></i></a>
+                                                    </li>
                                                     <li><a href="#"><span className="icon_heart_alt"></span></a></li>
                                                     <li><a href="#" onClick={(e) => {
                                                         e.preventDefault();
@@ -490,7 +504,10 @@ const Home = () => {
                                                 </ul>
                                             </div>
                                             <div className="product__item__text">
-                                                <h6><a href="#">{product.nameProduct}</a></h6>
+                                                <h6 class={"name_product"}>
+                                                    <div id={"nameProduct"} onClick={() => handleProductDetail(product.id)}>{product.nameProduct}</div>
+                                                    {/*<Link to={`/product/${product.id}`}>{product.nameProduct}</Link>*/}
+                                                </h6>
                                                 <div className="rating">
                                                     <i className="fa fa-star"></i>
                                                     <i className="fa fa-star"></i>
