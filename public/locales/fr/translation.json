@@ -26,8 +26,18 @@
   "products": {
     "home": "Accueil",
     "title": "Produits",
-    "menu": "Menu",
-    "page": "Page"
+    "menu": "Catégories",
+    "page": "Page",
+    "sort_by": "Trier par",
+    "default_sort": "Par défaut",
+    "price_low_to_high": "Prix : Croissant",
+    "price_high_to_low": "Prix : Décroissant",
+    "name_a_to_z": "Nom : A-Z",
+    "name_z_to_a": "Nom : Z-A",
+    "category_a_to_z": "Catégorie : A-Z",
+    "category_z_to_a": "Catégorie : Z-A",
+    "search_placeholder": "Rechercher des produits",
+    "search": "Rechercher"
   },
   "add_to_cart": {
     "error": "Erreur !",
@@ -298,6 +308,8 @@
     "avatar_requirements": "JPG, GIF ou PNG autorisés. Taille maximale de 800K"
   },
   "validation": {
+    "birthday_invalid": "Date de naissance invalide. Veuillez fournir une date valide au format MM-dd-yyyy.",
+    "invalid_date_format": "Le format de date est invalide. Utilisez MM-dd-yyyy (par exemple, 06-15-2025).",
     "username_notBlank": "Le nom d'utilisateur ne peut pas être vide",
     "username_size": "Le nom d'utilisateur doit comporter entre 3 et 50 caractères",
     "fullname_notBlank": "Le nom complet ne peut pas être vide",

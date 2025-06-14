@@ -35,7 +35,9 @@
     "name_a_to_z": "Tên: A-Z",
     "name_z_to_a": "Tên: Z-A",
     "category_a_to_z": "Danh mục: A-Z",
-    "category_z_to_a": "Danh mục: Z-A"
+    "category_z_to_a": "Danh mục: Z-A",
+    "search_placeholder": "Tìm kiếm sản phẩm",
+    "search": "Tìm kiếm"
   },
   "add_to_cart": {
     "error": "Lỗi!",
@@ -308,6 +310,8 @@
 
   },
   "validation": {
+    "birthday_invalid": "Ngày sinh không hợp lệ. Vui lòng cung cấp ngày hợp lệ theo định dạng MM-dd-yyyy.",
+    "invalid_date_format": "Định dạng ngày không hợp lệ. Sử dụng MM-dd-yyyy (ví dụ: 06-15-2025).",
     "username_notBlank": "Tên đăng nhập không được để trống",
     "username_size": "Tên đăng nhập phải từ 3 đến 50 ký tự",
     "fullname_notBlank": "Họ và tên không được để trống",

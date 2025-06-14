@@ -26,8 +26,18 @@
   "products": {
     "home": "首页",
     "title": "产品",
-    "menu": "菜单",
-    "page": "页面"
+    "menu": "类别",
+    "page": "页面",
+    "sort_by": "排序方式",
+    "default_sort": "默认",
+    "price_low_to_high": "价格：从低到高",
+    "price_high_to_low": "价格：从高到低",
+    "name_a_to_z": "名称：A-Z",
+    "name_z_to_a": "名称：Z-A",
+    "category_a_to_z": "类别：A-Z",
+    "category_z_to_a": "类别：Z-A",
+    "search_placeholder": "搜索产品",
+    "search": "搜索"
   },
   "add_to_cart": {
     "error": "错误！",
@@ -298,6 +308,8 @@
     "avatar_requirements": "允许JPG、GIF或PNG。最大尺寸为800K"
   },
   "validation": {
+    "birthday_invalid": "无效的生日。请提供 MM-dd-yyyy 格式的有效日期。",
+    "invalid_date_format": "日期格式无效。请使用 MM-dd-yyyy（例如：06-15-2025）。",
     "username_notBlank": "用户名不能为空",
     "username_size": "用户名必须介于3到50个字符之间",
     "fullname_notBlank": "全名不能为空",

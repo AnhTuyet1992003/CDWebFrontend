@@ -25,9 +25,19 @@
   },
   "products": {
     "home": "ホーム",
-    "title": "製品",
-    "menu": "メニュー",
-    "page": "ページ"
+    "title": "商品",
+    "menu": "カテゴリ",
+    "page": "ページ",
+    "sort_by": "並べ替え",
+    "default_sort": "デフォルト",
+    "price_low_to_high": "価格：安い順",
+    "price_high_to_low": "価格：高い順",
+    "name_a_to_z": "名前：A-Z",
+    "name_z_to_a": "名前：Z-A",
+    "category_a_to_z": "カテゴリ：A-Z",
+    "category_z_to_a": "カテゴリ：Z-A",
+    "search_placeholder": "商品を検索",
+    "search": "検索"
   },
   "add_to_cart": {
     "error": "エラー！",
@@ -238,7 +248,7 @@
     "select_cancel_reason": "この操作の理由を選択してください！",
     "cancel_request_canceled": "キャンセルリクエストが成功しました"
   }
-  },
+  ,
   "profile": {
     "warning_choose_avatar": "⚠️ 有効な画像を選択してください。",
     "error_choose_avatar": "❌ JPEG、PNG、JPG形式の画像のみ対応しています！",
@@ -299,6 +309,8 @@
     "avatar_requirements": "JPG、GIF、またはPNGが許可されています。最大サイズは800K"
   },
   "validation": {
+    "birthday_invalid": "無効な誕生日です。MM-dd-yyyy形式で有効な日付を入力してください。",
+    "invalid_date_format": "日付形式が無効です。MM-dd-yyyy形式を使用してください（例：06-15-2025）。",
     "username_notBlank": "ユーザー名を空にすることはできません",
     "username_size": "ユーザー名は3～50文字でなければなりません",
     "fullname_notBlank": "フルネームを空にすることはできません",
