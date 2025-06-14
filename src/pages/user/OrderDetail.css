@@ -95,7 +95,16 @@
     background: #ffffff;
     transform: scale(1.1);
 }
-
+.modal.fade.show {
+    display: block;
+}
+.modal-dialog {
+    max-width: 500px;
+    margin: 1.75rem auto;
+}
+.modal-content {
+    border-radius: 0.3rem;
+}
 .order_user_content{
     .content{
         width: 100%;
@@ -197,4 +206,31 @@
     color: #0275d8;
     font-size: 11px;
     cursor: pointer;
+}
+.order_user .btn_status_order {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+}
+
+.order_user .status_order_detail_container {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.order_user .reason_cancel {
+    font-size: 12px;
+    color: #666;
+    margin-top: 4px;
+}
+
+.order_user .btn_orderDetail {
+    display: flex;
+    gap: 8px;
+}
+.my-swal-popup {
+    position: relative;
+    z-index: 99900000000000 ;
 }
