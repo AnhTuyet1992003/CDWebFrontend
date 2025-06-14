@@ -456,7 +456,7 @@ const ListOrder = () => {
                                                                 )}
                                                                 {order.statusOrderId === 2 && (
                                                                     <>
-                                                                        <a className="dropdown-item" href="#" style={{color:"blue"}} onClick={() => handleSimpleAction(order.id, 3, 'Đơn hàng đã được giao!')}>
+                                                                        <a className="dropdown-item" href="#" style={{color:"blue"}} onClick={() => handleSimpleAction(order.id, 3, 'Đơn hàng đã đưa đơn vị vận chuyển!')}>
                                                                             <FontAwesomeIcon icon={faTruckFast} style={{ marginRight: 8, color:"blue"}} /> Giao hàng
                                                                         </a>
                                                                         <a className="dropdown-item" style={{color:"red"}} href="#" onClick={() => handleActionWithReason(order.id, 'cancel')}>
@@ -465,9 +465,20 @@ const ListOrder = () => {
                                                                     </>
                                                                 )}
                                                                 {order.statusOrderId === 3 && (
-                                                                    <a className="dropdown-item" href="#" style={{color:"red"}} onClick={() => handleActionWithReason(order.id, 'delivery_failed')}>
-                                                                        <i className="icon-base bx bx-error-circle me-1"></i> Giao hàng thất bại
-                                                                    </a>
+                                                                    <>
+                                                                        <a className="dropdown-item" href="#"
+                                                                           style={{color: "red"}}
+                                                                           onClick={() => handleSimpleAction(order.id, 4, "Giao hàng thành công")}>
+                                                                            <i className="icon-base bx bx-error-circle me-1"></i> Giao
+                                                                            hàng thất bại
+                                                                        </a>
+                                                                        <a className="dropdown-item" href="#"
+                                                                           style={{color: "red"}}
+                                                                           onClick={() => handleActionWithReason(order.id, 'delivery_failed')}>
+                                                                            <i className="icon-base bx bx-error-circle me-1"></i> Giao
+                                                                            hàng thất bại
+                                                                        </a>
+                                                                    </>
                                                                 )}
                                                                 {order.statusOrderId === 5 && (
                                                                     <>
