@@ -1,0 +1,35 @@
+.add-coupon .container,
+.list-coupon .container {
+    padding: 20px;
+}
+
+.add-coupon h2,
+.list-coupon h2 {
+    margin-bottom: 20px;
+}
+
+.add-coupon .form-group {
+    margin-bottom: 15px;
+}
+
+.add-coupon .btn-primary {
+    margin-top: 10px;
+}
+
+.list-coupon .table {
+    font-size: 14px;
+}
+
+.list-coupon .table th,
+.list-coupon .table td {
+    vertical-align: middle;
+}
+
+.list-coupon .pagination {
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.list-coupon .input-group {
+    max-width: 300px;
+}

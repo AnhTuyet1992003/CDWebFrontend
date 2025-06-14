@@ -127,6 +127,18 @@ const Header = () => {
                         </Link>
                     </li>
                     <li className="menu-item">
+                        <Link to="/admin-add-coupon" style={{cursor: 'pointer'}} className="menu-link"><i
+                            className="menu-icon tf-icons bx bx-chat"></i>
+                            <div className="text-truncate" data-i18n="Chat">Tạo mã giảm giá</div>
+                        </Link>
+                    </li>
+                    <li className="menu-item">
+                        <Link to="/admin-list-coupon" style={{cursor: 'pointer'}} className="menu-link"><i
+                            className="menu-icon tf-icons bx bx-chat"></i>
+                            <div className="text-truncate" data-i18n="Chat">Danh sách mã giảm</div>
+                        </Link>
+                    </li>
+                    <li className="menu-item">
                         <Link to="/list-product-need-import" style={{cursor: 'pointer'}} className="menu-link"><i
                             className="menu-icon tf-icons bx bx-chat"></i>
                             <div className="text-truncate" data-i18n="Chat">Danh sách sản phẩm cần nhập</div>

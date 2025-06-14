@@ -62,7 +62,7 @@ const ListOrder = () => {
         });
     };
 
-    const hasReasonCancel = filteredOrders.some(order => order.reasonCancel != null);
+    const hasReasonCancel = filteredOrders.some(order => order.orderReason != null);
 
     useEffect(() => {
         if (!token) {
@@ -411,6 +411,7 @@ const ListOrder = () => {
                                             <th>ID</th>
                                             <th>Tổng tiền</th>
                                             <th>Trạng thái</th>
+                                            <th>Thanh toán</th>
                                             <th>Ngày tạo</th>
                                             {hasReasonCancel && <th className="reason-column">Lý do</th>}
                                             <th>Hành động</th>
@@ -433,8 +434,16 @@ const ListOrder = () => {
                                                             {title}
                                                         </span>
                                                     </td>
+                                                    <td>
+                                                       <span
+                                                           className={`badge me-1 ${order.paymentId === 1 ? 'bg-label-success' : 'bg-label-info'}`}>
+                                                                  {order.paymentId === 1 ? 'COD' : 'Đã thanh toán'}
+                                                                </span>
+
+
+                                                    </td>
                                                     <td>{formatDate(order.created)}</td>
-                                                    {hasReasonCancel && <td className="reason-column">{order.reasonCancel || ''}</td>}
+                                                    {hasReasonCancel && <td className="reason-column">{order.orderReason || ''}</td>}
                                                     <td>
                                                         <div className="dropdown">
                                                             <button type="button" className="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
