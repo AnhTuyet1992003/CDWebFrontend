@@ -509,7 +509,7 @@ const UserProfileEdit = () => {
                                                 value={user.birthday}
                                                 onChange={handleChange}
                                                 className="form-control"
-                                                placeholder="yyyy-MM-dd"
+                                                placeholder="MM-dd-yyyy"
                                             />
                                             {errors.birthday && <small className="error">{i18next.t(errors.birthday)}</small>}
                                         </div>

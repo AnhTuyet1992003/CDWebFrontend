@@ -26,8 +26,18 @@
   "products": {
     "home": "Home",
     "title": "Products",
-    "menu": "Menu",
-    "page": "Page"
+    "menu": "Categories",
+    "page": "Page",
+    "sort_by": "Sort by",
+    "default_sort": "Default",
+    "price_low_to_high": "Price: Low to High",
+    "price_high_to_low": "Price: High to Low",
+    "name_a_to_z": "Name: A-Z",
+    "name_z_to_a": "Name: Z-A",
+    "category_a_to_z": "Category: A-Z",
+    "category_z_to_a": "Category: Z-A",
+    "search_placeholder": "Search products",
+    "search": "Search"
   },
   "add_to_cart": {
     "error": "Error!",
@@ -279,6 +289,8 @@
   },
 
   "validation": {
+    "birthday_invalid": "Invalid birthday. Please provide a valid date in MM-dd-yyyy format.",
+    "invalid_date_format": "Date format is invalid. Use MM-dd-yyyy (e.g., 06-15-2025).",
     "username_notBlank": "Username cannot be blank",
     "username_size": "Username must be between 3 and 50 characters",
     "fullname_notBlank": "Full name cannot be blank",

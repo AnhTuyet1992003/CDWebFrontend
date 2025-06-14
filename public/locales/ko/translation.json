@@ -26,8 +26,18 @@
   "products": {
     "home": "홈",
     "title": "제품",
-    "menu": "메뉴",
-    "page": "페이지"
+    "menu": "카테고리",
+    "page": "페이지",
+    "sort_by": "정렬 기준",
+    "default_sort": "기본",
+    "price_low_to_high": "가격: 낮은 순",
+    "price_high_to_low": "가격: 높은 순",
+    "name_a_to_z": "이름: A-Z",
+    "name_z_to_a": "이름: Z-A",
+    "category_a_to_z": "카테고리: A-Z",
+    "category_z_to_a": "카테ゴ리: Z-A",
+    "search_placeholder": "제품 검색",
+    "search": "검색"
   },
   "add_to_cart": {
     "error": "오류!",
@@ -298,6 +308,8 @@
     "avatar_requirements": "JPG, GIF 또는 PNG 허용. 최대 크기는 800K"
   },
   "validation": {
+    "birthday_invalid": "유효하지 않은 생년월일입니다. MM-dd-yyyy 형식으로 유효한 날짜를 입력하세요.",
+    "invalid_date_format": "날짜 형식이 유효하지 않습니다. MM-dd-yyyy 형식을 사용하세요 (예: 06-15-2025).",
     "username_notBlank": "사용자 이름은 비워둘 수 없습니다",
     "username_size": "사용자 이름은 3~50자 사이여야 합니다",
     "fullname_notBlank": "전체 이름은 비워둘 수 없습니다",
