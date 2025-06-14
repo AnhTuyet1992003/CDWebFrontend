@@ -109,34 +109,6 @@ const Cart = () => {
 
         // Áp dụng giảm giá từ coupon
         if (selectedCoupon) {
-            if (selectedCoupon.maxUsesPerUser - selectedCoupon.usageCount <= 0)
-            {
-                Swal.fire({
-                    icon: 'warning',
-                    title: "Không thõa mãn điều kiện của mã giảm",
-                    text: "Hết lượt sử dụng mã này",
-                    confirmButtonText: 'OK',
-                })
-                setSelectedCoupon(null);
-            }
-            if (totalPrice<selectedCoupon.minOrderValue){
-                Swal.fire({
-                    icon: 'warning',
-                    title: "Không thõa mãn điều kiện của mã giảm",
-                    text: "Không đủ tổng tiền tối thiểu",
-                    confirmButtonText: 'OK',
-                })
-                setSelectedCoupon(null);
-            }
-            if (selectedItems.length<selectedCoupon.minProductQuantity){
-                Swal.fire({
-                    icon: 'warning',
-                    title: "Không thõa mãn điều kiện của mã giảm",
-                    text: "Không đủ số lượng sản phẩm tối thiểu",
-                    confirmButtonText: 'OK',
-                })
-                setSelectedCoupon(null);
-            }
             if (selectedCoupon.couponType === 'Giảm theo tiền') {
                 discountAmount = Math.min(selectedCoupon.discountValue, totalPrice); // Không giảm quá tổng giá
                 totalPrice -= discountAmount;
@@ -158,6 +130,36 @@ const Cart = () => {
             discountAmount,
         };
     }, [selectedItems, cart.items, selectedCoupon]);
+
+    useEffect(()=>{
+        if (selectedCoupon) {
+            if (selectedCoupon.maxUsesPerUser - selectedCoupon.usageCount <= 0) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: "Không thỏa mãn điều kiện của mã giảm",
+                    text: "Hết lượt sử dụng mã này",
+                    confirmButtonText: 'OK',
+                });
+                setSelectedCoupon(null);
+            } else if (selectedSummary.originalTotalPrice < selectedCoupon.minOrderValue) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: "Không thỏa mãn điều kiện của mã giảm",
+                    text: "Không đủ tổng tiền tối thiểu",
+                    confirmButtonText: 'OK',
+                });
+                setSelectedCoupon(null);
+            } else if (selectedSummary.totalQuantityProduct < selectedCoupon.minProductQuantity) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: "Không thỏa mãn điều kiện của mã giảm",
+                    text: "Không đủ số lượng sản phẩm tối thiểu",
+                    confirmButtonText: 'OK',
+                });
+                setSelectedCoupon(null);
+            }
+        }
+    }, [selectedCoupon, selectedSummary.originalTotalPrice, selectedSummary.totalQuantityProduct]);
 
     const formatVND = (money) => {
         return new Intl.NumberFormat('vi-VN').format(money) + ' ₫';

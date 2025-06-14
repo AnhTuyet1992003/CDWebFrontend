@@ -295,8 +295,8 @@ const Checkout = () => {
             })
             return 0;
         }
-        const productCount = order?.cart_items_choose?.length || 0;
-        if (productCount < coupon.minProductQuantity) {
+        const totalProductQuantity = order?.cart_items_choose?.reduce((sum, item) => sum + (item.quantity || 0), 0) || 0;
+        if (totalProductQuantity < coupon.minProductQuantity) {
             Swal.fire({
                 icon: 'warning',
                 title: "Không thỏa mãn điều kiện của mã giảm",

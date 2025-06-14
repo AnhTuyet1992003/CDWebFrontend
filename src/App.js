@@ -49,6 +49,9 @@ import Coupon from './pages/user/coupon'
 import ChooseCoupon from './pages/user/choose-coupon'
 import ListOrder from './pages/admin/list-order'
 import OrderDetailAdmin from './pages/admin/order-detail'
+import AddCoupon from './pages/admin/add-coupon'
+import ListCoupon from './pages/admin/list-coupon'
+import CouponDetail from './pages/admin/coupon-detail'
 function App() {
   return (
       <Router>
@@ -106,6 +109,12 @@ function App() {
             <Route path="/list-product-need-import" element={<LayoutAdmin><ListProductNeedImport /></LayoutAdmin>} />
             <Route path="/admin-list-order" element={<LayoutAdmin><ListOrder /></LayoutAdmin>} />
             <Route path="/admin-order-detail" element={<LayoutAdmin><OrderDetailAdmin /></LayoutAdmin>} />
+            <Route path="/admin-add-coupon" element={<LayoutAdmin><AddCoupon /></LayoutAdmin>} />
+            <Route path="/admin-list-coupon" element={<LayoutAdmin><ListCoupon /></LayoutAdmin>} />
+            <Route path="/admin-coupon-detail" element={<LayoutAdmin><CouponDetail /></LayoutAdmin>} />
+            <Route path="/admin-add-coupon/:id" element={<LayoutAdmin><AddCoupon /></LayoutAdmin>} />
+            <Route path="/admin-coupon-detail/:id" element={<LayoutAdmin><CouponDetail /></LayoutAdmin>} />
+
             {/*<Route path="/admin-list-user" element={<AdminListUser/>} />*/}
           {/*/!* Admin Routes *!/*/}
           {/*<Route path="/admin" element={<AdminHome />} />*/}

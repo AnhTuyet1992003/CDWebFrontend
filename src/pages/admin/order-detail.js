@@ -3,8 +3,10 @@ import axios from "axios";
 import Swal from "sweetalert2";
 import { useLocation, useNavigate } from "react-router-dom";
 import './ListOrderAdmin.css';
+import {useTranslation} from "react-i18next";
 
 const OrderDetail = () => {
+    const { t } = useTranslation('translation');
     const [order, setOrder] = useState(null);
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
@@ -54,7 +56,7 @@ const OrderDetail = () => {
     const getPaymentText = (paymentId) => {
         switch (paymentId) {
             case 1: return 'Thanh toán khi nhận hàng (COD)';
-            case 2: return 'Thanh toán qua thẻ';
+            case 3: return 'Thanh toán qua VnPay';
             default: return 'Không xác định';
         }
     };
@@ -183,7 +185,13 @@ const OrderDetail = () => {
                                             </li>
                                             <li className="list-group-item d-flex justify-content-between">
                                                 <span>Phương thức thanh toán:</span>
-                                                <strong>{getPaymentText(order.paymentId)}</strong>
+                                                <strong>
+                                                    {order.paymentId === 3 && (
+                                                        <span className="badge bg-success rounded-pill ms-2" style={{color:"white"}}>
+                                                                {t('order_detail.payment_ok')}
+                                                        </span>
+                                                    )}
+                                                    {getPaymentText(order.paymentId)}</strong>
                                             </li>
                                             <li className="list-group-item d-flex justify-content-between">
                                                 <span>Trạng thái:</span>
