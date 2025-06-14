@@ -27,7 +27,15 @@
     "home": "Trang chủ",
     "title": "Sản phẩm",
     "menu": "Danh mục",
-    "page": "Trang"
+    "page": "Trang",
+    "sort_by": "Sắp xếp theo",
+    "default_sort": "Mặc định",
+    "price_low_to_high": "Giá: Thấp đến cao",
+    "price_high_to_low": "Giá: Cao đến thấp",
+    "name_a_to_z": "Tên: A-Z",
+    "name_z_to_a": "Tên: Z-A",
+    "category_a_to_z": "Danh mục: A-Z",
+    "category_z_to_a": "Danh mục: Z-A"
   },
   "add_to_cart": {
     "error": "Lỗi!",

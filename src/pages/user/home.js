@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from "react";
-import {Link} from "react-router-dom";
+import { Link } from "react-router-dom";
 import Chatbox from './Chatbox';
 import axios from "axios";  // đúng đường dẫn file Chatbox bạn tạo
 import AddToCart from "./AddToCart";
 import { useTranslation } from 'react-i18next';
 import './AddToCart.css'
+
 const Home = () => {
     const { t } = useTranslation('translation');
     const [products, setProducts] = useState([]);
@@ -14,52 +15,78 @@ const Home = () => {
     const [currentPage, setCurrentPage] = useState(0);
     const [totalPages, setTotalPages] = useState(1);
     const [pageSize, setPageSize] = useState(9);
+    const [sortBy, setSortBy] = useState(''); // 'price', 'nameProduct', 'categoryCode'
+    const [sortOrder, setSortOrder] = useState('asc'); // 'asc' hoặc 'desc'
+
     useEffect(() => {
         fetchProducts(currentPage, pageSize);
     }, [currentPage, pageSize]);
-
 
     const fetchProducts = async (page, size) => {
         try {
             const res = await axios.get(`https://localhost:8443/api/v1/products/list_page?page=${page}&size=${size}`);
             setProducts(res.data.products);
             setCurrentPage(res.data.currentPage);
-            setPageSize(res.data.pageSize)
+            setPageSize(res.data.pageSize);
             setTotalPages(res.data.totalPages);
         } catch (error) {
             console.error('Lỗi khi tải sản phẩm:', error);
         }
     };
+
     const handlePageSizeChange = (newSize) => {
         setPageSize(Number(newSize));
         setCurrentPage(0); // reset về trang đầu tiên
     };
-
-
-    // useEffect(() => {
-    //     axios.get("https://localhost:8443/api/v1/products/list", {
-    //         withCredentials: true
-    //     })
-    //         .then(reponse => {
-    //             setProducts(reponse.data);
-    //         })
-    //         .catch(error => {
-    //             console.error("Lỗi khi lấy sản phẩm:", error);
-    //         });
-    // }, []);
 
     const handlePageClick = (page) => {
         setCurrentPage(page);
     };
 
     const handleOpenAddToCart = (producId) => {
-      setSelectedProductId(producId);
-      setShowAddToCart(true);
+        setSelectedProductId(producId);
+        setShowAddToCart(true);
     };
 
     const handleCloseAddToCart = () => {
         setShowAddToCart(false);
     };
+
+    const handleSortChange = (e) => {
+        const value = e.target.value;
+        if (value) {
+            const [newSortBy, newSortOrder] = value.split(':');
+            setSortBy(newSortBy || '');
+            setSortOrder(newSortOrder || 'asc');
+        } else {
+            setSortBy('');
+            setSortOrder('asc');
+        }
+    };
+
+    // Hàm sắp xếp sản phẩm
+    const sortProducts = (products, sortBy, sortOrder) => {
+        if (!sortBy) return [...products]; // Trả về bản sao nếu không sắp xếp
+        return [...products].sort((a, b) => {
+            let valueA = a[sortBy] || '';
+            let valueB = b[sortBy] || '';
+            if (typeof valueA === 'string') {
+                valueA = valueA.toLowerCase();
+                valueB = valueB.toLowerCase();
+            }
+            return sortOrder === 'asc' ? (valueA < valueB ? -1 : valueA > valueB ? 1 : 0) : (valueA > valueB ? -1 : valueA < valueB ? 1 : 0);
+        });
+    };
+
+    // Hàm lấy URL hình ảnh
+    const getProductImage = (product) => {
+        return product.imageUrls && Array.isArray(product.imageUrls) && product.imageUrls.length > 0
+            ? product.imageUrls[0]
+            : (product.image || '/img/default-product.jpg');
+    };
+
+    // Danh sách sản phẩm đã được sắp xếp
+    const sortedProducts = sortProducts(products, sortBy, sortOrder);
 
     return (
         <>
@@ -297,29 +324,28 @@ const Home = () => {
                         </div>
                         <div className="col-lg-9 col-md-9">
                             <div className="col-lg-12"
-                                 style={{marginBottom:"30px", position: "relative", height: "40px"}}>
+                                 style={{marginBottom: "30px", position: "relative", height: "40px"}}>
                                 {/* Select nằm sát trái */}
                                 <div style={{position: "absolute", left: 0, top: "50%", transform: "translateY(-50%)"}}>
                                     <label style={{marginRight: "8px", fontWeight: "500"}}></label>
                                     <select
                                         defaultValue="9"
                                         style={{
-                                        padding: "6px 12px",
-                                        borderRadius: "5px",
-                                        border: "1px solid #ccc",
-                                        fontSize: "14px",
-                                        backgroundColor: "#fff",
-                                        cursor: "pointer"
-                                    }}
-                                            onChange={(e) => handlePageSizeChange(e.target.value)}
+                                            padding: "6px 12px",
+                                            borderRadius: "5px",
+                                            border: "1px solid #ccc",
+                                            fontSize: "14px",
+                                            backgroundColor: "#fff",
+                                            cursor: "pointer"
+                                        }}
+                                        onChange={(e) => handlePageSizeChange(e.target.value)}
                                     >
                                         <option value="3">3 / {t('products.page')}</option>
                                         <option value="6">6 / {t('products.page')}</option>
-                                        <option defaultChecked={true}  value="9">9 / {t('products.page')}</option>
+                                        <option defaultChecked={true} value="9">9 / {t('products.page')}</option>
                                         <option value="12">12 / {t('products.page')}</option>
                                     </select>
                                 </div>
-
 
                                 {/* Phân trang nằm chính giữa */}
                                 <div style={{
@@ -349,8 +375,76 @@ const Home = () => {
                                         )}
                                     </div>
                                 </div>
-                            </div>
 
+                                <div style={{position: "absolute", right: 0, top: "25%"}}>
+                                    <label
+                                        style={{marginRight: "8px", fontWeight: "500"}}>{t('products.sort_by')}:</label>
+                                    <select
+                                        value={`${sortBy}:${sortOrder}`}
+                                        onChange={handleSortChange}
+                                        style={{
+                                            padding: "6px 12px",
+                                            borderRadius: "5px",
+                                            border: "1px solid #ccc",
+                                            fontSize: "14px",
+                                            backgroundColor: "#fff",
+                                            cursor: "pointer"
+                                        }}
+                                    >
+                                        <option value="">{t('products.default_sort')}</option>
+                                        <option value="price:asc">{t('products.price_low_to_high')}</option>
+                                        <option value="price:desc">{t('products.price_high_to_low')}</option>
+                                        <option value="nameProduct:desc">{t('products.name_a_to_z')}</option>
+                                        <option value="nameProduct:asc">{t('products.name_z_to_a')}</option>
+                                        <option value="categoryCode:asc">{t('products.category_a_to_z')}</option>
+                                        <option value="categoryCode:desc">{t('products.category_z_to_a')}</option>
+                                    </select>
+                                </div>
+                                <div style={{
+                                    position: "absolute",
+                                    left: "50%",
+                                    top: "50%",
+                                    transform: "translate(-50%, -50%)"
+                                }}>
+                                    <div className="pagination__option">
+                                        {[...Array(totalPages)].map((_, index) => (
+                                            <a
+                                                key={index}
+                                                href="#"
+                                                onClick={(e) => {
+                                                    e.preventDefault();
+                                                    handlePageClick(index);
+                                                }}
+                                                className={currentPage === index ? "active" : ""}
+                                            >
+                                                {index + 1}
+                                            </a>
+                                        ))}
+                                        {currentPage < totalPages - 1 && (
+                                            <a
+                                                href="#"
+                                                onClick={(e) => {
+                                                    e.preventDefault();
+                                                    handlePageClick(currentPage + 1);
+                                                }}
+                                            >
+                                                <i className="fa fa-angle-right"></i>
+                                            </a>
+                                        )}
+                                        {currentPage > 0 && (
+                                            <a
+                                                href="#"
+                                                onClick={(e) => {
+                                                    e.preventDefault();
+                                                    handlePageClick(currentPage - 1);
+                                                }}
+                                            >
+                                                <i className="fa fa-angle-left"></i>
+                                            </a>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
 
                             <div className="row">
                                 {/** nhãn new **/}
@@ -379,7 +473,7 @@ const Home = () => {
                                 {/*        </div>*/}
                                 {/*    </div>*/}
                                 {/*</div>*/}
-                                {products.map((product) => (
+                                {sortedProducts.map((product) => (
                                     <div className="col-lg-4 col-md-6" key={product.id}>
                                         <div className="product__item">
                                             <div className="product__item__pic set-bg"
@@ -467,35 +561,35 @@ const Home = () => {
                                 {/*        </div>*/}
                                 {/*    </div>*/}
                                 {/*</div>*/}
-                                <div className="col-lg-12 text-center">
-                                    <div className="pagination__option">
-                                        {[...Array(totalPages)].map((_, index) => (
-                                            <a key={index} href="#" onClick={(e) => {
-                                                e.preventDefault();
-                                                handlePageClick(index);
-                                            }}
-                                               className={currentPage === index ? "active" : ""}
-                                            >
-                                                {index + 1}
-                                            </a>
-                                        ))}
-                                        {currentPage < totalPages - 1 && (
-                                            <a href="#" onClick={(e) => {
-                                                e.preventDefault();
-                                                handlePageClick(currentPage + 1);
-                                            }}>
-                                                <i className="fa fa-angle-right"></i>
-                                            </a>
-                                        )}
-                                    </div>
-                                </div>
+                                {/*<div className="col-lg-12 text-center">*/}
+                                {/*    <div className="pagination__option">*/}
+                                {/*        {[...Array(totalPages)].map((_, index) => (*/}
+                                {/*            <a key={index} href="#" onClick={(e) => {*/}
+                                {/*                e.preventDefault();*/}
+                                {/*                handlePageClick(index);*/}
+                                {/*            }}*/}
+                                {/*               className={currentPage === index ? "active" : ""}*/}
+                                {/*            >*/}
+                                {/*                {index + 1}*/}
+                                {/*            </a>*/}
+                                {/*        ))}*/}
+                                {/*        {currentPage < totalPages - 1 && (*/}
+                                {/*            <a href="#" onClick={(e) => {*/}
+                                {/*                e.preventDefault();*/}
+                                {/*                handlePageClick(currentPage + 1);*/}
+                                {/*            }}>*/}
+                                {/*                <i className="fa fa-angle-right"></i>*/}
+                                {/*            </a>*/}
+                                {/*        )}*/}
+                                {/*    </div>*/}
+
+                                {/*</div>*/}
                             </div>
                         </div>
                     </div>
                 </div>
                 {/*<Chatbox />*/}
             </section>
-
         </>
     );
 }
