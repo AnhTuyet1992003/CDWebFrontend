@@ -27,6 +27,7 @@ const ProductDetail = () => {
     const [activeTab, setActiveTab] = useState('description');
     const navigate = useNavigate();
     const thumbnailRef = useRef(null);
+    const [reviews, setReviews] = useState({ totalReviews: 0, averageRating: 0 });
     useEffect(() => {
         window.scrollTo(0, 0);
     }, []);
@@ -70,6 +71,18 @@ const ProductDetail = () => {
                 .catch(error => {
                     console.error('Lỗi khi lấy thông tin sản phẩm:', error);
                     Swal.fire(t('add_to_cart.error'), t('add_to_cart.error_get_product'), 'error');
+                });
+            // Fetch reviews
+            axios.get(`https://localhost:8443/api/v1/reviews/rating-summary/${productId}`)
+                .then(reviewRes => {
+                    setReviews({
+                        totalReviews: reviewRes.data.totalReviews,
+                        averageRating: reviewRes.data.averageRating
+                    });
+                })
+                .catch(error => {
+                    console.error(`Error fetching reviews for product ${productId}:`, error);
+                    setReviews({ totalReviews: 0, averageRating: 0 });
                 });
         }
     }, [productId, t]);
@@ -179,6 +192,23 @@ const ProductDetail = () => {
 
     if (!product) return null;
 
+    const renderStars = (averageRating) => {
+        const stars = [];
+        const fullStars = Math.floor(averageRating);
+        const hasHalfStar = averageRating % 1 >= 0.5;
+
+        for (let i = 0; i < fullStars; i++) {
+            stars.push(<i key={`star-${i}`} className="fa fa-star"></i>);
+        }
+        if (hasHalfStar && stars.length < 5) {
+            stars.push(<i key="half-star" className="fa fa-star-half-o"></i>);
+        }
+        while (stars.length < 5) {
+            stars.push(<i key={`empty-star-${stars.length}`} className="fa fa-star-o"></i>);
+        }
+        return stars;
+    };
+
     const availableSizes = selectedColor
         ? product.sizeColorVariants.filter(variant => variant.color === selectedColor).map(variant => variant.size)
         : product.sizeColorVariants.map(variant => variant.size);
@@ -248,14 +278,22 @@ const ProductDetail = () => {
                                 <h3>{product.nameProduct} <span>Brand: {product.brandName}</span>
                                 </h3>
                                 <div className="rating">
-                                    <i className="fa fa-star"></i>
-                                    <i className="fa fa-star"></i>
-                                    <i className="fa fa-star"></i>
-                                    <i className="fa fa-star"></i>
-                                    <i className="fa fa-star"></i>
-                                    <span>( 138 reviews )</span>
+                                    <p style={{color: "black"}}>
+                                        {product.nameProduct}
+                                        <br/>
+                                        <span style={{fontSize: "10px"}}>
+                                    {renderStars(reviews.averageRating)}
+                                </span>
+                                        <span style={{color: "#656565", fontSize: "12px"}}>
+                                    {" | "}{reviews.totalReviews} đánh giá
+                                </span>
+                                {/*        <span style={{color: "#656565", fontSize: "12px"}}>*/}
+                                {/*    {" | 0 lượt mua"}*/}
+                                {/*</span>*/}
+                                    </p>
                                 </div>
-                                <div className="product__details__price">{formatVND(product.price)} <span>$ 83.0</span></div>
+                                <div className="product__details__price">{formatVND(product.price)} <span>$ 83.0</span>
+                                </div>
                                 <p>{product.description}</p>
                                 <div className="product__details__button">
                                     <div className="quantity">
