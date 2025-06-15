@@ -630,6 +630,7 @@ const Home = () => {
     const [sortOrder, setSortOrder] = useState('asc');
     const [searchTerm, setSearchTerm] = useState('');
     const [isSearching, setIsSearching] = useState(false);
+    const [reviews, setReviews] = useState({});
 
     useEffect(() => {
         if (!isSearching) {
@@ -640,10 +641,38 @@ const Home = () => {
     const fetchProducts = async (page, size) => {
         try {
             const res = await axios.get(`https://localhost:8443/api/v1/products/list_page?page=${page}&size=${size}&isActive=true`);
+            const fetchedProducts = res.data.products;
             setProducts(res.data.products);
             setCurrentPage(res.data.currentPage);
             setPageSize(res.data.pageSize);
             setTotalPages(res.data.totalPages);
+            // Fetch reviews for each product
+            const reviewPromises = fetchedProducts.map(product =>
+                axios.get(`https://localhost:8443/api/v1/reviews/rating-summary/${product.id}`)
+                    .then(reviewRes => ({
+                        productId: product.id,
+                        totalReviews: reviewRes.data.totalReviews,
+                        averageRating: reviewRes.data.averageRating
+                    }))
+                    .catch(error => {
+                        console.error(`Error fetching reviews for product ${product.id}:`, error);
+                        return {
+                            productId: product.id,
+                            totalReviews: 0,
+                            averageRating: 0
+                        };
+                    })
+            );
+            const reviewResults = await Promise.all(reviewPromises);
+            const reviewsMap = reviewResults.reduce((acc, review) => ({
+                ...acc,
+                [review.productId]: {
+                    totalReviews: review.totalReviews,
+                    averageRating: review.averageRating
+                }
+            }), {});
+            setReviews(reviewsMap);
+
         } catch (error) {
             console.error('Lỗi khi tải sản phẩm:', error);
         }
@@ -731,6 +760,23 @@ const Home = () => {
         navigate('/product/product-detail', {
             state: { productId: id }
         });
+    };
+
+    const renderStars = (averageRating) => {
+        const stars = [];
+        const fullStars = Math.floor(averageRating);
+        const hasHalfStar = averageRating % 1 >= 0.5;
+
+        for (let i = 0; i < fullStars; i++) {
+            stars.push(<i key={`star-${i}`} className="fa fa-star"></i>);
+        }
+        if (hasHalfStar && stars.length < 5) {
+            stars.push(<i key="half-star" className="fa fa-star-half-o"></i>);
+        }
+        while (stars.length < 5) {
+            stars.push(<i key={`empty-star-${stars.length}`} className="fa fa-star-o"></i>);
+        }
+        return stars;
     };
 
     return (
@@ -1116,11 +1162,20 @@ const Home = () => {
                                                     <div id="nameProduct" onClick={() => handleProductDetail(product.id)}>{product.nameProduct}</div>
                                                 </h6>
                                                 <div className="rating">
-                                                    <i className="fa fa-star"></i>
-                                                    <i className="fa fa-star"></i>
-                                                    <i className="fa fa-star"></i>
-                                                    <i className="fa fa-star"></i>
-                                                    <i className="fa fa-star"></i>
+                                                    {reviews[product.id] ? renderStars(reviews[product.id].averageRating) : (
+                                                        <>
+                                                            <i className="fa fa-star-o"></i>
+                                                            <i className="fa fa-star-o"></i>
+                                                            <i className="fa fa-star-o"></i>
+                                                            <i className="fa fa-star-o"></i>
+                                                            <i className="fa fa-star-o"></i>
+                                                            {/*{reviews[product.id].averageRating}
+                                                            {reviews[product.id].totalReviews} đánh giá*/}
+                                                            <div className="product__reviews">
+                                                                {reviews[product.id] ? `${reviews[product.id].totalReviews} số sao` : `0 đánh giá`}
+                                                            </div>
+                                                        </>
+                                                    )}
                                                 </div>
                                                 <div className="product__price">{product.price.toLocaleString()}₫</div>
                                             </div>

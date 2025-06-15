@@ -333,7 +333,7 @@ const AddCoupon = () => {
                                         name="max_discount_amount"
                                         value={formData.max_discount_amount}
                                         onChange={handleChange}
-                                        placeholder={t('coupon.enter_max_discount_amount')}
+                                        placeholder={t('coupon.enter_max_discount')}
                                     />
                                 </Form.Group>
                             </Col>

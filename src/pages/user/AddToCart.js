@@ -20,7 +20,7 @@ const AddToCart = ({ productId, onClose }) => {
     const [selectedImage, setSelectedImage] = useState(null);
     const [imageList, setImageList] = useState([]);
     const [selectedImageIndex, setSelectedImageIndex] = useState(0); // Giả sử mặc định chọn ảnh đầu tiên
-
+    const [reviews, setReviews] = useState({ totalReviews: 0, averageRating: 0 });
     const thumbnailRef = useRef(null);
 
     const scrollThumbnails = (direction) => {
@@ -58,6 +58,18 @@ const AddToCart = ({ productId, onClose }) => {
                 .catch(error => {
                     console.error("Lỗi khi lấy thông tin sản phẩm:", error);
                     Swal.fire(t('add_to_cart.error'), t('add_to_cart.error_get_product'), 'error');
+                });
+            // Fetch reviews
+            axios.get(`https://localhost:8443/api/v1/reviews/rating-summary/${productId}`)
+                .then(reviewRes => {
+                    setReviews({
+                        totalReviews: reviewRes.data.totalReviews,
+                        averageRating: reviewRes.data.averageRating
+                    });
+                })
+                .catch(error => {
+                    console.error(`Error fetching reviews for product ${productId}:`, error);
+                    setReviews({ totalReviews: 0, averageRating: 0 });
                 });
         }
     }, [productId]);
@@ -101,7 +113,22 @@ const AddToCart = ({ productId, onClose }) => {
     const handleSizeSelect = (size) => {
         setSelectedSize(prev => prev === size ? null : size);
     };
+    const renderStars = (averageRating) => {
+        const stars = [];
+        const fullStars = Math.floor(averageRating);
+        const hasHalfStar = averageRating % 1 >= 0.5;
 
+        for (let i = 0; i < fullStars; i++) {
+            stars.push(<i key={`star-${i}`} className="fa fa-star"></i>);
+        }
+        if (hasHalfStar && stars.length < 5) {
+            stars.push(<i key="half-star" className="fa fa-star-half-o"></i>);
+        }
+        while (stars.length < 5) {
+            stars.push(<i key={`empty-star-${stars.length}`} className="fa fa-star-o"></i>);
+        }
+        return stars;
+    };
 
     if (!product) return null;
 
@@ -281,14 +308,14 @@ const AddToCart = ({ productId, onClose }) => {
                                 {product.nameProduct}
                                 <br/>
                                 <span style={{fontSize: "10px"}}>
-                                    <i className="fa fa-star"></i>
-                                    <i className="fa fa-star"></i>
-                                    <i className="fa fa-star"></i>
-                                    <i className="fa fa-star"></i>
-                                    <i className="fa fa-star"></i>
+                                    {renderStars(reviews.averageRating)}
                                 </span>
-                                <span style={{color: "#656565", fontSize: "12px"}}> | 31 đánh giá </span>
-                                <span style={{color: "#656565", fontSize: "12px"}}> | 0 lượt mua</span>
+                                <span style={{color: "#656565", fontSize: "12px"}}>
+                                    {" | "}{reviews.totalReviews} đánh giá
+                                </span>
+                                {/*<span style={{color: "#656565", fontSize: "12px"}}>*/}
+                                {/*    {" | 0 lượt mua"}*/}
+                                {/*</span>*/}
                             </p>
                         </div>
                         <div className="row row_price">

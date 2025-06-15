@@ -476,10 +476,10 @@ const ListOrder = () => {
                                                                 {order.statusOrderId === 3 && (
                                                                     <>
                                                                         <a className="dropdown-item" href="#"
-                                                                           style={{color: "red"}}
+                                                                           style={{color: "green"}}
                                                                            onClick={() => handleSimpleAction(order.id, 4, "Giao hàng thành công")}>
-                                                                            <i className="icon-base bx bx-error-circle me-1"></i> Giao
-                                                                            hàng thất bại
+                                                                            <FontAwesomeIcon icon={faTruckFast} style={{ marginRight: 8, color:"green"}} /> Giao
+                                                                            hàng thành công
                                                                         </a>
                                                                         <a className="dropdown-item" href="#"
                                                                            style={{color: "red"}}
