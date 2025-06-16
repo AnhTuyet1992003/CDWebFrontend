@@ -423,18 +423,10 @@ const ProductDetail = () => {
                                     </li>
                                     <li className="nav-item">
                                         <button
-                                            className={`nav-link ${activeTab === 'specification' ? 'active' : ''}`}
-                                            onClick={() => setActiveTab('specification')}
-                                        >
-                                            Specification
-                                        </button>
-                                    </li>
-                                    <li className="nav-item">
-                                        <button
                                             className={`nav-link ${activeTab === 'reviews' ? 'active' : ''}`}
                                             onClick={() => setActiveTab('reviews')}
                                         >
-                                            Reviews (2)
+                                            Bình luận và đánh giá ({reviews.totalReviews})
                                         </button>
                                     </li>
                                 </ul>
@@ -450,21 +442,6 @@ const ProductDetail = () => {
                                             </p>
                                         </div>
                                     )}
-
-                                    {activeTab === 'specification' && (
-                                        <div className="tab-pane fade show active">
-                                            <h6>Specification</h6>
-                                            <p>
-                                                Thông số kỹ thuật chi tiết của sản phẩm được liệt kê ở đây. Bao gồm kích
-                                                thước, chất liệu, trọng lượng,...
-                                            </p>
-                                            <p>
-                                                Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem.
-                                                Nulla consequat massa quis enim.
-                                            </p>
-                                        </div>
-                                    )}
-
                                     {activeTab === 'reviews' && (
                                         <div className="tab-pane fade show active">
                                             <ProductReviews productId={productId} />
