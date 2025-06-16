@@ -23,6 +23,9 @@ const Checkout = () => {
         ward: '',
         addressDetail: '',
     });
+    const [provinces, setProvinces] = useState([]);
+    const [districts, setDistricts] = useState([]);
+    const [wards, setWards] = useState([]);
     const [editingAddressId, setEditingAddressId] = useState(null);
     const [note, setNote] = useState('');
     const [paymentId, setPaymentId] = useState('1');
@@ -36,6 +39,81 @@ const Checkout = () => {
     const toggleCouponModal = () => {
         setIsCouponModalOpen(!isCouponModalOpen);
     };
+
+    // Fetch provinces from API
+    useEffect(() => {
+        const fetchProvinces = async () => {
+            try {
+                const response = await axios.get('https://provinces.open-api.vn/api/p/');
+                setProvinces(response.data);
+            } catch (error) {
+                console.error('Error fetching provinces:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: t('checkout.error'),
+                    text: 'Không thể tải danh sách tỉnh/thành phố!',
+                });
+            }
+        };
+        fetchProvinces();
+    }, [t]);
+
+    // Fetch districts when province changes
+    useEffect(() => {
+        if (formData.province) {
+            const fetchDistricts = async () => {
+                try {
+                    const province = provinces.find(p => p.name === formData.province);
+                    if (province) {
+                        const response = await axios.get(`https://provinces.open-api.vn/api/p/${province.code}?depth=2`);
+                        setDistricts(response.data.districts || []);
+                        setFormData(prev => ({ ...prev, district: '', ward: '' }));
+                        setWards([]);
+                    }
+                } catch (error) {
+                    console.error('Error fetching districts:', error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: t('checkout.error'),
+                        text: 'Không thể tải danh sách quận/huyện!',
+                    });
+                }
+            };
+            fetchDistricts();
+        } else {
+            setDistricts([]);
+            setWards([]);
+            setFormData(prev => ({ ...prev, district: '', ward: '' }));
+        }
+    }, [formData.province, provinces, t]);
+
+    // Fetch wards when district changes
+    useEffect(() => {
+        if (formData.district) {
+            const fetchWards = async () => {
+                try {
+                    const district = districts.find(d => d.name === formData.district);
+                    if (district) {
+                        const response = await axios.get(`https://provinces.open-api.vn/api/d/${district.code}?depth=2`);
+                        setWards(response.data.wards || []);
+                        setFormData(prev => ({ ...prev, ward: '' }));
+                    }
+                } catch (error) {
+                    console.error('Error fetching wards:', error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: t('checkout.error'),
+                        text: 'Không thể tải danh sách phường/xã!',
+                    });
+                }
+            };
+            fetchWards();
+        } else {
+            setWards([]);
+            setFormData(prev => ({ ...prev, ward: '' }));
+        }
+    }, [formData.district, districts, t]);
+
 
     // Lấy danh sách mã giảm giá từ API
     useEffect(() => {
@@ -670,30 +748,59 @@ const Checkout = () => {
                                                 <p>
                                                     {t('checkout.city')} <span>*</span>
                                                 </p>
-                                                <select className="choose_address_select" name="province" onChange={handleChange} value={formData.province} required>
+                                                <select
+                                                    className="choose_address_select"
+                                                    name="province"
+                                                    onChange={handleChange}
+                                                    value={formData.province}
+                                                    required
+                                                >
                                                     <option value="">{t('checkout.choose_city')}</option>
-                                                    <option value="Hà Nội">Hà Nội</option>
-                                                    <option value="Hồ Chí Minh">Hồ Chí Minh</option>
-                                                    <option value="Đà Nẵng">Đà Nẵng</option>
+                                                    {provinces.map((province) => (
+                                                        <option key={province.code} value={province.name}>
+                                                            {province.name}
+                                                        </option>
+                                                    ))}
                                                 </select>
                                             </div>
                                             <div className="checkout__form__input">
                                                 <p>
                                                     {t('checkout.ward')} <span>*</span>
                                                 </p>
-                                                <select className="choose_address_select" name="district" onChange={handleChange} value={formData.district} required>
-                                                    <option value="">{t('checkout.choose_ward')}</option>
-                                                    <option value="Phường 12">Phường 12</option>
-                                                    <option value="Phường 13">Phường 13</option>
+                                                <select
+                                                    className="choose_address_select"
+                                                    name="district"
+                                                    onChange={handleChange}
+                                                    value={formData.district}
+                                                    required
+                                                    disabled={!formData.province}
+                                                >
+                                                    <option value="">{t('checkout.choose_district')}</option>
+                                                    {districts.map((district) => (
+                                                        <option key={district.code} value={district.name}>
+                                                            {district.name}
+                                                        </option>
+                                                    ))}
                                                 </select>
                                             </div>
                                             <div className="checkout__form__input">
                                                 <p>
                                                     {t('checkout.district')} <span>*</span>
                                                 </p>
-                                                <select className="choose_address_select" name="ward" onChange={handleChange} value={formData.ward} required>
-                                                    <option value="">{t('checkout.choose_district')}</option>
-                                                    <option value="Quận Bình Thạnh">Quận Bình Thạnh</option>
+                                                <select
+                                                    className="choose_address_select"
+                                                    name="ward"
+                                                    onChange={handleChange}
+                                                    value={formData.ward}
+                                                    required
+                                                    disabled={!formData.district}
+                                                >
+                                                    <option value="">{t('checkout.choose_ward')}</option>
+                                                    {wards.map((ward) => (
+                                                        <option key={ward.code} value={ward.name}>
+                                                            {ward.name}
+                                                        </option>
+                                                    ))}
                                                 </select>
                                             </div>
                                             <div className="checkout__form__input">
