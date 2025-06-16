@@ -70,3 +70,7 @@
     color: #28a745; /* Màu xanh lá */
     font-weight: bold;
 }
+.card label{
+    font-size: 18px;
+    font-weight: bold;
+}

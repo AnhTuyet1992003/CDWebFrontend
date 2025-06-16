@@ -410,7 +410,7 @@ const UserProfileEdit = () => {
         <div className="containerEdit light-style flex-grow-1 container-p-y">
             <h4 className="font-weight-bold py-3 mb-4">{i18next.t('profile.edit_profile')}</h4>
             {message && <div className="mb-4 text-red-500">{i18next.t(message)}</div>}
-            <div className="card overflow-hidden">
+            <div className="card_user_profile_edit overflow-hidden">
                 <div className="row no-gutters row-bordered row-border-light">
                     <div className="col-md-3 pt-0">
                         <div className="list-group list-group-flush account2-settings-links">
