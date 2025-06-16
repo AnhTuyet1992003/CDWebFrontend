@@ -219,29 +219,12 @@ const Header = () => {
                                     <li className={isActive('/coupon') ? 'active' : ''}>
                                         <Link to="/coupon">Mã giảm giá</Link>
                                     </li>
-                                    <li className={isActive('/choose-coupon') ? 'active' : ''}>
-                                        <Link to="/choose-coupon">chọn giảm giá</Link>
-                                    </li>
-                                    <li>
-                                        <a href="#">Pages</a>
-                                        <ul className="dropdown">
-                                            <li><Link to="/import-order">Nhap hang</Link></li>
-                                            <li><Link to="/list-import-order">List Nhap hang</Link></li>
-                                            <li><Link to="/user-password-edit">ddoi pass</Link></li>
-                                            <li><Link to="/product-detail">Chi tiết sản phẩm</Link></li>
-                                            <li><Link to="/checkout">Thanh toán</Link></li>
-                                            <li><Link to="/blog-detail">Blog Detail</Link></li>
-                                        </ul>
-                                    </li>
-                                    <li className={isActive('/blog') ? 'active' : ''}>
-                                        <Link to="/blog">{t('header.about')}</Link>
-                                    </li>
                                     <li className={isActive('/contact') ? 'active' : ''}>
                                         <Link to="/contact">{t('header.contact')}</Link>
                                     </li>
-                                    <li className={isActive('/admin-index') ? 'active' : ''}>
-                                        <Link to="/admin-index">Admin</Link>
-                                    </li>
+                                    {/*<li className={isActive('/admin-index') ? 'active' : ''}>*/}
+                                    {/*    <Link to="/admin-index">Admin</Link>*/}
+                                    {/*</li>*/}
                                 </ul>
                             </nav>
                         </div>
