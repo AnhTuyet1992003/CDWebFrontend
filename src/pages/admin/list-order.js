@@ -10,8 +10,8 @@ const ListOrder = () => {
     const [statuses, setStatuses] = useState([]);
     const [orderCountsByStatus, setOrderCountsByStatus] = useState({});
     const [orders, setOrders] = useState([]);
-    const [filteredOrders, setFilteredOrders] = useState([]); // Danh sách đơn hàng đã lọc
-    const [searchQuery, setSearchQuery] = useState(''); // Giá trị tìm kiếm
+    const [filteredOrders, setFilteredOrders] = useState([]);
+    const [searchQuery, setSearchQuery] = useState('');
     const [selectedStatusId, setSelectedStatusId] = useState(null);
     const [currentPage, setCurrentPage] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
@@ -20,11 +20,10 @@ const ListOrder = () => {
     const [showReasonModal, setShowReasonModal] = useState(false);
     const [selectedReasonId, setSelectedReasonId] = useState('');
     const [selectedOrderId, setSelectedOrderId] = useState(null);
-    const [actionType, setActionType] = useState(''); // 'cancel' or 'delivery_failed'
+    const [actionType, setActionType] = useState('');
     const pageSize = 10;
     const navigate = useNavigate();
 
-    // Lấy token từ cookie
     const token = document.cookie
         .split("; ")
         .find(row => row.startsWith("token="))
@@ -107,7 +106,6 @@ const ListOrder = () => {
         });
     }, [token, navigate]);
 
-    // Lọc đơn hàng dựa trên searchQuery
     useEffect(() => {
         const filtered = orders.filter(order =>
             order.id.toString().includes(searchQuery)
@@ -216,6 +214,20 @@ const ListOrder = () => {
                         title: 'Thành công',
                         text: 'Đơn hàng đã được hủy!',
                     });
+                    // Refresh orders immediately
+                    axios.get(`https://localhost:8443/api/v1/orders/getOrder/status/admin?statusId=${selectedStatusId}&page=${currentPage}&size=${pageSize}`, {
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                            "Content-Type": "application/json"
+                        },
+                        withCredentials: true
+                    }).then(res => {
+                        setOrders(res.data.orders);
+                        setFilteredOrders(res.data.orders.filter(order => order.id.toString().includes(searchQuery)));
+                        setTotalPages(res.data.totalPages);
+                        setTotalItems(res.data.totalItems);
+                        setCurrentPage(res.data.currentPage);
+                    });
                 });
             } else if (actionType === 'delivery_failed') {
                 const reasonId = parseInt(selectedReasonId);
@@ -226,11 +238,25 @@ const ListOrder = () => {
                         title: 'Thành công',
                         text: 'Đã cập nhật trạng thái giao hàng thất bại!',
                     });
+                    // Refresh orders immediately
+                    axios.get(`https://localhost:8443/api/v1/orders/getOrder/status/admin?statusId=${selectedStatusId}&page=${currentPage}&size=${pageSize}`, {
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                            "Content-Type": "application/json"
+                        },
+                        withCredentials: true
+                    }).then(res => {
+                        setOrders(res.data.orders);
+                        setFilteredOrders(res.data.orders.filter(order => order.id.toString().includes(searchQuery)));
+                        setTotalPages(res.data.totalPages);
+                        setTotalItems(res.data.totalItems);
+                        setCurrentPage(res.data.currentPage);
+                    });
                 });
             }
             setShowReasonModal(false);
             setReasons([]);
-            handleStatusClick(selectedStatusId, currentPage);
+            // Refresh order counts for all statuses
             statuses.forEach(status => {
                 axios.get(`https://localhost:8443/api/v1/orders/getOrder/status/admin?statusId=${status.status_id}&page=0&size=${pageSize}`, {
                     headers: {
@@ -267,7 +293,6 @@ const ListOrder = () => {
             cancelButtonText: 'Không',
         }).then((result) => {
             if (result.isConfirmed) {
-                // For "Hủy yêu cầu" actions (status 5 or 8), clear the cancel reason first
                 if ((statusId === 2 && orders.find(o => o.id === orderId).statusOrderId === 5) ||
                     (statusId === 4 && orders.find(o => o.id === orderId).statusOrderId === 8)) {
                     deleteOrderReason(orderId)
@@ -278,7 +303,21 @@ const ListOrder = () => {
                                     title: 'Thành công',
                                     text: successMessage,
                                 });
-                                handleStatusClick(selectedStatusId, currentPage);
+                                // Refresh orders immediately
+                                axios.get(`https://localhost:8443/api/v1/orders/getOrder/status/admin?statusId=${selectedStatusId}&page=${currentPage}&size=${pageSize}`, {
+                                    headers: {
+                                        Authorization: `Bearer ${token}`,
+                                        "Content-Type": "application/json"
+                                    },
+                                    withCredentials: true
+                                }).then(res => {
+                                    setOrders(res.data.orders);
+                                    setFilteredOrders(res.data.orders.filter(order => order.id.toString().includes(searchQuery)));
+                                    setTotalPages(res.data.totalPages);
+                                    setTotalItems(res.data.totalItems);
+                                    setCurrentPage(res.data.currentPage);
+                                });
+                                // Refresh order counts
                                 statuses.forEach(status => {
                                     axios.get(`https://localhost:8443/api/v1/orders/getOrder/status/admin?statusId=${status.status_id}&page=0&size=${pageSize}`, {
                                         headers: {
@@ -313,14 +352,27 @@ const ListOrder = () => {
                             });
                         });
                 } else {
-                    // For other actions, just update the status
                     updateOrderStatus(orderId, statusId).then(() => {
                         Swal.fire({
                             icon: 'success',
                             title: 'Thành công',
                             text: successMessage,
                         });
-                        handleStatusClick(selectedStatusId, currentPage);
+                        // Refresh orders immediately
+                        axios.get(`https://localhost:8443/api/v1/orders/getOrder/status/admin?statusId=${selectedStatusId}&page=${currentPage}&size=${pageSize}`, {
+                            headers: {
+                                Authorization: `Bearer ${token}`,
+                                "Content-Type": "application/json"
+                            },
+                            withCredentials: true
+                        }).then(res => {
+                            setOrders(res.data.orders);
+                            setFilteredOrders(res.data.orders.filter(order => order.id.toString().includes(searchQuery)));
+                            setTotalPages(res.data.totalPages);
+                            setTotalItems(res.data.totalItems);
+                            setCurrentPage(res.data.currentPage);
+                        });
+                        // Refresh order counts
                         statuses.forEach(status => {
                             axios.get(`https://localhost:8443/api/v1/orders/getOrder/status/admin?statusId=${status.status_id}&page=0&size=${pageSize}`, {
                                 headers: {
@@ -439,8 +491,6 @@ const ListOrder = () => {
                                                            className={`badge me-1 ${order.paymentId === 1 ? 'bg-label-success' : 'bg-label-info'}`}>
                                                                   {order.paymentId === 1 ? 'COD' : 'Đã thanh toán'}
                                                                 </span>
-
-
                                                     </td>
                                                     <td>{formatDate(order.created)}</td>
                                                     {hasReasonCancel && <td className="reason-column">{order.orderReason || ''}</td>}

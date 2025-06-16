@@ -637,7 +637,10 @@ const Cart = () => {
             if (result.status === 'success') {
                 localStorage.setItem('preparedOrder', JSON.stringify(result.data));
                 navigate('/checkout');
-            } else {
+            } else if (result.status === 'product unActive') {
+                Swal.fire({ icon: 'warning', title: t('cart.error'), text: result.message });
+                return;
+            }else {
                 Swal.fire({ icon: 'error', title: t('cart.error'), text: result.message });
             }
         } catch (error) {
