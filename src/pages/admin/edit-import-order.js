@@ -757,10 +757,11 @@ const EditImportOrder = () => {
                 });
 
                 const importOrder = response.data;
-                console.log('Import Order Data:', importOrder);
+                console.log('Import Order Data price:', importOrder.price);
 
 // Lấy thông tin sản phẩm chi tiết từ product_size_colorId
                 const productsPromises = importOrder.products.map(async (product) => {
+                    console.log('products:', product);
                     try {
                         const productSizeColorResponse = await axios.get(
                             `https://localhost:8443/api/v1/products/getNameSizeColor/${product.product_size_colorId}`,
@@ -782,7 +783,7 @@ const EditImportOrder = () => {
                             { headers: { Authorization: `Bearer ${token}` } }
                         );
                         const productData = productResponse.data;
-                        console.log('product:', { id: productData.id, nameProduct: productData.nameProduct });
+                        console.log('product11111:', { id: productData.id, nameProduct: productData.nameProduct , import_price: productData.import_price });
 
                         return {
                             productId: productData.id || null, // Sử dụng productData.id làm productId
@@ -791,7 +792,7 @@ const EditImportOrder = () => {
                             color: productSizeColor.colorName?.trim().toLowerCase() || '',
                             size: productSizeColor.sizeName?.trim().toLowerCase() || '',
                             quantity: product.quantity.toString(),
-                            price: product.price.toString(),
+                            price: productData.import_price.toString(),
                         };
                     } catch (error) {
                         console.error('Error fetching product details:', error);
@@ -1278,7 +1279,7 @@ const EditImportOrder = () => {
                     )}
 
                     {/* Tên người nhập */}
-                    <div className="form-group mb-3">
+                    <div className="form-groupp mb-3">
                         <label className="form-label">Tên người nhập</label>
                         <input
                             type="text"
@@ -1289,7 +1290,7 @@ const EditImportOrder = () => {
                     </div>
 
                     {/* Tổng giá nhập */}
-                    <div className="form-group mb-4">
+                    <div className="form-groupp mb-4">
                         <label className="form-label">Tổng giá nhập</label>
                         <input
                             type="number"

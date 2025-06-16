@@ -331,7 +331,8 @@ hr {
     margin-top: 1rem;
 }
 
-.form-label {
+ .form-groupp label {
+     position: relative;
     font-weight: 500;
     margin-bottom: 8px;
     display: block;

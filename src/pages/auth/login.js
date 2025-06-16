@@ -11,6 +11,7 @@ import axios from 'axios';
 import Cookies from 'js-cookie';
 import { jwtDecode } from 'jwt-decode';
 import { useTranslation } from 'react-i18next';
+import Swal from "sweetalert2";
 
 const Login = () => {
     const { t, i18n } = useTranslation();
@@ -49,7 +50,12 @@ const Login = () => {
             }, { withCredentials: true }).catch(error => {
                 console.error("Login failed: ", error); // In toàn bộ lỗi
             });
-
+            const roles = response.data.role;
+            Cookies.set('roles', roles, {
+                expires: 1,
+                secure: true,
+                sameSite: 'None',
+            });
             const accessToken = response.data.accessToken;
             console.log("Access token nhận được:", accessToken);
 
@@ -67,13 +73,23 @@ const Login = () => {
             localStorage.setItem('username', decoded.sub);
 
             window.dispatchEvent(new Event("storage"));
-            alert(t('login.success_alert'));
+            Swal.fire({
+                icon: 'success',
+                title: '✅ Đăng nhập thành công!',
+                timer: 1500,
+                showConfirmButton: false,
+            });
             console.log('Login success, token:', Cookies.get('token'));
             // Chuyển hướng đến trang chủ
-            navigate('/home');
+            // Điều hướng dựa trên role
+            if (roles.includes('admin')) {
+                navigate('/admin');
+            } else {
+                navigate('/home');
+            }
         } catch (error) {
             console.error('Login failed:', error);
-            alert(t('login.error_alert'));
+            Swal.fire(t('login.error_alert'), t(''), 'error');
         }
     };
 
@@ -174,26 +190,26 @@ const Login = () => {
                                 </div>
 
                                 {/* Icon-based Social Login */}
-                                <div className="social-login" style={{ marginTop: '30px' }}>
-                                    <span className="social-label" style={{ fontSize: '15px' }}>{t('login.social_label')}</span>
-                                    <ul className="socials">
-                                        <li>
-                                            <button type="button" className="social-icon" onClick={() => handleSocialLogin('facebook')}>
-                                                <FontAwesomeIcon icon={faFacebookF} style={{ fontSize: '18px' }} />
-                                            </button>
-                                        </li>
-                                        <li>
-                                            <button type="button" className="social-icon" onClick={() => alert(t('login.twitter_not_supported'))}>
-                                                <FontAwesomeIcon icon={faTwitter} style={{ fontSize: '18px' }} />
-                                            </button>
-                                        </li>
-                                        <li>
-                                            <button type="button" className="social-icon" onClick={() => handleSocialLogin('google')}>
-                                                <FontAwesomeIcon icon={faGoogle} style={{ fontSize: '18px' }} />
-                                            </button>
-                                        </li>
-                                    </ul>
-                                </div>
+                                {/*<div className="social-login" style={{ marginTop: '30px' }}>*/}
+                                {/*    <span className="social-label" style={{ fontSize: '15px' }}>{t('login.social_label')}</span>*/}
+                                {/*    <ul className="socials">*/}
+                                {/*        <li>*/}
+                                {/*            <button type="button" className="social-icon" onClick={() => handleSocialLogin('facebook')}>*/}
+                                {/*                <FontAwesomeIcon icon={faFacebookF} style={{ fontSize: '18px' }} />*/}
+                                {/*            </button>*/}
+                                {/*        </li>*/}
+                                {/*        <li>*/}
+                                {/*            <button type="button" className="social-icon" onClick={() => alert(t('login.twitter_not_supported'))}>*/}
+                                {/*                <FontAwesomeIcon icon={faTwitter} style={{ fontSize: '18px' }} />*/}
+                                {/*            </button>*/}
+                                {/*        </li>*/}
+                                {/*        <li>*/}
+                                {/*            <button type="button" className="social-icon" onClick={() => handleSocialLogin('google')}>*/}
+                                {/*                <FontAwesomeIcon icon={faGoogle} style={{ fontSize: '18px' }} />*/}
+                                {/*            </button>*/}
+                                {/*        </li>*/}
+                                {/*    </ul>*/}
+                                {/*</div>*/}
                             </form>
                         </div>
                     </div>
