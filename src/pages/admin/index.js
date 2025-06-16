@@ -108,6 +108,9 @@ const TestAdmin = () => {
         }
     };
 
+    const formatVND = (money) => {
+        return new Intl.NumberFormat('vi-VN').format(money) + " ₫";
+    };
     // Fetch top 10 best-selling products
     const fetchTopProducts = async () => {
         setTopProductsLoading(true);
@@ -204,7 +207,7 @@ const TestAdmin = () => {
             xaxis: {
                 categories: Object.keys(revenueData).map(dateStr => format(new Date(dateStr), 'dd/MM/yyyy')),
             },
-            yaxis: { title: { text: 'Doanh thu ($)' } },
+            yaxis: { title: { text: 'Doanh thu (VNĐ)' } },
             stroke: { curve: 'smooth', width: 3 },
             colors: ['#00C851'],
             tooltip: { y: { formatter: val => `$${val.toFixed(2)}` } },
@@ -350,7 +353,7 @@ const TestAdmin = () => {
                         <div className="d-flex align-items-start row">
                             <div className="col-sm-7">
                                 <div className="card-body">
-                                    <h5 className="card-title text-primary mb-3">Chúc mừng John! 🎉</h5>
+                                    <h5 className="card-title text-primary mb-3">Chúc mừng Bạn! 🎉</h5>
                                     <p className="mb-6">
                                         Bạn đã đạt doanh số cao hơn 72% hôm nay.<br />Xem huy hiệu mới trong hồ sơ của bạn.
                                     </p>
@@ -805,100 +808,7 @@ const TestAdmin = () => {
                                 </div>
                             </div>
                         </div>
-                        <div className="card-body pt-4">
-                            <ul className="p-0 m-0">
-                                <li className="d-flex align-items-center mb-6">
-                                    <div className="avatar flex-shrink-0 me-3">
-                                        <img src="/img-admin/icons/unicons/paypal.png" alt="Paypal" className="rounded" />
-                                    </div>
-                                    <div className="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
-                                        <div className="me-2">
-                                            <small className="d-block">Paypal</small>
-                                            <h6 className="fw-normal mb-0">Gửi tiền</h6>
-                                        </div>
-                                        <div className="user-progress d-flex align-items-center gap-2">
-                                            <h6 className="fw-normal mb-0">+82.6</h6>
-                                            <span className="text-body-secondary">USD</span>
-                                        </div>
-                                    </div>
-                                </li>
-                                <li className="d-flex align-items-center mb-6">
-                                    <div className="avatar flex-shrink-0 me-3">
-                                        <img src="/img-admin/icons/unicons/wallet.png" alt="Ví" className="rounded" />
-                                    </div>
-                                    <div className="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
-                                        <div className="me-2">
-                                            <small className="d-block">Ví</small>
-                                            <h6 className="fw-normal mb-0">Mac'D</h6>
-                                        </div>
-                                        <div className="user-progress d-flex align-items-center gap-2">
-                                            <h6 className="fw-normal mb-0">+270.69</h6>
-                                            <span className="text-body-secondary">USD</span>
-                                        </div>
-                                    </div>
-                                </li>
-                                <li className="d-flex align-items-center mb-6">
-                                    <div className="avatar flex-shrink-0 me-3">
-                                        <img src="/img-admin/icons/unicons/chart.png" alt="Chuyển khoản" className="rounded" />
-                                    </div>
-                                    <div className="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
-                                        <div className="me-2">
-                                            <small className="d-block">Chuyển khoản</small>
-                                            <h6 className="fw-normal mb-0">Hoàn tiền</h6>
-                                        </div>
-                                        <div className="user-progress d-flex align-items-center gap-2">
-                                            <h6 className="fw-normal mb-0">+637.91</h6>
-                                            <span className="text-body-secondary">USD</span>
-                                        </div>
-                                    </div>
-                                </li>
-                                <li className="d-flex align-items-center mb-6">
-                                    <div className="avatar flex-shrink-0 me-3">
-                                        <img src="/img-admin/icons/unicons/cc-primary.png" alt="Thẻ tín dụng" className="rounded" />
-                                    </div>
-                                    <div className="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
-                                        <div className="me-2">
-                                            <small className="d-block">Thẻ tín dụng</small>
-                                            <h6 className="fw-normal mb-0">Đặt món ăn</h6>
-                                        </div>
-                                        <div className="user-progress d-flex align-items-center gap-2">
-                                            <h6 className="fw-normal mb-0">-838.71</h6>
-                                            <span className="text-body-secondary">USD</span>
-                                        </div>
-                                    </div>
-                                </li>
-                                <li className="d-flex align-items-center mb-6">
-                                    <div className="avatar flex-shrink-0 me-3">
-                                        <img src="/img-admin/icons/unicons/wallet.png" alt="Ví" className="rounded" />
-                                    </div>
-                                    <div className="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
-                                        <div className="me-2">
-                                            <small className="d-block">Ví</small>
-                                            <h6 className="fw-normal mb-0">Starbucks</h6>
-                                        </div>
-                                        <div className="user-progress d-flex align-items-center gap-2">
-                                            <h6 className="fw-normal mb-0">+203.33</h6>
-                                            <span className="text-body-secondary">USD</span>
-                                        </div>
-                                    </div>
-                                </li>
-                                <li className="d-flex align-items-center">
-                                    <div className="avatar flex-shrink-0 me-3">
-                                        <img src="/img-admin/icons/unicons/cc-warning.png" alt="Mastercard" className="rounded" />
-                                    </div>
-                                    <div className="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
-                                        <div className="me-2">
-                                            <small className="d-block">Mastercard</small>
-                                            <h6 className="fw-normal mb-0">Đặt món ăn</h6>
-                                        </div>
-                                        <div className="user-progress d-flex align-items-center gap-2">
-                                            <h6 className="fw-normal mb-0">-92.45</h6>
-                                            <span className="text-body-secondary">USD</span>
-                                        </div>
-                                    </div>
-                                </li>
-                            </ul>
-                        </div>
+
                     </div>
                 </div>
             </div>
